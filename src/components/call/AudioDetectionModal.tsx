@@ -297,7 +297,6 @@ export function AudioDetectionModal({
                   <li>Device driver or audio route issue may be present</li>
                 </ul>
               </div>
-              {/* seperator line */}
             <div className="h-px bg-gray-200 my-2"></div>  
           </div>
         )}
