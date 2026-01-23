@@ -184,9 +184,9 @@ function Call({ interview, responseToken }: InterviewProps) {
       intervalId = setInterval(() => {
         // Check pause conditions using refs for immediate response
         if (!isTimerPausedRef.current && !audioNotDetectedRef.current) {
-          setTime((prevTime) => prevTime + 10);
+          setTime((prevTime) => prevTime + 1);
         }
-      }, 100);
+      }, 10);
     }
 
     return () => {
