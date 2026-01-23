@@ -12,8 +12,10 @@ export const useGetAllResponses = (interviewId: string | null, enabled: boolean 
       return await ResponseService.getAllResponses(interviewId);
     },
     enabled: enabled && !!interviewId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes (increased to prevent rapid refetches)
     gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false, // Disabled to prevent infinite loops
+    refetchInterval: false, // Disable automatic refetching
   });
 
   const refetch = () => {

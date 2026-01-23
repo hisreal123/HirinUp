@@ -23,15 +23,94 @@ const createResponse = async (payload: any) => {
 };
 
 const saveResponse = async (payload: any, call_id: string) => {
-  const { error, data } = await supabase
-    .from("response")
-    .update({ ...payload })
-    .eq("call_id", call_id);
-  if (error) {
-    console.log(error);
+  console.log("[ResponseService] saveResponse called:", {
+    call_id,
+    payloadKeys: Object.keys(payload),
+    hasDetails: !!payload.details,
+    detailsType: typeof payload.details,
+  });
 
+  // Check if response exists first
+  const existingResponse = await getResponseByCallId(call_id);
+  if (!existingResponse) {
+    console.error("[ResponseService] No response found with call_id:", call_id);
     return [];
   }
+
+  console.log("[ResponseService] Found existing response:", {
+    id: existingResponse.id,
+    call_id: existingResponse.call_id,
+    interview_id: existingResponse.interview_id,
+    hasExistingDetails: !!existingResponse.details,
+  });
+
+  // Prepare payload - ensure details is properly formatted for JSONB
+  const updatePayload = {
+    ...payload,
+    // Ensure details is a proper object (Supabase JSONB handles this automatically)
+    details: payload.details || null,
+  };
+
+  console.log("[ResponseService] Update payload prepared:", {
+    call_id,
+    payloadKeys: Object.keys(updatePayload),
+    hasDetails: !!updatePayload.details,
+    detailsIsObject: typeof updatePayload.details === 'object' && updatePayload.details !== null,
+    detailsSize: updatePayload.details ? JSON.stringify(updatePayload.details).length : 0,
+  });
+
+  const { error, data, count } = await supabase
+    .from("response")
+    .update(updatePayload)
+    .eq("call_id", call_id)
+    .select(); // Select to get updated data
+
+  if (error) {
+    console.error("[ResponseService] Error saving response:", error);
+    console.error("[ResponseService] Error details:", {
+      error,
+      errorMessage: error.message,
+      errorCode: error.code,
+      errorDetails: error.details,
+      errorHint: error.hint,
+      call_id,
+      payloadKeys: Object.keys(updatePayload),
+    });
+    return [];
+  }
+
+  console.log("[ResponseService] Supabase update response:", {
+    call_id,
+    updatedRows: data?.length || 0,
+    count,
+    hasData: !!data,
+    dataLength: data?.length,
+  });
+
+  if (!data || data.length === 0) {
+    console.error("[ResponseService] WARNING: Update succeeded but no data returned!", {
+      call_id,
+      count,
+    });
+    // Try to fetch the response again to verify it was updated
+    const verifyResponse = await getResponseByCallId(call_id);
+    console.log("[ResponseService] Verification fetch:", {
+      call_id,
+      found: !!verifyResponse,
+      hasDetails: !!verifyResponse?.details,
+      detailsType: verifyResponse?.details ? typeof verifyResponse.details : 'null',
+    });
+    return verifyResponse ? [verifyResponse] : [];
+  }
+
+  console.log("[ResponseService] Successfully saved response:", {
+    call_id,
+    updatedRows: data.length,
+    hasDetails: !!data[0]?.details,
+    detailsType: data[0]?.details ? typeof data[0].details : 'null',
+    detailsKeys: data[0]?.details ? Object.keys(data[0].details).slice(0, 10) : [],
+    responseId: data[0]?.id,
+  });
 
   return data;
 };
@@ -193,14 +272,33 @@ const updateResponseById = async (payload: any, responseId: number) => {
 };
 
 const updateResponseByToken = async (payload: any, token: string) => {
+  console.log("[ResponseService] Updating response by token:", {
+    token,
+    payload,
+  });
+  
   const { error, data } = await supabase
     .from("response")
     .update({ ...payload })
-    .eq("token", token);
+    .eq("token", token)
+    .select(); // Select to get updated data
+  
   if (error) {
-    console.log(error);
+    console.error("[ResponseService] Error updating response by token:", error);
+    console.error("[ResponseService] Error details:", {
+      error,
+      token,
+      payload,
+    });
     return [];
   }
+  
+  console.log("[ResponseService] Successfully updated response by token:", {
+    token,
+    updatedRows: data?.length || 0,
+    data,
+  });
+  
   return data;
 };
 

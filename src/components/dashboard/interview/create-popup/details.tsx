@@ -352,7 +352,7 @@ function DetailsPopup({
               <input
                 type="number"
                 step="1"
-                max="5"
+                max="20"
                 min="1"
                 className="border-b-2 text-center focus:outline-none  border-gray-500 w-14 px-2 py-0.5 ml-3"
                 value={numQuestions}
@@ -362,8 +362,8 @@ function DetailsPopup({
                     value === "" ||
                     (Number.isInteger(Number(value)) && Number(value) > 0)
                   ) {
-                    if (Number(value) > 5) {
-                      value = "5";
+                    if (Number(value) > 20) {
+                      value = "20";
                     }
                     setNumQuestions(value);
                   }

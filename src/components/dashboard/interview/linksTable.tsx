@@ -76,7 +76,9 @@ function LinksTable({ data, interviewId, organizationNameSlug }: LinksTableProps
       },
       cell: ({ row }) => {
         const response = row.original;
-        const isUnused = !response.call_id || !response.details;
+        // A link is "used" if it has call_id (interview started)
+        // call_id is assigned when the interview begins, so that's when the link becomes "used"
+        const isUnused = !response.call_id;
         return (
           <div className="flex items-center gap-2">
             <div
@@ -108,7 +110,8 @@ function LinksTable({ data, interviewId, organizationNameSlug }: LinksTableProps
       cell: ({ row }) => {
         const name = row.getValue("name") as string | null;
         const response = row.original;
-        const isUnused = !response.call_id || !response.details;
+        // A link is "used" if it has call_id (interview started)
+        const isUnused = !response.call_id;
         return (
           <div className="font-medium">
             {isUnused
@@ -178,7 +181,8 @@ function LinksTable({ data, interviewId, organizationNameSlug }: LinksTableProps
       },
       cell: ({ row }) => {
         const response = row.original;
-        const isUnused = !response.call_id || !response.details;
+        // A link is "used" if it has call_id (interview started)
+        const isUnused = !response.call_id;
         const isEnded = row.getValue("is_ended") as boolean;
         if (isUnused) {
           return <span className="text-sm text-gray-500">-</span>;
@@ -218,7 +222,8 @@ function LinksTable({ data, interviewId, organizationNameSlug }: LinksTableProps
       header: "Actions",
       cell: ({ row }) => {
         const response = row.original;
-        const isUnused = !response.call_id || !response.details;
+        // A link is "used" if it has call_id (interview started)
+        const isUnused = !response.call_id;
         if (isUnused) {
           return <span className="text-sm text-gray-400">-</span>;
         }
@@ -256,7 +261,8 @@ function LinksTable({ data, interviewId, organizationNameSlug }: LinksTableProps
       const token = (response as any).token || "";
       const name = (response.name || "").toLowerCase();
       const email = (response.email || "").toLowerCase();
-      const isUnused = !response.call_id || !response.details;
+      // A link is "used" if it has call_id (interview started)
+      const isUnused = !response.call_id;
       const status = isUnused ? "unused" : (response.is_ended ? "completed" : "in progress");
       
       return (

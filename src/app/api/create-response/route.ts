@@ -11,7 +11,7 @@ import { createClient } from "@supabase/supabase-js";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { interview_id, email, name } = body;
+    const { interview_id, email, name, call_id, candidate_id } = body;
 
     if (!interview_id) {
       return NextResponse.json(
@@ -48,6 +48,8 @@ export async function POST(req: Request) {
         email: email || null,
         name: name || null,
         token: responseToken, // Add the random token
+        call_id: call_id || null,
+        candidate_id: candidate_id || null,
         is_ended: false,
         is_analysed: false,
         is_viewed: false,

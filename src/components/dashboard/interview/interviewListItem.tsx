@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResponseService } from "@/services/responses.service";
 import MiniLoader from "@/components/loaders/mini-loader/miniLoader";
@@ -17,15 +17,30 @@ function InterviewListItem({ name, interviewerId, id, readableSlug }: Props) {
   const { data: responses, isLoading: responsesLoading } = useGetAllResponses(id);
   const analyzeCallMutation = useAnalyzeCall();
   const [isFetching, setIsFetching] = useState(false);
+  
+  // Track which calls we've already analyzed to prevent loops
+  const analyzedCallsRef = useRef<Set<string>>(new Set());
 
   // Analyze unanalyzed responses
   useEffect(() => {
     if (!responses || responses.length === 0) return;
 
-    const unanalyzedResponses = responses.filter((response) => !response.is_analysed && response.call_id);
+    const unanalyzedResponses = responses.filter(
+      (response) => 
+        !response.is_analysed && 
+        response.call_id && 
+        !analyzedCallsRef.current.has(response.call_id)
+    );
     
     if (unanalyzedResponses.length > 0) {
       setIsFetching(true);
+      
+      // Mark as analyzing to prevent duplicate calls
+      unanalyzedResponses.forEach((response) => {
+        if (response.call_id) {
+          analyzedCallsRef.current.add(response.call_id);
+        }
+      });
       
       // Analyze all unanalyzed responses in parallel
       Promise.all(
@@ -35,6 +50,10 @@ function InterviewListItem({ name, interviewerId, id, readableSlug }: Props) {
               `Failed to analyze call for response id ${response.call_id}:`,
               error,
             );
+            // Remove from set on error so it can be retried
+            if (response.call_id) {
+              analyzedCallsRef.current.delete(response.call_id);
+            }
           })
         )
       ).finally(() => {

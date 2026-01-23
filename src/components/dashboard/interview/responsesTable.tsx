@@ -143,7 +143,30 @@ function ResponsesTable({ data, interviewId }: ResponsesTableProps) {
       accessorKey: "is_ended",
       header: "Status",
       cell: ({ row }) => {
+        const response = row.original;
         const isEnded = row.getValue("is_ended") as boolean;
+        const hasCallId = !!response.call_id;
+        const hasDetails = !!response.details;
+        
+        // If response has details but no call_id, show special status
+        if (hasDetails && !hasCallId) {
+          return (
+            <div className="text-sm">
+              <span className="text-orange-600 font-semibold">Missing Call ID</span>
+            </div>
+          );
+        }
+        
+        // If no details at all, show not started
+        if (!hasDetails) {
+          return (
+            <div className="text-sm">
+              <span className="text-gray-500 font-semibold">Not Started</span>
+            </div>
+          );
+        }
+        
+        // Normal status for responses with call_id and details
         return (
           <div className="text-sm">
             {isEnded ? (
@@ -179,14 +202,28 @@ function ResponsesTable({ data, interviewId }: ResponsesTableProps) {
       header: "Actions",
       cell: ({ row }) => {
         const response = row.original;
+        const callId = response.call_id;
+        const hasDetails = !!response.details;
+        
+        if (hasDetails && !callId) {
+          return (
+            <span className="text-sm text-orange-500">No Call ID</span>
+          );
+        }
+        
+        if (!hasDetails) {
+          return (
+            <span className="text-sm text-gray-400">-</span>
+          );
+        }
+        
+        // Only show View button if call_id exists
         return (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => {
-              if (response.call_id) {
-                router.push(`/interviews/${interviewId}?call=${response.call_id}`);
-              }
+              router.push(`/interviews/${interviewId}?call=${callId}`);
             }}
             className="h-8 px-2"
           >

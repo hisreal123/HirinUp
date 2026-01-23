@@ -6,6 +6,8 @@ interface CreateResponseParams {
   interview_id: string;
   email?: string;
   name?: string;
+  call_id?: string;
+  candidate_id?: number;
 }
 
 interface CreateResponseResponse {

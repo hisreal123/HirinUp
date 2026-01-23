@@ -9,8 +9,14 @@ import {
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { useResponses } from "@/contexts/responses.context";
-import axios from "axios";
 import { RetellWebClient } from "retell-client-js-sdk";
+import { useGetAllEmails } from "@/hooks/useGetAllEmails";
+import { useCreateOrUpdateCandidate } from "@/hooks/useCreateOrUpdateCandidate";
+import { useRegisterCall } from "@/hooks/useRegisterCall";
+import { useUpdateResponseByToken } from "@/hooks/useUpdateResponseByToken";
+import { useCreateResponse } from "@/hooks/useCreateResponse";
+import { useSaveResponse } from "@/hooks/useSaveResponse";
+import { useAnalyzeCall } from "@/hooks/useAnalyzeCall";
 import { toast } from "sonner";
 import { Interview } from "@/types/interview";
 import { FeedbackData } from "@/types/response";
@@ -53,6 +59,13 @@ type transcriptType = {
 
 function Call({ interview, responseToken }: InterviewProps) {
   const { createResponse } = useResponses();
+  const createResponseMutation = useCreateResponse();
+  const { data: emailsData } = useGetAllEmails(interview?.id, !!interview?.id);
+  const createOrUpdateCandidateMutation = useCreateOrUpdateCandidate();
+  const registerCallMutation = useRegisterCall();
+  const updateResponseByTokenMutation = useUpdateResponseByToken();
+  const saveResponseMutation = useSaveResponse();
+  const analyzeCallMutation = useAnalyzeCall();
   const [lastInterviewerResponse, setLastInterviewerResponse] = useState<string>("");
   const [lastUserResponse, setLastUserResponse] = useState<string>("");
   const [activeTurn, setActiveTurn] = useState<string>("");
@@ -77,6 +90,7 @@ function Call({ interview, responseToken }: InterviewProps) {
   // Refs to track pause states for the timer interval
   const isTimerPausedRef = useRef<boolean>(false);
   const audioNotDetectedRef = useRef<boolean>(false);
+  const hasSavedEndedRef = useRef<boolean>(false);
 
   // Refs for silence detection after agent stops talking
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -85,7 +99,7 @@ function Call({ interview, responseToken }: InterviewProps) {
   const lastUserResponseLengthRef = useRef<number>(0);
 
   const candidateForm = useCandidateForm();
-  const audioMessage = "I can see you, but I'm not receiving any audio yet. Let's quickly check a few things together.";
+  const audioMessage = "I have not received any response from you, let's fix that.";
 
   // Audio detection state - managed by InterviewStage when mounted
   const [audioNotDetected, setAudioNotDetected] = useState(false);
@@ -196,6 +210,18 @@ function Call({ interview, responseToken }: InterviewProps) {
     };
   }, [isCalling, isEnded]);
 
+  // Helper function to format seconds to MM:SS
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Calculate time used and time left
+  const timeUsedSeconds = Number(currentTimeDuration);
+  const totalTimeSeconds = Number(interviewTimeDuration) * 60;
+  const timeLeftSeconds = Math.max(0, totalTimeSeconds - timeUsedSeconds);
+
   // Update current duration display and check for end condition
   useEffect(() => {
     const newDuration = Math.floor(time / 100);
@@ -273,7 +299,7 @@ return;
     });
 
     webClient.on("agent_stop_talking", () => {
-      console.log('[Call] Agent stopped talking, starting 10-second response timer');
+      console.log('[Call] Agent stopped talking, starting 5-second response timer');
       setActiveTurn("user");
 
       if (silenceTimerRef.current) {
@@ -292,12 +318,12 @@ return;
         const userResponded = lastUserResponse?.length > lastUserResponseLengthRef?.current;
 
         if (userResponded) {
-          console.log('[Call] User responded during the 10 seconds, canceling silence detection');
+          console.log('[Call] User responded during the 5 seconds, canceling silence detection');
           
 return;
         }
 
-        console.log('[Call] 10 seconds passed without user response, showing message');
+        console.log('[Call] 5 seconds passed without user response, showing message');
         setLastInterviewerResponse(audioMessage);
 
         messageTimerRef.current = setTimeout(() => {
@@ -308,7 +334,7 @@ return;
             triggerSilenceDetectionRef.current(true);
           }
         }, 2000);
-      }, 10000);
+      }, 5000);
     });
 
     webClient.on("error", (error) => {
@@ -368,9 +394,8 @@ return;
     };
     setLoading(true);
 
-    const oldUserEmails: string[] = (
-      await ResponseService.getAllEmails(interview.id)
-    ).map((item) => item.email);
+    // Check if user is old using cached emails data
+    const oldUserEmails: string[] = (emailsData || []).map((item) => item.email);
     const OldUser =
       oldUserEmails.includes(candidateForm.email) ||
       (interview?.respondents && !interview?.respondents.includes(candidateForm.email));
@@ -378,7 +403,6 @@ return;
     if (OldUser) {
       setIsOldUser(true);
       setLoading(false);
-
       return;
     }
 
@@ -409,18 +433,93 @@ return;
         work_experience: parsedWorkExperience,
       };
 
-      const newCandidateId = await CandidateService.createOrUpdateCandidate(
+      // Create or update candidate using TanStack Query
+      const newCandidateId = await createOrUpdateCandidateMutation.mutateAsync({
         candidateData,
-        candidateForm.email,
-      );
+        email: candidateForm.email,
+      });
       setCandidateId(newCandidateId);
 
-      const registerCallResponse: registerCallResponseType = await axios.post(
-        "/api/register-call",
-        { dynamic_data: data, interviewer_id: interview?.interviewer_id },
-      );
+      // Register call using TanStack Query
+      const registerCallResponse = await registerCallMutation.mutateAsync({
+        dynamic_data: data,
+        interviewer_id: interview?.interviewer_id ? Number(interview.interviewer_id) : 0,
+      });
 
-      const callResponse = registerCallResponse?.data?.registerCallResponse;
+      const callResponse = registerCallResponse?.registerCallResponse;
+      
+      // Debug: Log the call response to verify call_id is present
+      console.log("[Call] Register call response:", {
+        hasCallResponse: !!callResponse,
+        call_id: callResponse?.call_id,
+        hasAccessToken: !!callResponse?.access_token,
+        fullResponse: callResponse,
+      });
+      
+      if (!callResponse?.call_id) {
+        console.error("[Call] No call_id received from Retell");
+        toast.error("Failed to register call. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      const retellCallId = callResponse.call_id;
+      setCallId(retellCallId);
+      
+      console.log("[Call] Setting call_id:", retellCallId);
+      console.log("[Call] Response token:", responseToken);
+
+      // IMPORTANT: Save call_id to response IMMEDIATELY after registration
+      // This ensures the link is marked as "used" even if the call fails to start
+      if (responseToken) {
+        // Update response by token using TanStack Query
+        try {
+          console.log("[Call] Updating response by token (before call start):", {
+            token: responseToken,
+            call_id: retellCallId,
+          });
+          await updateResponseByTokenMutation.mutateAsync({
+            payload: {
+              call_id: retellCallId,
+              email: candidateForm.email,
+              name: candidateForm.fullName,
+              candidate_id: newCandidateId,
+            },
+            token: responseToken,
+          });
+          console.log("[Call] Successfully updated response by token (before call start)");
+        } catch (error) {
+          console.error("[Call] Failed to update response by token:", error);
+          console.error("[Call] Error details:", {
+            error,
+            token: responseToken,
+            call_id: retellCallId,
+          });
+          // Fallback: create new response if update fails
+          await createResponseMutation.mutateAsync({
+            interview_id: interview.id,
+            call_id: retellCallId,
+            email: candidateForm.email,
+            name: candidateForm.fullName,
+            candidate_id: newCandidateId ?? undefined,
+          });
+        }
+      } else {
+        // Create response using TanStack Query
+        console.log("[Call] Creating new response (no token, before call start):", {
+          interview_id: interview.id,
+          call_id: retellCallId,
+        });
+        await createResponseMutation.mutateAsync({
+          interview_id: interview.id,
+          call_id: retellCallId,
+          email: candidateForm.email,
+          name: candidateForm.fullName,
+          candidate_id: newCandidateId ?? undefined,
+        });
+      }
+
+      // Now start the call (after call_id is saved)
       if (callResponse?.access_token) {
         await webClient
           .startCall({
@@ -428,34 +527,15 @@ return;
           })
           .catch((err) => {
             console.error("Error starting call:", err);
+            // Call_id is already saved, so link is marked as used even if call fails
+            toast.error("Failed to start call. The interview link has been marked as used.");
             throw err;
           });
         setIsCalling(true);
         setIsStarted(true);
-
-        setCallId(callResponse?.call_id || "");
-
-        if (responseToken) {
-          await ResponseService.updateResponseByToken(
-            {
-              call_id: callResponse.call_id,
-              email: candidateForm.email,
-              name: candidateForm.fullName,
-              candidate_id: newCandidateId,
-            },
-            responseToken,
-          );
-        } else {
-          await createResponse({
-            interview_id: interview.id,
-            call_id: callResponse.call_id,
-            email: candidateForm.email,
-            name: candidateForm.fullName,
-            candidate_id: newCandidateId,
-          });
-        }
       } else {
-        console.log("Failed to register call");
+        console.error("[Call] No access token received from Retell");
+        toast.error("Failed to get call access token. The interview link has been marked as used.");
       }
     } catch (error) {
       console.error("Error starting conversation:", error);
@@ -481,18 +561,69 @@ return;
     fetchInterviewer();
   }, [interview.interviewer_id]);
 
-  useEffect(() => {
-    if (isEnded) {
-      const updateInterview = async () => {
-        await ResponseService.saveResponse(
-          { is_ended: true, tab_switch_count: tabSwitchCount },
-          callId,
-        );
-      };
+  // Track if we've already fetched details to prevent duplicate fetches
+  const hasFetchedDetailsRef = useRef(false);
 
-      updateInterview();
+  useEffect(() => {
+    if (isEnded && callId && !hasSavedEndedRef.current) {
+      // Mark as saved to prevent duplicate calls
+      hasSavedEndedRef.current = true;
+      
+      // Use TanStack Query mutation to save response and invalidate cache
+      saveResponseMutation.mutate({
+        payload: { is_ended: true, tab_switch_count: tabSwitchCount },
+        callId,
+      });
+      
+      // Also fetch and save call details as a fallback (in case webhook doesn't fire)
+      // Wait a bit for Retell to process the call before fetching
+      if (!hasFetchedDetailsRef.current) {
+        hasFetchedDetailsRef.current = true;
+        
+        // Retry logic: try multiple times with increasing delays
+        const retryFetchDetails = (attempt: number = 1, maxAttempts: number = 3) => {
+          const delay = attempt * 3000; // 3s, 6s, 9s
+          
+          setTimeout(() => {
+            console.log(`[Call] Attempting to fetch call details (attempt ${attempt}/${maxAttempts}) for ${callId}`);
+            analyzeCallMutation.mutate(
+              { id: callId },
+              {
+                onSuccess: (data) => {
+                  console.log(`[Call] Successfully fetched call details on attempt ${attempt}:`, {
+                    callId,
+                    hasCallResponse: !!data.callResponse,
+                    hasAnalytics: !!data.analytics,
+                  });
+                },
+                onError: (error) => {
+                  console.error(`[Call] Failed to fetch call details on attempt ${attempt}:`, error);
+                  
+                  // Retry if we haven't exceeded max attempts
+                  if (attempt < maxAttempts) {
+                    console.log(`[Call] Retrying fetch call details in ${delay + 3000}ms...`);
+                    retryFetchDetails(attempt + 1, maxAttempts);
+                  } else {
+                    console.error("[Call] Max retry attempts reached. Details may not be available yet.");
+                    // Reset ref so it can be manually retried later
+                    hasFetchedDetailsRef.current = false;
+                  }
+                },
+              }
+            );
+          }, delay);
+        };
+        
+        retryFetchDetails();
+      }
     }
-  }, [isEnded, callId, tabSwitchCount]);
+    
+    // Reset the refs if callId changes (new call started)
+    if (!isEnded && callId) {
+      hasSavedEndedRef.current = false;
+      hasFetchedDetailsRef.current = false;
+    }
+  }, [isEnded, callId, tabSwitchCount, saveResponseMutation, analyzeCallMutation]);
 
   return (
     <div className="flex justify-center items-center min-h-screen">
@@ -501,19 +632,67 @@ return;
         <Card className="h-[88vh] rounded-lg text-xl font-bold transition-all md:block dark:border-white">
           <div>
             {isStarted && (
-              <div className="m-4 h-[10px] rounded-md border-[1px] border-gray-300">
-                <div
-                  className="bg-secondary h-[10px] rounded-md"
-                  style={{
-                    width: isEnded
-                      ? "100%"
-                      : `${
-                          (Number(currentTimeDuration) /
-                            (Number(interviewTimeDuration) * 60)) *
-                          100
-                        }%`,
-                  }}
-                />
+              <div className="m-4">
+                {/* Timer Info Display */}
+                <div className="flex flex-row items-center justify-between mb-2 px-2">
+                  <div className="flex flex-col">
+                    <div className="text-xs text-gray-600">Time Used</div>
+                    <div className={`text-sm font-bold ${isTimerPaused ? 'text-amber-600' : 'text-gray-800'}`}>
+                      {formatTime(timeUsedSeconds)}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    {isTimerPaused && (
+                      <div className="text-xs font-semibold text-amber-600 mb-1 animate-pulse">
+                        ⏸ PAUSED
+                      </div>
+                    )}
+                    {!isTimerPaused && !isEnded && (
+                      <div className="text-xs text-gray-500">
+                        Running
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <div className="text-xs text-gray-600">Time Left</div>
+                    <div className={`text-sm font-bold ${timeLeftSeconds < 60 ? 'text-red-600' : 'text-gray-800'}`}>
+                      {formatTime(timeLeftSeconds)}
+                    </div>
+                  </div>
+                </div>
+                {/* Progress Bar */}
+                <div className="h-[10px] rounded-md border-[1px] border-gray-300 relative overflow-hidden">
+                  <div
+                    className={`h-[10px] rounded-md transition-all ${
+                      isTimerPaused 
+                        ? 'bg-amber-500' 
+                        : isEnded 
+                        ? 'bg-secondary' 
+                        : 'bg-secondary'
+                    }`}
+                    style={{
+                      width: isEnded
+                        ? "100%"
+                        : `${
+                            (Number(currentTimeDuration) /
+                              (Number(interviewTimeDuration) * 60)) *
+                            100
+                          }%`,
+                    }}
+                  />
+                  {isTimerPaused && (
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                      style={{
+                        width: `${(Number(currentTimeDuration) / (Number(interviewTimeDuration) * 60)) * 100}%`
+                      }}
+                    >
+                      <div className="text-[8px] font-bold text-white drop-shadow-md">
+                        PAUSED
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             <CardHeader className="items-center p-1">
@@ -523,7 +702,7 @@ return;
                 </CardTitle>
               )}
               {!isEnded && (
-                <div className="flex mt-2 flex-row">
+                <div className="flex mt-2 flex-row items-center justify-center">
                   <AlarmClockIcon className="text-primary h-[1rem] w-[1rem] rotate-0 scale-100 dark:-rotate-90 dark:scale-0 mr-2 font-bold" />
                   <div className="text-sm font-normal space-x-1">
                     Expected duration:
@@ -532,6 +711,11 @@ return;
                     </span>
                     or less
                   </div>
+                  {isStarted && (
+                    <div className="ml-4 text-xs text-gray-500">
+                      ({formatTime(timeUsedSeconds)} / {formatTime(totalTimeSeconds)})
+                    </div>
+                  )}
                 </div>
               )}
             </CardHeader>

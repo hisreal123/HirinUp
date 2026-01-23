@@ -81,7 +81,7 @@ function InterviewHome() {
   const [activeTab, setActiveTab] = useState<"details" | "responses" | "links" | "feedback">("details");
 
   const createResponseMutation = useCreateResponse();
-  const { data: responsesData, isLoading: responsesLoading, refetch: refetchResponses } = useGetAllResponses(interviewId);
+  const { data: responsesData, isLoading: responsesLoading, refetch: refetchResponses } = useGetAllResponses(interviewId, true);
 
   // Update local state when query data changes
   useEffect(() => {
@@ -289,9 +289,10 @@ function InterviewHome() {
       return [];
     }
     
-    // Filter out responses without call_id or details (anonymous/unused links)
+    // Show responses that have details (either with or without call_id)
+    // This includes responses with details but missing call_id
     const responsesWithDetails = responses.filter(
-      (response) => response.call_id && response.details
+      (response) => response.details
     );
     
     if (filterStatus == "ALL") {
@@ -684,7 +685,7 @@ function InterviewHome() {
                       </TabsContent>
                       <TabsContent value="responses" className="mt-4">
                         <ResponsesTable
-                          data={responses?.filter((r) => r.call_id && r.details) || []}
+                          data={filterResponses() || []}
                           interviewId={interviewId}
                         />
                       </TabsContent>

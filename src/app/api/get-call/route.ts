@@ -102,7 +102,15 @@ export async function POST(req: Request) {
 
     // Save the response to database
     try {
-      await ResponseService.saveResponse(
+      logger.info("Attempting to save response details:", {
+        call_id: body.id,
+        hasCallResponse: !!callResponse,
+        hasTranscript: !!callResponse.transcript,
+        hasAnalytics: analytics !== null,
+        duration,
+      });
+
+      const saveResult = await ResponseService.saveResponse(
         {
           details: callResponse,
           is_analysed: analytics !== null,
@@ -111,9 +119,23 @@ export async function POST(req: Request) {
         },
         body.id,
       );
+
+      if (!saveResult || saveResult.length === 0) {
+        logger.error("Failed to save response - no rows updated:", {
+          call_id: body.id,
+          saveResult,
+        });
+      } else {
+        logger.info("Successfully saved response details:", {
+          call_id: body.id,
+          updatedRows: saveResult.length,
+          hasDetails: !!saveResult[0]?.details,
+        });
+      }
     } catch (saveError) {
       const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
       logger.error("Error saving response:", errorMessage);
+      logger.error("Save error stack:", saveError instanceof Error ? saveError.stack : "No stack trace");
       // Continue and return the data even if save fails
     }
 
