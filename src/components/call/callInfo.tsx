@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { Analytics, CallData } from "@/types/response";
-import axios from "axios";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { useGetCall } from "@/hooks/useGetCall";
 import ReactAudioPlayer from "react-audio-player";
 import { DownloadIcon, TrashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -60,27 +60,20 @@ function CallInfo({
   const [interviewId, setInterviewId] = useState<string>("");
   const [tabSwitchCount, setTabSwitchCount] = useState<number>();
 
+  const { data: callData, isLoading: callLoading, refetch: refetchCall } = useGetCall(call_id, !!call_id);
+
+  // Update state when call data changes
   useEffect(() => {
-    const fetchResponses = async () => {
-      setIsLoading(true);
-      setCall(undefined);
-      setEmail("");
-      setName("");
+    if (callData) {
+      setCall(callData.callResponse);
+      setAnalytics(callData.analytics);
+    }
+  }, [callData]);
 
-      try {
-        const response = await axios.post("/api/get-call", { id: call_id });
-        setCall(response.data.callResponse);
-        setAnalytics(response.data.analytics);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchResponses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [call_id]);
+  // Update loading state
+  useEffect(() => {
+    setIsLoading(callLoading);
+  }, [callLoading]);
 
   useEffect(() => {
     const fetchEmail = async () => {

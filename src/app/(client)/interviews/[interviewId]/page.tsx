@@ -22,9 +22,10 @@ import { InterviewService } from "@/services/interviews.service";
 import EditInterview from "@/components/dashboard/interview/editInterview";
 import Modal from "@/components/dashboard/Modal";
 import { toast } from "sonner";
-import axios from "axios";
 import SharePopup from "@/components/dashboard/interview/sharePopup";
 import GenerateLinkModal from "@/components/dashboard/interview/generateLinkModal";
+import { useCreateResponse } from "@/hooks/useCreateResponse";
+import { useGetAllResponses } from "@/hooks/useGetAllResponses";
 import {
   Tooltip,
   TooltipTrigger,
@@ -79,34 +80,48 @@ function InterviewHome() {
   const [organizationNameSlug, setOrganizationNameSlug] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"details" | "responses" | "links" | "feedback">("details");
 
- 
-  const generateAndSetSharedLink = async () => {
-    try {
-      const response = await axios.post("/api/create-response", {
-        interview_id: interviewId,
-      });
+  const createResponseMutation = useCreateResponse();
+  const { data: responsesData, isLoading: responsesLoading, refetch: refetchResponses } = useGetAllResponses(interviewId);
 
-      if (response.data?.response_id) {
-        const responseId = response.data.response_id;
-        const orgName = organizationNameSlug || interview?.readable_slug || "organization";
-        const generatedUrl = `${base_url}/join/${orgName}/${interviewId}/${responseId}`;
-        setSharedGeneratedLink(generatedUrl);
-        return generatedUrl;
-      } else {
-        toast.error("Failed to generate link", {
-          position: "bottom-right",
-          duration: 3000,
-        });
-        return null;
-      }
-    } catch (error: any) {
-      console.error("Error generating link:", error);
-      toast.error("Failed to generate link", {
-        position: "bottom-right",
-        duration: 3000,
-      });
-      return null;
+  // Update local state when query data changes
+  useEffect(() => {
+    if (responsesData) {
+      setResponses(responsesData);
     }
+  }, [responsesData]);
+
+  const generateAndSetSharedLink = async () => {
+    return new Promise<string | null>((resolve) => {
+      createResponseMutation.mutate(
+        { interview_id: interviewId },
+        {
+          onSuccess: (data) => {
+            if (data?.response_id) {
+              const responseId = data.response_id;
+              const orgName = organizationNameSlug || interview?.readable_slug || "organization";
+              const generatedUrl = `${base_url}/join/${orgName}/${interviewId}/${responseId}`;
+              setSharedGeneratedLink(generatedUrl);
+              // Refetch responses to update the list
+              refetchResponses();
+              resolve(generatedUrl);
+            } else {
+              toast.error("Failed to generate link", {
+                position: "bottom-right",
+                duration: 3000,
+              });
+              resolve(null);
+            }
+          },
+          onError: () => {
+            toast.error("Failed to generate link", {
+              position: "bottom-right",
+              duration: 3000,
+            });
+            resolve(null);
+          },
+        },
+      );
+    });
   };
 
   const seeInterviewPreviewPage = async () => {
@@ -151,12 +166,11 @@ function InterviewHome() {
         setLoading(false);
       }
     };
-    if (!interview || !isGeneratingInsights) {
-      fetchInterview();
-    }
 
+    fetchInterview();
+    // Only refetch when interviewId changes, not on other state changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getInterviewById, interviewId, isGeneratingInsights]);
+  }, [interviewId]);
 
   useEffect(() => {
     const fetchOrganizationData = async () => {
@@ -174,29 +188,15 @@ function InterviewHome() {
 
     fetchOrganizationData();
   }, [organization]);
+  // Responses are now fetched via TanStack Query hook
+  // Update loading state based on responses query
   useEffect(() => {
-    if (!interviewId) {
-      console.warn("No interviewId found, cannot fetch responses");
-      return;
+    if (responsesLoading) {
+      setLoading(true);
+    } else {
+      setLoading(false);
     }
-
-    const fetchResponses = async () => {
-      try {
-        console.log("Fetching responses for interviewId:", interviewId);
-        const response = await ResponseService.getAllResponses(interviewId);
-        console.log("Fetched responses:", response);
-        setResponses(response);
-        setLoading(true);
-      } catch (error) {
-        console.error("Error fetching responses:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResponses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [interviewId]);
+  }, [responsesLoading]);
 
   useEffect(() => {
     if (!interviewId) {
@@ -217,25 +217,18 @@ function InterviewHome() {
   }, [interviewId]);
 
   const handleDeleteResponse = (deletedCallId: string) => {
-    if (responses) {
-      setResponses(
-        responses.filter((response) => response.call_id !== deletedCallId),
-      );
-      if (callId === deletedCallId) {
-        router.push(`/interviews/${interviewId}`);
-      }
+    // Refetch responses to get updated list
+    refetchResponses();
+    if (callId === deletedCallId) {
+      router.push(`/interviews/${interviewId}`);
     }
   };
 
   const handleResponseClick = async (response: Response) => {
     try {
       await ResponseService.saveResponse({ is_viewed: true }, response.call_id);
-      if (responses) {
-        const updatedResponses = responses.map((r) =>
-          r.call_id === response.call_id ? { ...r, is_viewed: true } : r,
-        );
-        setResponses(updatedResponses);
-      }
+      // Refetch responses to get updated view status
+      refetchResponses();
       setIsViewed(true);
     } catch (error) {
       console.error(error);
@@ -269,13 +262,8 @@ function InterviewHome() {
   };
 
   const handleCandidateStatusChange = (callId: string, newStatus: string) => {
-    setResponses((prevResponses) => {
-      return prevResponses?.map((response) =>
-        response.call_id === callId
-          ? { ...response, candidate_status: newStatus }
-          : response,
-      );
-    });
+    // Refetch responses to get updated status
+    refetchResponses();
   };
 
   const openSharePopup = async () => {

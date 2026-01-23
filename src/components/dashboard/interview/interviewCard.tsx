@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { ResponseService } from "@/services/responses.service";
-import axios from "axios";
 import MiniLoader from "@/components/loaders/mini-loader/miniLoader";
 import { InterviewerService } from "@/services/interviewers.service";
+import { useGetAllResponses } from "@/hooks/useGetAllResponses";
+import { useAnalyzeCall } from "@/hooks/useAnalyzeCall";
 
 interface Props {
   name: string | null;
@@ -15,7 +15,8 @@ interface Props {
 }
 
 function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
-  const [responseCount, setResponseCount] = useState<number | null>(null);
+  const { data: responses, isLoading: responsesLoading } = useGetAllResponses(id);
+  const analyzeCallMutation = useAnalyzeCall();
   const [isFetching, setIsFetching] = useState(false);
   const [img, setImg] = useState("");
 
@@ -29,41 +30,32 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Analyze unanalyzed responses
   useEffect(() => {
-    const fetchResponses = async () => {
-      try {
-        const responses = await ResponseService.getAllResponses(id);
-        setResponseCount(responses.length);
-        if (responses.length > 0) {
-          setIsFetching(true);
-          for (const response of responses) {
-            if (!response.is_analysed) {
-              try {
-                const result = await axios.post("/api/get-call", {
-                  id: response.call_id,
-                });
+    if (!responses || responses.length === 0) return;
 
-                if (result.status !== 200) {
-                  throw new Error(`HTTP error! status: ${result.status}`);
-                }
-              } catch (error) {
-                console.error(
-                  `Failed to call api/get-call for response id ${response.call_id}:`,
-                  error,
-                );
-              }
-            }
-          }
-          setIsFetching(false);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    const unanalyzedResponses = responses.filter((response) => !response.is_analysed && response.call_id);
+    
+    if (unanalyzedResponses.length > 0) {
+      setIsFetching(true);
+      
+      // Analyze all unanalyzed responses in parallel
+      Promise.all(
+        unanalyzedResponses.map((response) =>
+          analyzeCallMutation.mutateAsync({ id: response.call_id! }).catch((error) => {
+            console.error(
+              `Failed to analyze call for response id ${response.call_id}:`,
+              error,
+            );
+          })
+        )
+      ).finally(() => {
+        setIsFetching(false);
+      });
+    }
+  }, [responses, analyzeCallMutation]);
 
-    fetchResponses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const responseCount = responses?.length || null;
 
 
   return (

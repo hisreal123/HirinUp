@@ -11,7 +11,19 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ClientProvider } from "@/contexts/clients.context";
 import { SidebarProvider } from "@/contexts/sidebar.context";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
 const providers = ({ children }: ThemeProviderProps) => {
   const Provider = compose([
