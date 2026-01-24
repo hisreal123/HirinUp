@@ -44,7 +44,7 @@ const saveResponse = async (payload: any, call_id: string) => {
     hasExistingDetails: !!existingResponse.details,
   });
 
-  
+
   const updatePayload: any = {
     ...payload,
   };
@@ -66,7 +66,7 @@ const saveResponse = async (payload: any, call_id: string) => {
     .from("response")
     .update(updatePayload)
     .eq("call_id", call_id)
-    .select(); // Select to get updated data
+    .select(); 
 
   if (error) {
     console.error("[ResponseService] Error saving response:", error);
