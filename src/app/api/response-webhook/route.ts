@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       break;
     case "call_analyzed":
       try {
+        console.log("Call analyzed event received, fetching call details:", call.call_id);
         const result = await fetch(`${baseUrl}/api/get-call`, {
           method: "POST",
           headers: {
@@ -39,9 +40,29 @@ export async function POST(req: NextRequest) {
             id: call.call_id,
           }),
         });
-        console.log("Call analyzed event received", call.call_id);
+        
+        if (!result.ok) {
+          const errorText = await result.text();
+          console.error("Failed to fetch call details:", {
+            status: result.status,
+            statusText: result.statusText,
+            error: errorText,
+            call_id: call.call_id,
+          });
+        } else {
+          const data = await result.json();
+          console.log("Successfully fetched and saved call details:", {
+            call_id: call.call_id,
+            hasCallResponse: !!data.callResponse,
+            hasAnalytics: !!data.analytics,
+          });
+        }
       } catch (error) {
-        console.error("Error calling get-call API:", error);
+        console.error("Error calling get-call API:", {
+          error,
+          call_id: call.call_id,
+          message: error instanceof Error ? error.message : String(error),
+        });
       }
       break;
     default:

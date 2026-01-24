@@ -84,8 +84,55 @@ const getInterviewer = async (interviewerId: bigint) => {
   return interviewerData;
 };
 
+const deleteInterviewer = async (interviewerId: bigint) => {
+  const { error } = await supabase
+    .from("interviewer")
+    .delete()
+    .eq("id", interviewerId);
+
+  if (error) {
+    console.error("Error deleting interviewer:", error);
+    throw new Error(`Database delete error: ${error.message}`);
+  }
+
+  return true;
+};
+
+const deleteInterviewerByName = async (name: string) => {
+  const { error } = await supabase
+    .from("interviewer")
+    .delete()
+    .eq("name", name);
+
+  if (error) {
+    console.error("Error deleting interviewer by name:", error);
+    throw new Error(`Database delete error: ${error.message}`);
+  }
+
+  return true;
+};
+
+const updateInterviewerAgentId = async (interviewerId: bigint, agentId: string) => {
+  const { data, error } = await supabase
+    .from("interviewer")
+    .update({ agent_id: agentId })
+    .eq("id", interviewerId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating interviewer agent_id:", error);
+    throw new Error(`Database update error: ${error.message}`);
+  }
+
+  return data;
+};
+
 export const InterviewerService = {
   getAllInterviewers,
   createInterviewer,
   getInterviewer,
+  deleteInterviewer,
+  deleteInterviewerByName,
+  updateInterviewerAgentId,
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 import { toast } from "sonner";
@@ -25,14 +25,22 @@ function GenerateLinkModal({
   const [generatedLink, setGeneratedLink] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
+  const isGeneratingRef = useRef(false);
   
   const createResponseMutation = useCreateResponse();
 
   const generateLink = async () => {
+    // Prevent duplicate calls
+    if (isGeneratingRef.current || createResponseMutation.isPending) {
+      return;
+    }
+
+    isGeneratingRef.current = true;
     createResponseMutation.mutate(
       { interview_id: interviewId },
       {
         onSuccess: (data) => {
+          isGeneratingRef.current = false;
           if (data?.response_id) {
             const responseId = data.response_id;
             // New format: /join/[organization_name]/[interview_id]/[response_id]
@@ -49,6 +57,9 @@ function GenerateLinkModal({
               duration: 3000,
             });
           }
+        },
+        onError: () => {
+          isGeneratingRef.current = false;
         },
       },
     );
@@ -77,24 +88,22 @@ function GenerateLinkModal({
   };
 
   useEffect(() => {
-    // Use shared link if available, otherwise generate new one
-    if (open) {
-      if (sharedLink) {
-        setGeneratedLink(sharedLink);
-      } else if (!generatedLink && !createResponseMutation.isPending) {
-        // Auto-generate link when modal opens if no shared link exists
-        generateLink();
-      }
+    // Use shared link if available when modal opens
+    if (open && sharedLink) {
+      setGeneratedLink(sharedLink);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+    // Reset generated link when modal closes
+    if (!open) {
+      setGeneratedLink("");
+    }
+  }, [open, sharedLink]);
   
   useEffect(() => {
     // Update generated link when shared link changes
     if (sharedLink && sharedLink !== generatedLink) {
       setGeneratedLink(sharedLink);
     }
-  }, [sharedLink]);
+  }, [sharedLink, generatedLink]);
 
   if (!open) return null;
 

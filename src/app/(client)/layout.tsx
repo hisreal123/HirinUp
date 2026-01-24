@@ -51,6 +51,8 @@ export default function RootLayout({
       >
         <MobileRestriction>
           <ClerkProvider
+            signInUrl="/sign-in"
+            signUpUrl="/sign-up"
             signInFallbackRedirectUrl={"/dashboard"}
             afterSignOutUrl={"/sign-in"}
           >

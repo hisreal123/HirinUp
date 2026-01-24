@@ -289,17 +289,16 @@ function InterviewHome() {
       return [];
     }
     
-    // Show responses that have details (either with or without call_id)
-    // This includes responses with details but missing call_id
-    const responsesWithDetails = responses.filter(
-      (response) => response.details
+    // Only show completed responses: must have both call_id AND details
+    const completedResponses = responses.filter(
+      (response) => response.call_id && response.details
     );
     
     if (filterStatus == "ALL") {
-      return responsesWithDetails;
+      return completedResponses;
     }
 
-    return responsesWithDetails.filter(
+    return completedResponses.filter(
       (response) => response?.candidate_status == filterStatus,
     );
   };

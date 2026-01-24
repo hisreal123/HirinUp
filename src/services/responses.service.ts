@@ -44,12 +44,15 @@ const saveResponse = async (payload: any, call_id: string) => {
     hasExistingDetails: !!existingResponse.details,
   });
 
-  // Prepare payload - ensure details is properly formatted for JSONB
-  const updatePayload = {
+  
+  const updatePayload: any = {
     ...payload,
-    // Ensure details is a proper object (Supabase JSONB handles this automatically)
-    details: payload.details || null,
   };
+  
+
+  if ('details' in payload) {
+    updatePayload.details = payload.details || null;
+  }
 
   console.log("[ResponseService] Update payload prepared:", {
     call_id,

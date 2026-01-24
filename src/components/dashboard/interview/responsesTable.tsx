@@ -43,6 +43,11 @@ function ResponsesTable({ data, interviewId }: ResponsesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
+  // Filter to only show completed responses (have both call_id AND details)
+  const completedResponses = data.filter(
+    (response) => response.call_id && response.details
+  );
+
   const formatDate = (dateString: string | Date) => {
     return formatDateReadable(dateString.toString());
   };
@@ -236,7 +241,7 @@ function ResponsesTable({ data, interviewId }: ResponsesTableProps) {
   ];
 
   const table = useReactTable({
-    data,
+    data: completedResponses,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -272,10 +277,10 @@ function ResponsesTable({ data, interviewId }: ResponsesTableProps) {
     },
   });
 
-  if (data.length === 0) {
+  if (completedResponses.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No responses to display
+        No completed responses to display
       </div>
     );
   }

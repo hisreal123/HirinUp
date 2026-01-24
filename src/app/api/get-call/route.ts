@@ -124,12 +124,26 @@ export async function POST(req: Request) {
         logger.error("Failed to save response - no rows updated:", {
           call_id: body.id,
           saveResult,
+          hasCallResponse: !!callResponse,
+          callResponseKeys: callResponse ? Object.keys(callResponse).slice(0, 10) : [],
+        });
+        
+        // Try to check if response exists
+        const checkResponse = await ResponseService.getResponseByCallId(body.id);
+        logger.error("Response check after failed save:", {
+          call_id: body.id,
+          responseExists: !!checkResponse,
+          hasCallId: !!checkResponse?.call_id,
+          responseId: checkResponse?.id,
         });
       } else {
         logger.info("Successfully saved response details:", {
           call_id: body.id,
           updatedRows: saveResult.length,
           hasDetails: !!saveResult[0]?.details,
+          detailsKeys: saveResult[0]?.details ? Object.keys(saveResult[0].details).slice(0, 10) : [],
+          isAnalysed: saveResult[0]?.is_analysed,
+          duration: saveResult[0]?.duration,
         });
       }
     } catch (saveError) {
