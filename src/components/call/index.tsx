@@ -238,6 +238,8 @@ function Call({ interview, responseToken }: InterviewProps) {
   const totalTimeSeconds = Number(interviewTimeDuration) * 60;
   const timeLeftSeconds = Math.max(0, totalTimeSeconds - timeUsedSeconds);
 
+  const [isTimeUp, setIsTimeUp] = useState<boolean>(false);
+
   // Update current duration display and check for end condition
   useEffect(() => {
     const newDuration = Math.floor(time / 100);
@@ -256,6 +258,11 @@ function Call({ interview, responseToken }: InterviewProps) {
       });
     }
 
+    // Check if time is up
+    if (newDuration >= timeLimit && !isTimeUp) {
+      setIsTimeUp(true);
+    }
+
     // Only end the call if not paused and time exceeded
     if (
       newDuration >= timeLimit &&
@@ -271,6 +278,7 @@ function Call({ interview, responseToken }: InterviewProps) {
       });
       webClient.stopCall();
       setIsEnded(true);
+      setIsTimeUp(true);
     }
   }, [
     time,
@@ -279,6 +287,7 @@ function Call({ interview, responseToken }: InterviewProps) {
     isCalling,
     audioNotDetected,
     isTimerPaused,
+    isTimeUp,
   ]);
 
   useEffect(() => {
@@ -639,7 +648,7 @@ function Call({ interview, responseToken }: InterviewProps) {
       const interviewer = await InterviewerService.getInterviewer(
         interview.interviewer_id,
       );
-      setInterviewerImg(interviewer.image);
+      setInterviewerImg(interviewer.image || "/interviewers/default.png");
     };
     fetchInterviewer();
   }, [interview.interviewer_id]);
@@ -748,7 +757,12 @@ function Call({ interview, responseToken }: InterviewProps) {
                     </div>
                   </div>
                   <div className="flex flex-col items-center">
-                    {isTimerPaused && (
+                    {isTimeUp && isEnded && (
+                      <div className="text-xs font-semibold text-red-600 mb-1">
+                        ⏰ TIME UP
+                      </div>
+                    )}
+                    {isTimerPaused && !isTimeUp && (
                       <div className="text-xs font-semibold text-amber-600 mb-1 animate-pulse">
                         ⏸ PAUSED
                       </div>
@@ -760,9 +774,9 @@ function Call({ interview, responseToken }: InterviewProps) {
                   <div className="flex flex-col items-end">
                     <div className="text-xs text-gray-600">Time Left</div>
                     <div
-                      className={`text-sm font-bold ${timeLeftSeconds < 60 ? "text-red-600" : "text-gray-800"}`}
+                      className={`text-sm font-bold ${isTimeUp ? "text-red-600" : timeLeftSeconds < 60 ? "text-red-600" : "text-gray-800"}`}
                     >
-                      {formatTime(timeLeftSeconds)}
+                      {isTimeUp ? "00:00" : formatTime(timeLeftSeconds)}
                     </div>
                   </div>
                 </div>
@@ -770,11 +784,13 @@ function Call({ interview, responseToken }: InterviewProps) {
                 <div className="h-[10px] rounded-md border-[1px] border-gray-300 relative overflow-hidden">
                   <div
                     className={`h-[10px] rounded-md transition-all ${
-                      isTimerPaused
-                        ? "bg-amber-500"
-                        : isEnded
-                          ? "bg-secondary"
-                          : "bg-secondary"
+                      isTimeUp
+                        ? "bg-red-500"
+                        : isTimerPaused
+                          ? "bg-amber-500"
+                          : isEnded
+                            ? "bg-secondary"
+                            : "bg-secondary"
                     }`}
                     style={{
                       width: isEnded
@@ -786,7 +802,14 @@ function Call({ interview, responseToken }: InterviewProps) {
                           }%`,
                     }}
                   />
-                  {isTimerPaused && (
+                  {isTimeUp && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="text-[8px] font-bold text-white drop-shadow-md">
+                        TIME UP
+                      </div>
+                    </div>
+                  )}
+                  {isTimerPaused && !isTimeUp && (
                     <div
                       className="absolute inset-0 flex items-center justify-center pointer-events-none"
                       style={{

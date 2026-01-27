@@ -15,7 +15,8 @@ interface Props {
 }
 
 function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
-  const { data: responses, isLoading: responsesLoading } = useGetAllResponses(id);
+  const { data: responses, isLoading: responsesLoading } =
+    useGetAllResponses(id);
   const analyzeCallMutation = useAnalyzeCall();
   const [isFetching, setIsFetching] = useState(false);
   const [img, setImg] = useState("");
@@ -38,36 +39,38 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
     if (!responses || responses.length === 0) return;
 
     const unanalyzedResponses = responses.filter(
-      (response) => 
-        !response.is_analysed && 
-        response.call_id && 
-        !analyzedCallsRef.current.has(response.call_id)
+      (response) =>
+        !response.is_analysed &&
+        response.call_id &&
+        !analyzedCallsRef.current.has(response.call_id),
     );
-    
+
     if (unanalyzedResponses.length > 0) {
       setIsFetching(true);
-      
+
       // Mark as analyzing to prevent duplicate calls
       unanalyzedResponses.forEach((response) => {
         if (response.call_id) {
           analyzedCallsRef.current.add(response.call_id);
         }
       });
-      
+
       // Analyze all unanalyzed responses in parallel
       Promise.all(
         unanalyzedResponses.map((response) =>
-          analyzeCallMutation.mutateAsync({ id: response.call_id! }).catch((error) => {
-            console.error(
-              `Failed to analyze call for response id ${response.call_id}:`,
-              error,
-            );
-            // Remove from set on error so it can be retried
-            if (response.call_id) {
-              analyzedCallsRef.current.delete(response.call_id);
-            }
-          })
-        )
+          analyzeCallMutation
+            .mutateAsync({ id: response.call_id! })
+            .catch((error) => {
+              console.error(
+                `Failed to analyze call for response id ${response.call_id}:`,
+                error,
+              );
+              // Remove from set on error so it can be retried
+              if (response.call_id) {
+                analyzedCallsRef.current.delete(response.call_id);
+              }
+            }),
+        ),
       ).finally(() => {
         setIsFetching(false);
       });
@@ -75,7 +78,6 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
   }, [responses, analyzeCallMutation]);
 
   const responseCount = responses?.length || null;
-
 
   return (
     <a
@@ -99,13 +101,19 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
           </div>
           <div className="flex flex-row items-center mx-4 ">
             <div className="w-full overflow-hidden">
-              <Image
-                src={img}
-                alt="Picture of the interviewer"
-                width={70}
-                height={70}
-                className="object-cover object-center"
-              />
+              {img ? (
+                <Image
+                  src={img}
+                  alt="Picture of the interviewer"
+                  width={70}
+                  height={70}
+                  className="object-cover object-center"
+                />
+              ) : (
+                <div className="w-[70px] h-[70px] bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 text-xs">No Image</span>
+                </div>
+              )}
             </div>
             <div className="text-black text-sm font-semibold mt-2 mr-2 whitespace-nowrap">
               Responses:{" "}

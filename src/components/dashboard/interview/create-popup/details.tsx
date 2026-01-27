@@ -91,7 +91,7 @@ function DetailsPopup({
       // Check if response has error
       if (response.data.error) {
         const errorMessage = response.data.details || response.data.error;
-        
+
         if (errorMessage.includes("quota") || errorMessage.includes("429")) {
           toast.error(
             "OpenAI API quota exceeded. Please check your billing and add credits to your OpenAI account.",
@@ -104,7 +104,7 @@ function DetailsPopup({
             duration: 5000,
           });
         }
-        
+
         setLoading(false);
         setIsClicked(false);
         return;
@@ -165,16 +165,16 @@ function DetailsPopup({
         description: generatedQuestionsResponse.description || "",
         is_anonymous: isAnonymous,
       };
-      
+
       setInterviewData(updatedInterviewData);
       toast.success("Questions generated successfully!", {
         duration: 3000,
       });
     } catch (error: any) {
       console.error("Error generating questions:", error);
-      
+
       let errorMessage = "Failed to generate questions. Please try again.";
-      
+
       if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
         if (error.response.data.details) {
@@ -196,7 +196,7 @@ function DetailsPopup({
           duration: 5000,
         });
       }
-      
+
       setLoading(false);
       setIsClicked(false);
     }
@@ -276,13 +276,19 @@ function DetailsPopup({
                     }`}
                     onClick={() => setSelectedInterviewer(item.id)}
                   >
-                    <Image
-                      src={item.image}
-                      alt="Picture of the interviewer"
-                      width={70}
-                      height={70}
-                      className="w-full h-full object-cover"
-                    />
+                    {item.image ? (
+                      <Image
+                        src={item.image}
+                        alt="Picture of the interviewer"
+                        width={70}
+                        height={70}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500 text-xs">No Image</span>
+                      </div>
+                    )}
                   </div>
                   <CardTitle className="mt-0 text-xs text-center">
                     {item.name}
