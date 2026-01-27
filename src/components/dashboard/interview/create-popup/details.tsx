@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { useInterviewers } from "@/contexts/interviewers.context";
+import { useGenerateInterviewQuestions } from "@/hooks/useGenerateInterviewQuestions";
 import { InterviewBase, Question } from "@/types/interview";
 import { ChevronRight, ChevronLeft, Info } from "lucide-react";
 import Image from "next/image";
@@ -37,6 +37,7 @@ function DetailsPopup({
   setFileName,
 }: Props) {
   const { interviewers } = useInterviewers();
+  const generateQuestionsMutation = useGenerateInterviewQuestions();
   const [isClicked, setIsClicked] = useState(false);
   const [openInterviewerDetails, setOpenInterviewerDetails] = useState(false);
   const [interviewerDetails, setInterviewerDetails] = useState<Interviewer>();
@@ -83,35 +84,17 @@ function DetailsPopup({
         context: uploadedDocumentContext,
       };
 
-      const response = await axios.post(
-        "/api/generate-interview-questions",
-        data,
-      );
+      const response = await generateQuestionsMutation.mutateAsync(data);
 
       // Check if response has error
-      if (response.data.error) {
-        const errorMessage = response.data.details || response.data.error;
-
-        if (errorMessage.includes("quota") || errorMessage.includes("429")) {
-          toast.error(
-            "OpenAI API quota exceeded. Please check your billing and add credits to your OpenAI account.",
-            {
-              duration: 5000,
-            },
-          );
-        } else {
-          toast.error(`Failed to generate questions: ${errorMessage}`, {
-            duration: 5000,
-          });
-        }
-
+      if (response.error) {
         setLoading(false);
         setIsClicked(false);
         return;
       }
 
       // Check if response has the expected data
-      if (!response.data?.response) {
+      if (!response.response) {
         toast.error("Invalid response from server. Please try again.", {
           duration: 5000,
         });
@@ -120,12 +103,10 @@ function DetailsPopup({
         return;
       }
 
-      let generatedQuestionsResponse;
-      try {
-        generatedQuestionsResponse = JSON.parse(response.data.response);
-      } catch (parseError) {
-        console.error("Error parsing response:", parseError);
-        toast.error("Failed to parse generated questions. Please try again.", {
+      const generatedQuestionsResponse = JSON.parse(response.response);
+
+      if (!generatedQuestionsResponse.questions) {
+        toast.error("No questions generated. Please try again.", {
           duration: 5000,
         });
         setLoading(false);
@@ -133,26 +114,20 @@ function DetailsPopup({
         return;
       }
 
-      // Validate the response structure
-      if (
-        !generatedQuestionsResponse.questions ||
-        !Array.isArray(generatedQuestionsResponse.questions)
+      const questionsArray = generatedQuestionsResponse.questions;
+      const updatedQuestions: Question[] = [];
+
+      for (
+        let i = 0;
+        i < questionsArray.length && i < Number(numQuestions);
+        i++
       ) {
-        toast.error("Invalid question format received. Please try again.", {
-          duration: 5000,
-        });
-        setLoading(false);
-        setIsClicked(false);
-        return;
-      }
-
-      const updatedQuestions = generatedQuestionsResponse.questions.map(
-        (question: Question) => ({
+        updatedQuestions.push({
           id: uuidv4(),
-          question: question.question.trim(),
+          question: questionsArray[i],
           follow_up_count: 1,
-        }),
-      );
+        });
+      }
 
       const updatedInterviewData = {
         ...interviewData,
@@ -167,36 +142,11 @@ function DetailsPopup({
       };
 
       setInterviewData(updatedInterviewData);
-      toast.success("Questions generated successfully!", {
-        duration: 3000,
-      });
     } catch (error: any) {
       console.error("Error generating questions:", error);
-
-      let errorMessage = "Failed to generate questions. Please try again.";
-
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-        if (error.response.data.details) {
-          errorMessage += `: ${error.response.data.details}`;
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      if (errorMessage.includes("quota") || errorMessage.includes("429")) {
-        toast.error(
-          "OpenAI API quota exceeded. Please check your billing and add credits to your OpenAI account.",
-          {
-            duration: 5000,
-          },
-        );
-      } else {
-        toast.error(errorMessage, {
-          duration: 5000,
-        });
-      }
-
+      setLoading(false);
+      setIsClicked(false);
+    } finally {
       setLoading(false);
       setIsClicked(false);
     }

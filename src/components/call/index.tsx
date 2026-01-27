@@ -88,6 +88,9 @@ function Call({ interview, responseToken }: InterviewProps) {
     useState<string>("30");
   const [time, setTime] = useState(0);
   const [currentTimeDuration, setCurrentTimeDuration] = useState<string>("0");
+  const [callStartTime, setCallStartTime] = useState<number | null>(null);
+  const [totalModalTime, setTotalModalTime] = useState<number>(0);
+  const [modalStartTime, setModalStartTime] = useState<number | null>(null);
   const [micPermissionDenied, setMicPermissionDenied] =
     useState<boolean>(false);
   const [isTimerPaused, setIsTimerPaused] = useState<boolean>(false);
@@ -141,17 +144,36 @@ function Call({ interview, responseToken }: InterviewProps) {
     audioNotDetectedRef.current = detected;
   }, []);
 
-  const handleTimerPausedChange = useCallback((paused: boolean) => {
-    console.log("[Call] handleTimerPausedChange called with:", paused);
-    setIsTimerPaused(paused);
-    isTimerPausedRef.current = paused;
-    // Also reset audioNotDetected when resuming
-    if (!paused) {
-      console.log("[Call] Resuming timer, resetting audioNotDetected");
-      setAudioNotDetected(false);
-      audioNotDetectedRef.current = false;
-    }
-  }, []);
+  const handleTimerPausedChange = useCallback(
+    (paused: boolean) => {
+      console.log("[Call] handleTimerPausedChange called with:", paused);
+      setIsTimerPaused(paused);
+      isTimerPausedRef.current = paused;
+
+      // Track modal time
+      if (paused && !modalStartTime) {
+        console.log("[Modal Timer] Modal opened, tracking pause time");
+        setModalStartTime(Date.now());
+      } else if (!paused && modalStartTime) {
+        const modalDuration = (Date.now() - modalStartTime) / 1000;
+        setTotalModalTime((prev) => prev + modalDuration);
+        setModalStartTime(null);
+        console.log(
+          "[Modal Timer] Modal closed, added",
+          modalDuration,
+          "seconds to total modal time",
+        );
+      }
+
+      // Also reset audioNotDetected when resuming
+      if (!paused) {
+        console.log("[Call] Resuming timer, resetting audioNotDetected");
+        setAudioNotDetected(false);
+        audioNotDetectedRef.current = false;
+      }
+    },
+    [modalStartTime],
+  );
 
   // Clear silence timer when user actually responds (transcript changes)
   useEffect(() => {
@@ -205,18 +227,17 @@ function Call({ interview, responseToken }: InterviewProps) {
     }
   }, [lastUserResponse]);
 
-  // Timer interval - uses refs to check pause state synchronously
-  // Runs every 100ms instead of 10ms to reduce state updates (increments by 10 to maintain same time scale)
+  // Timer interval - increment only when not paused
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
     if (isCalling && !isEnded) {
       intervalId = setInterval(() => {
-        // Check pause conditions using refs for immediate response
-        if (!isTimerPausedRef.current) {
-          setTime((prevTime) => prevTime + 1);
+        // Only increment when timer is NOT paused
+        if (!isTimerPausedRef.current && !audioNotDetectedRef.current) {
+          setTime((prevTime) => prevTime + 10); // Increment by 10 (100ms worth)
         }
-      }, 10);
+      }, 100); // Run every 100ms
     }
 
     return () => {
@@ -233,8 +254,8 @@ function Call({ interview, responseToken }: InterviewProps) {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Calculate time used and time left
-  const timeUsedSeconds = Number(currentTimeDuration);
+  // Calculate time used and time left using incremental timer
+  const timeUsedSeconds = Math.floor(time / 100); // Convert to seconds
   const totalTimeSeconds = Number(interviewTimeDuration) * 60;
   const timeLeftSeconds = Math.max(0, totalTimeSeconds - timeUsedSeconds);
 
@@ -242,39 +263,43 @@ function Call({ interview, responseToken }: InterviewProps) {
 
   // Update current duration display and check for end condition
   useEffect(() => {
-    const newDuration = Math.floor(time / 100);
-    setCurrentTimeDuration(String(newDuration));
+    const currentDuration = Math.floor(time / 100);
+    setCurrentTimeDuration(String(currentDuration));
 
     // Add logging to debug timer issues
     const timeLimit = Number(interviewTimeDuration) * 60;
-    if (newDuration > 0 && newDuration % 60 === 0) {
-      // Log every minute
-      console.log("[Timer Debug]", {
-        currentDuration: newDuration,
+
+    // Log every 10 seconds for debugging
+    if (currentDuration > 0 && currentDuration % 10 === 0) {
+      console.log("[Timer Debug] Every 10s check:", {
+        currentDuration,
         timeLimit,
         interviewTimeDuration,
-        timeRemaining: timeLimit - newDuration,
-        willEnd: newDuration >= timeLimit,
+        timeRemaining: timeLimit - currentDuration,
+        willEnd: currentDuration >= timeLimit,
+        isTimerPaused,
+        audioNotDetected,
+        isEnded,
+        isCalling,
       });
     }
 
     // Check if time is up
-    if (newDuration >= timeLimit && !isTimeUp) {
+    if (currentDuration >= timeLimit && !isTimeUp) {
+      console.log("[Timer] Setting isTimeUp to true");
       setIsTimeUp(true);
     }
 
-    // Only end the call if not paused and time exceeded
-    if (
-      newDuration >= timeLimit &&
-      !isEnded &&
-      isCalling &&
-      !audioNotDetected &&
-      !isTimerPaused
-    ) {
-      console.log("[Timer] Ending call due to time limit reached", {
-        newDuration,
+    // FORCE END CALL when time limit is reached
+    if (currentDuration >= timeLimit && !isEnded && isCalling) {
+      console.error("[Timer] *** FORCE ENDING CALL NOW ***", {
+        currentDuration,
         timeLimit,
         interviewTimeDuration,
+        actualMinutesElapsed: currentDuration / 60,
+        expectedMinutes: Number(interviewTimeDuration),
+        reason: "Timer enforcement - exact timing",
+        timestamp: new Date().toISOString(),
       });
       webClient.stopCall();
       setIsEnded(true);
@@ -285,15 +310,18 @@ function Call({ interview, responseToken }: InterviewProps) {
     interviewTimeDuration,
     isEnded,
     isCalling,
-    audioNotDetected,
-    isTimerPaused,
     isTimeUp,
+    isTimerPaused,
+    audioNotDetected,
   ]);
 
   useEffect(() => {
     webClient.on("call_started", () => {
-      console.log("Call started");
+      const startTime = Date.now();
+      console.log("Call started at:", new Date(startTime).toISOString());
       setIsCalling(true);
+      setCallStartTime(startTime); // Track real start time
+      console.log("[Timer Setup] Call started, startTime set to:", startTime);
 
       const requestMicPermission = async () => {
         if (hasRequestedPermission.current) {
@@ -451,6 +479,12 @@ function Call({ interview, responseToken }: InterviewProps) {
       questions: interview?.questions?.map((q) => q?.question).join(", ") || "",
       name: candidateForm.fullName || "not provided",
     };
+
+    console.log("[TIMER DEBUG] Data sent to AI:", data);
+    console.log(
+      "[TIMER DEBUG] Interview time_duration:",
+      interview?.time_duration,
+    );
     setLoading(true);
 
     // Check if user is old using cached emails data
@@ -633,8 +667,18 @@ function Call({ interview, responseToken }: InterviewProps) {
       console.log(
         "[Timer Setup] Setting interview duration:",
         interview.time_duration,
+        "Type:",
+        typeof interview.time_duration,
       );
       setInterviewTimeDuration(interview?.time_duration);
+
+      // Verify the conversion
+      const expectedSeconds = Number(interview.time_duration) * 60;
+      console.log("[Timer Setup] Expected total seconds:", expectedSeconds);
+      console.log(
+        "[Timer Setup] Expected display duration:",
+        `${interview.time_duration}:00`,
+      );
     } else {
       console.log(
         "[Timer Setup] No time_duration found, using default:",

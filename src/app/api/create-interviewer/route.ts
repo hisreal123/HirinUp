@@ -90,14 +90,7 @@ export async function GET(req: NextRequest) {
         const newModel = await retellClient.llm.create({
           model: "gpt-4o",
           general_prompt: RETELL_AGENT_GENERAL_PROMPT,
-          general_tools: [
-            {
-              type: "end_call",
-              name: "end_call_1",
-              description:
-                "Only end the call if the user explicitly says they want to end the interview AND confirms it when asked. Do not end for casual goodbye phrases during the conversation.",
-            },
-          ],
+          general_tools: [],
         });
 
         logger.info("Creating Retell agent for Lisa...");
@@ -155,14 +148,7 @@ export async function GET(req: NextRequest) {
         const newModel = await retellClient.llm.create({
           model: "gpt-4o",
           general_prompt: RETELL_AGENT_GENERAL_PROMPT,
-          general_tools: [
-            {
-              type: "end_call",
-              name: "end_call_1",
-              description:
-                "Only end the call if the user explicitly says they want to end the interview AND confirms it when asked. Do not end for casual goodbye phrases during the conversation.",
-            },
-          ],
+          general_tools: [],
         });
 
         logger.info("Creating Retell agent for Bob...");
