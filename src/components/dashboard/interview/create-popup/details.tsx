@@ -80,7 +80,7 @@ function DetailsPopup({
       const data = {
         name: name.trim(),
         objective: objective.trim(),
-        number: numQuestions,
+        number: Number(numQuestions),
         context: uploadedDocumentContext,
       };
 
