@@ -136,3 +136,240 @@ If you have any questions or feedback, please feel free to reach out to us at [s
 ## License
 
 The software code is licensed under the MIT License.
+
+```
+
+```
+
+```
+
+```
+
+```
+FoloUp
+├─ .eslintrc.js
+├─ .prettierrc.js
+├─ components.json
+├─ CONTRIBUTING.md
+├─ docker-compose.yml
+├─ Dockerfile
+├─ LICENSE
+├─ Makefile
+├─ next.config.js
+├─ package.json
+├─ postcss.config.js
+├─ public
+│  ├─ audio
+│  │  ├─ Bob.wav
+│  │  └─ Lisa.wav
+│  ├─ blog
+│  │  ├─ blog-1.png
+│  │  ├─ blog-2.png
+│  │  └─ blog-3.png
+│  ├─ browser-client-icon.ico
+│  ├─ browser-user-icon.ico
+│  ├─ card-logo
+│  │  ├─ card-logo-1.webp
+│  │  ├─ card-logo-2.webp
+│  │  ├─ card-logo-3.webp
+│  │  └─ card-logo-4.webp
+│  ├─ closed.png
+│  ├─ FoloUp.png
+│  ├─ form-bg.webp
+│  ├─ Hero-1-scaled.webp
+│  ├─ Hero-scaled.webp
+│  ├─ interviewers
+│  │  ├─ Bob.png
+│  │  └─ Lisa.png
+│  ├─ invalid-url.png
+│  ├─ Loading-Time.png
+│  ├─ No-Responses.png
+│  ├─ pause.svg
+│  ├─ play.svg
+│  ├─ Premium-Plan-Icon.png
+│  ├─ solution-bg.webp
+│  ├─ step-images
+│  │  ├─ step-1.webp
+│  │  ├─ step-2.webp
+│  │  ├─ step-3.webp
+│  │  └─ step-4.webp
+│  ├─ trusted-logos
+│  │  ├─ trusted-logo-1.png
+│  │  ├─ trusted-logo-2.png
+│  │  └─ trusted-logo-3.png
+│  ├─ user
+│  │  ├─ user-image-1.webp
+│  │  └─ user-image-2.webp
+│  ├─ user-icon.png
+│  └─ video
+│     └─ circle-1.mp4
+├─ README.md
+├─ src
+│  ├─ actions
+│  │  └─ parse-pdf.ts
+│  ├─ app
+│  │  ├─ (client)
+│  │  │  ├─ (marketing)
+│  │  │  │  ├─ ai-candidate-screening
+│  │  │  │  │  └─ page.tsx
+│  │  │  │  ├─ home
+│  │  │  │  │  ├─ page.tsx
+│  │  │  │  │  └─ section
+│  │  │  │  │     ├─ hero.tsx
+│  │  │  │  │     ├─ hiring.tsx
+│  │  │  │  │     ├─ marketing
+│  │  │  │  │     │  ├─ data
+│  │  │  │  │     │  │  ├─ blogs.ts
+│  │  │  │  │     │  │  └─ faqs.ts
+│  │  │  │  │     │  ├─ faqItem.tsx
+│  │  │  │  │     │  └─ page.tsx
+│  │  │  │  │     ├─ problem-statement.tsx
+│  │  │  │  │     ├─ sally
+│  │  │  │  │     │  ├─ sally.tsx
+│  │  │  │  │     │  └─ swiper.tsx
+│  │  │  │  │     ├─ solution.tsx
+│  │  │  │  │     └─ timer
+│  │  │  │  │        ├─ page.tsx
+│  │  │  │  │        └─ slider.tsx
+│  │  │  │  ├─ layout
+│  │  │  │  │  ├─ footer.tsx
+│  │  │  │  │  ├─ header.tsx
+│  │  │  │  │  └─ top-annoucment.tsx
+│  │  │  │  └─ layout.tsx
+│  │  │  ├─ dashboard
+│  │  │  │  ├─ interviewers
+│  │  │  │  │  └─ page.tsx
+│  │  │  │  └─ page.tsx
+│  │  │  ├─ interviews
+│  │  │  │  └─ [interviewId]
+│  │  │  │     └─ page.tsx
+│  │  │  ├─ layout.tsx
+│  │  │  ├─ sign-in
+│  │  │  │  └─ [[...sign-in]]
+│  │  │  │     └─ page.tsx
+│  │  │  └─ sign-up
+│  │  │     └─ [[...sign-up]]
+│  │  │        └─ page.tsx
+│  │  ├─ (user)
+│  │  │  ├─ call
+│  │  │  │  └─ [interviewId]
+│  │  │  │     └─ page.tsx
+│  │  │  └─ layout.tsx
+│  │  ├─ api
+│  │  │  ├─ analyze-communication
+│  │  │  │  └─ route.ts
+│  │  │  ├─ create-interview
+│  │  │  │  └─ route.ts
+│  │  │  ├─ create-interviewer
+│  │  │  │  └─ route.ts
+│  │  │  ├─ generate-insights
+│  │  │  │  └─ route.ts
+│  │  │  ├─ generate-interview-questions
+│  │  │  │  └─ route.ts
+│  │  │  ├─ get-call
+│  │  │  │  └─ route.ts
+│  │  │  ├─ register-call
+│  │  │  │  └─ route.ts
+│  │  │  └─ response-webhook
+│  │  │     └─ route.ts
+│  │  └─ globals.css
+│  ├─ components
+│  │  ├─ call
+│  │  │  ├─ callInfo.tsx
+│  │  │  ├─ feedbackForm.tsx
+│  │  │  ├─ index.tsx
+│  │  │  └─ tabSwitchPrevention.tsx
+│  │  ├─ dashboard
+│  │  │  ├─ interview
+│  │  │  │  ├─ create-popup
+│  │  │  │  │  ├─ details.tsx
+│  │  │  │  │  ├─ questionCard.tsx
+│  │  │  │  │  └─ questions.tsx
+│  │  │  │  ├─ createInterviewCard.tsx
+│  │  │  │  ├─ createInterviewModal.tsx
+│  │  │  │  ├─ dataTable.tsx
+│  │  │  │  ├─ editInterview.tsx
+│  │  │  │  ├─ fileUpload.tsx
+│  │  │  │  ├─ interviewCard.tsx
+│  │  │  │  ├─ questionAnswerCard.tsx
+│  │  │  │  ├─ sharePopup.tsx
+│  │  │  │  └─ summaryInfo.tsx
+│  │  │  ├─ interviewer
+│  │  │  │  ├─ avatars.ts
+│  │  │  │  ├─ createInterviewerButton.tsx
+│  │  │  │  ├─ createInterviewerCard.tsx
+│  │  │  │  ├─ interviewerCard.tsx
+│  │  │  │  └─ interviewerDetailsModal.tsx
+│  │  │  └─ Modal.tsx
+│  │  ├─ loaders
+│  │  │  ├─ loader-with-logo
+│  │  │  │  ├─ loader.module.css
+│  │  │  │  └─ loaderWithLogo.tsx
+│  │  │  ├─ loader-with-text
+│  │  │  │  └─ loaderWithText.tsx
+│  │  │  └─ mini-loader
+│  │  │     ├─ mini-loader.module.css
+│  │  │     └─ miniLoader.tsx
+│  │  ├─ navbar.tsx
+│  │  ├─ providers.tsx
+│  │  ├─ sideMenu.tsx
+│  │  └─ ui
+│  │     ├─ alert-dialog.tsx
+│  │     ├─ avatar.tsx
+│  │     ├─ button.tsx
+│  │     ├─ card.tsx
+│  │     ├─ carousel.tsx
+│  │     ├─ context-menu.tsx
+│  │     ├─ form.tsx
+│  │     ├─ label.tsx
+│  │     ├─ scroll-area.tsx
+│  │     ├─ select.tsx
+│  │     ├─ separator.tsx
+│  │     ├─ skeleton.tsx
+│  │     ├─ slider.tsx
+│  │     ├─ switch.tsx
+│  │     ├─ table.tsx
+│  │     ├─ tabs.tsx
+│  │     ├─ textarea.tsx
+│  │     ├─ toast.tsx
+│  │     ├─ toaster.tsx
+│  │     ├─ toggle.tsx
+│  │     ├─ tooltip.tsx
+│  │     └─ use-toast.ts
+│  ├─ contexts
+│  │  ├─ clients.context.tsx
+│  │  ├─ interviewers.context.tsx
+│  │  ├─ interviews.context.tsx
+│  │  └─ responses.context.tsx
+│  ├─ lib
+│  │  ├─ compose.tsx
+│  │  ├─ constants.ts
+│  │  ├─ enum.tsx
+│  │  ├─ logger.ts
+│  │  ├─ prompts
+│  │  │  ├─ analytics.ts
+│  │  │  ├─ communication-analysis.ts
+│  │  │  ├─ generate-insights.ts
+│  │  │  └─ generate-questions.ts
+│  │  └─ utils.ts
+│  ├─ middleware.ts
+│  ├─ services
+│  │  ├─ analytics.service.ts
+│  │  ├─ clients.service.ts
+│  │  ├─ feedback.service.ts
+│  │  ├─ interviewers.service.ts
+│  │  ├─ interviews.service.ts
+│  │  └─ responses.service.ts
+│  └─ types
+│     ├─ database.types.ts
+│     ├─ interview.ts
+│     ├─ interviewer.ts
+│     ├─ organization.ts
+│     ├─ response.ts
+│     └─ user.ts
+├─ supabase_schema.sql
+├─ tailwind.config.ts
+├─ tsconfig.json
+└─ yarn.lock
+
+```
