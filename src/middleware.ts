@@ -1,7 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse, NextRequest } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
+  "/home(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/signin(.*)",
@@ -9,10 +11,18 @@ const isPublicRoute = createRouteMatcher([
   "/login(.*)",
   "/register(.*)",
   "/forgot-password(.*)",
+  "/verification-page(.*)",
   "/admin/signin(.*)",
   "/admin/signup(.*)",
   "/interview(.*)",
   "/join(.*)",
+  "/pricing(.*)",
+  "/book-a-demo(.*)",
+  "/job-tryouts(.*)",
+  "/ai-candidate-screening(.*)",
+  "/ethical-ai(.*)",
+  "/terms-condition(.*)",
+  "/privacy-policy(.*)",
   "/api/register-call(.*)",
   "/api/get-call(.*)",
   "/api/generate-interview-questions(.*)",
@@ -27,7 +37,7 @@ const isProtectedRoute = createRouteMatcher([
   "/interviews(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
+const clerkHandler = clerkMiddleware(async (auth, req) => {
   // Allow public routes without authentication - return early, don't call auth()
   if (isPublicRoute(req)) {
     return;
@@ -40,9 +50,21 @@ export default clerkMiddleware(async (auth, req) => {
       return authResult.redirectToSignIn({ returnBackUrl: req.url });
     }
   }
-  
+
   // For other routes that aren't public or protected, allow through
 });
+
+export default function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Redirect root to /home BEFORE Clerk processes
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/home", req.url));
+  }
+
+  // Let Clerk handle everything else
+  return clerkHandler(req, {} as any);
+}
 
 export const config = {
   matcher: [
