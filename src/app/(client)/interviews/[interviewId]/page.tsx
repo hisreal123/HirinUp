@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Switch} from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React, { useState, useEffect } from "react";
 import { useOrganization } from "@clerk/nextjs";
@@ -138,7 +138,9 @@ function InterviewHome() {
 
 
   useEffect(() => {
-    if (!interviewId) return;
+    if (!interviewId) {
+      return;
+    }
 
     const fetchInterview = async () => {
       try {
@@ -666,7 +668,7 @@ function InterviewHome() {
                         </CardContent>
                       </Card>
                     </div>
-                    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "responses" | "links")} className="w-full">
+                    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "responses" | "links" | "feedback")} className="w-full">
                       <TabsList>
                         <TabsTrigger value="details">Details</TabsTrigger>
                         <TabsTrigger value="responses">

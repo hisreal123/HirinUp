@@ -51,19 +51,34 @@ export default function RootLayout({
       >
         <MobileRestriction>
           <ClerkProvider
-            signInUrl="/sign-in"
-            signUpUrl="/sign-up"
+            signInUrl="/admin/signin"
+            signUpUrl="/admin/signup"
             signInFallbackRedirectUrl={"/dashboard"}
-            afterSignOutUrl={"/sign-in"}
+            afterSignOutUrl={"/admin/signin"}
           >
             <Providers>
               {!pathname.includes("/sign-in") &&
-                !pathname.includes("/sign-up") && <Navbar />}
+                !pathname.includes("/sign-up") &&
+                !pathname.includes("/signin") &&
+                !pathname.includes("/signup") &&
+                !pathname.includes("/login") &&
+                !pathname.includes("/register") &&
+                !pathname.includes("/forgot-password") && <Navbar />}
               <div className="flex flex-row h-screen bg-floral-white">
                 {!pathname.includes("/sign-in") &&
-                  !pathname.includes("/sign-up") && <SideMenu />}
+                  !pathname.includes("/sign-up") &&
+                  !pathname.includes("/signin") &&
+                  !pathname.includes("/signup") &&
+                  !pathname.includes("/login") &&
+                  !pathname.includes("/register") &&
+                  !pathname.includes("/forgot-password") && <SideMenu />}
                 {!pathname.includes("/sign-in") &&
-                  !pathname.includes("/sign-up") ? (
+                  !pathname.includes("/sign-up") &&
+                  !pathname.includes("/signin") &&
+                  !pathname.includes("/signup") &&
+                  !pathname.includes("/login") &&
+                  !pathname.includes("/register") &&
+                  !pathname.includes("/forgot-password") ? (
                   <ContentWrapper>{children}</ContentWrapper>
                 ) : (
                   <div className="pt-[64px] h-full overflow-y-auto flex-grow">
