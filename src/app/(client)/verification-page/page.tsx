@@ -96,7 +96,6 @@ function VerificationPage() {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-            {/* Honeypot fields - hidden from humans, visible to bots */}
             <HoneypotFields />
 
             <div className="space-y-2">
