@@ -162,7 +162,7 @@ function VerificationPage() {
                 <span
                   className={`text-xs ${
                     isReasonValid
-                      ? 'text-gray-500'
+                      ? 'text-gray-500'  
                       : wordCount > 0
                       ? 'text-red-500'
                       : 'text-gray-400'
