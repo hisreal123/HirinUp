@@ -107,9 +107,11 @@ function Call({ interview, responseToken }: InterviewProps) {
   const agentStoppedTalkingTimeRef = useRef<number | null>(null);
   const lastUserResponseLengthRef = useRef<number>(0);
 
+  // Refs to track values without causing re-registration of listeners
+  const lastUserResponseRef2 = useRef<string>("");
+  const audioNotDetectedStateRef = useRef<boolean>(false);
+
   const candidateForm = useCandidateForm();
-  const audioMessage =
-    "I have not received any response from you, let's fix that.";
 
   // Audio detection state - managed by InterviewStage when mounted
   const [audioNotDetected, setAudioNotDetected] = useState(false);
@@ -143,6 +145,7 @@ function Call({ interview, responseToken }: InterviewProps) {
   const handleAudioNotDetectedChange = useCallback((detected: boolean) => {
     setAudioNotDetected(detected);
     audioNotDetectedRef.current = detected;
+    audioNotDetectedStateRef.current = detected;
   }, []);
 
   const handleTimerPausedChange = useCallback(
@@ -177,8 +180,10 @@ function Call({ interview, responseToken }: InterviewProps) {
   );
 
   // Clear silence timer when user actually responds (transcript changes)
+  // Also keep ref in sync for use in event listeners
   useEffect(() => {
-    const currentResponseLength = lastUserResponse?.length;
+    const currentResponseLength = lastUserResponse?.length || 0;
+    lastUserResponseRef2.current = lastUserResponse || "";
 
     if (
       currentResponseLength > lastUserResponseLengthRef.current &&
@@ -292,7 +297,15 @@ function Call({ interview, responseToken }: InterviewProps) {
     }
 
     // FORCE END CALL when time limit is reached
+    // BUT don't end if modal is open (timer is paused) - give user time to respond
     if (currentDuration >= timeLimit && !isEnded && isCalling) {
+      // Safety check: don't end while timer is paused (modal is open)
+      if (isTimerPausedRef.current) {
+        console.log("[Timer] Time limit reached but timer is paused (modal open), waiting...");
+
+        return;
+      }
+
       console.error("[Timer] *** FORCE ENDING CALL NOW ***", {
         currentDuration,
         timeLimit,
@@ -301,6 +314,7 @@ function Call({ interview, responseToken }: InterviewProps) {
         expectedMinutes: Number(interviewTimeDuration),
         reason: "Timer enforcement - exact timing",
         timestamp: new Date().toISOString(),
+        isTimerPaused,
       });
       webClient.stopCall();
       setIsEnded(true);
@@ -395,11 +409,14 @@ function Call({ interview, responseToken }: InterviewProps) {
       }
 
       agentStoppedTalkingTimeRef.current = Date.now();
-      lastUserResponseLengthRef.current = lastUserResponse?.length;
+      // Capture current length at the moment agent stops talking
+      const capturedLength = lastUserResponseRef2.current?.length || 0;
+      lastUserResponseLengthRef.current = capturedLength;
 
       silenceTimerRef.current = setTimeout(() => {
-        const userResponded =
-          lastUserResponse?.length > lastUserResponseLengthRef?.current;
+        // Use ref to get current value at timeout execution time
+        const currentLength = lastUserResponseRef2.current?.length || 0;
+        const userResponded = currentLength > capturedLength;
 
         if (userResponded) {
           console.log(
@@ -412,7 +429,7 @@ function Call({ interview, responseToken }: InterviewProps) {
         console.log(
           "[Call] 5 seconds passed without user response, showing message",
         );
-        setLastInterviewerResponse(audioMessage);
+        setLastInterviewerResponse("I have not received any response from you, let's fix that.");
 
         messageTimerRef.current = setTimeout(() => {
           console.log("[Call] Showing modal and pausing timer");
@@ -460,7 +477,10 @@ function Call({ interview, responseToken }: InterviewProps) {
         messageTimerRef.current = null;
       }
     };
-  }, [audioNotDetected, audioMessage, lastUserResponse?.length]);
+    // IMPORTANT: Empty dependency array - only register listeners ONCE on mount
+    // State values are accessed via refs to avoid stale closures
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onEndCallClick = async () => {
     if (isStarted) {
