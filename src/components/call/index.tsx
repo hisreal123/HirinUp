@@ -395,7 +395,7 @@ function Call({ interview, responseToken }: InterviewProps) {
 
     webClient.on("agent_stop_talking", () => {
       console.log(
-        "[Call] Agent stopped talking, starting 5-second response timer",
+        "[Call] Agent stopped talking, starting 15-second response timer",
       );
       setActiveTurn("user");
 
@@ -420,14 +420,14 @@ function Call({ interview, responseToken }: InterviewProps) {
 
         if (userResponded) {
           console.log(
-            "[Call] User responded during the 5 seconds, canceling silence detection",
+            "[Call] User responded during the 15 seconds, canceling silence detection",
           );
 
           return;
         }
 
         console.log(
-          "[Call] 5 seconds passed without user response, showing message",
+          "[Call] 15 seconds passed without user response, showing message",
         );
         setLastInterviewerResponse("I have not received any response from you, let's fix that.");
 
@@ -438,8 +438,8 @@ function Call({ interview, responseToken }: InterviewProps) {
           if (triggerSilenceDetectionRef.current) {
             triggerSilenceDetectionRef.current(true);
           }
-        }, 2000);
-      }, 5000);
+        }, 5000);
+      }, 15000);
     });
 
     webClient.on("error", (error) => {

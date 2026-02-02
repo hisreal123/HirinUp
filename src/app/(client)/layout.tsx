@@ -61,11 +61,9 @@ export default function ClientLayout({
               )}
             </div>
             <Toaster
+              richColors
               toastOptions={{
                 classNames: {
-                  toast: "bg-white",
-                  title: "text-black",
-                  description: "text-red-400",
                   actionButton: "bg-primary",
                   cancelButton: "bg-orange-400",
                   closeButton: "bg-white-400",

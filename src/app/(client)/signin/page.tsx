@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 function SignInPage() {
   const [email, setEmail] = useState('');
@@ -13,8 +14,10 @@ function SignInPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement sign in logic
-    console.log('Sign in:', { email, password });
+    // POC: Show "not registered" toast for all sign in attempts
+    toast.error('You are not registered', {
+      description: 'Please sign up to create an account.',
+    });
   };
 
   return (
