@@ -1,21 +1,41 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useHoneypot } from '@/components/honeypot';
 
 function VerificationPage() {
+  const router = useRouter();
   const [professionalEmail, setProfessionalEmail] = useState('');
   const [legalName, setLegalName] = useState('');
   const [socialMediaLinks, setSocialMediaLinks] = useState('');
   const [reason, setReason] = useState('');
   const [notIllegal, setNotIllegal] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { checkHoneypot, HoneypotFields } = useHoneypot();
+
+  // Count words in reason text
+  const wordCount = reason.trim().split(/\s+/).filter(word => word.length > 0).length;
+  const minWords = 30;
+  const isReasonValid = wordCount >= minWords;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check for bot submission
+    if (checkHoneypot()) {
+      console.log('Bot detected - rejecting submission');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     // TODO: Implement verification logic
     console.log('Verification:', {
       professionalEmail,
@@ -25,6 +45,29 @@ function VerificationPage() {
       notIllegal,
       agreeTerms,
     });
+
+    // Encode name and email to pass to success page
+    const dataToEncode = {
+      name: legalName.trim(),
+      email: professionalEmail.trim(),
+    };
+    
+    try {
+      // Encode as base64, then URL-encode to handle special characters
+      const jsonString = JSON.stringify(dataToEncode);
+      const base64Encoded = btoa(jsonString);
+      const urlSafeToken = encodeURIComponent(base64Encoded);
+      
+      console.log('Encoded token:', urlSafeToken);
+      
+      // Redirect to response page with encoded token
+      router.push(`/verification-response/${urlSafeToken}`);
+    } catch (error) {
+      console.error('Error encoding data:', error);
+      setIsSubmitting(false);
+      // Fallback: redirect without token (will show 404)
+      router.push('/verification-response/invalid');
+    }
   };
 
   return (
@@ -53,6 +96,9 @@ function VerificationPage() {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+            {/* Honeypot fields - hidden from humans, visible to bots */}
+            <HoneypotFields />
+
             <div className="space-y-2">
               <label
                 htmlFor="professionalEmail"
@@ -105,22 +151,45 @@ function VerificationPage() {
             </div>
 
             <div className="space-y-2">
-              <label
-                htmlFor="reason"
-                className="text-sm font-medium text-gray-700"
-              >
-                Why do you want to use HirinUp?{' '}
-                <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="reason"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Why do you want to use HirinUp?{' '}
+                  <span className="text-red-500">*</span>
+                </label>
+                <span
+                  className={`text-xs ${
+                    isReasonValid
+                      ? 'text-gray-500'
+                      : wordCount > 0
+                      ? 'text-red-500'
+                      : 'text-gray-400'
+                  }`}
+                >
+                  {wordCount} / {minWords} words
+                  {!isReasonValid && wordCount > 0 && ' (minimum required)'}
+                </span>
+              </div>
               <Textarea
                 id="reason"
-                placeholder="Please provide context about your intended use of HirinUp and other relevant information about who you are..."
+                placeholder="Please provide context about your intended use of HirinUp and other relevant information about who you are... (Minimum 30 words required)"
                 value={reason}
-                rows={4}
-                className="resize-none"
+                rows={6}
+                className={`resize-none ${
+                  reason && !isReasonValid
+                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                    : ''
+                }`}
                 required
                 onChange={(e) => setReason(e.target.value)}
               />
+              {reason && !isReasonValid && (
+                <p className="text-xs text-red-500">
+                  Please provide at least {minWords} words. You currently have {wordCount} word{wordCount !== 1 ? 's' : ''}.
+                </p>
+              )}
             </div>
 
             <div className="space-y-3">
@@ -169,10 +238,36 @@ function VerificationPage() {
 
             <Button
               type="submit"
-              disabled={!notIllegal || !agreeTerms}
+              disabled={!notIllegal || !agreeTerms || !isReasonValid || isSubmitting}
               className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Verification
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="animate-spin h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Submitting...
+                </span>
+              ) : (
+                'Submit Verification'
+              )}
             </Button>
           </form>
 

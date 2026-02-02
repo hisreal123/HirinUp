@@ -94,6 +94,7 @@ function Call({ interview, responseToken }: InterviewProps) {
   const [micPermissionDenied, setMicPermissionDenied] =
     useState<boolean>(false);
   const [isTimerPaused, setIsTimerPaused] = useState<boolean>(false);
+  const [isPreparingCall, setIsPreparingCall] = useState<boolean>(false);
 
   // Refs to track pause states for the timer interval
   const isTimerPausedRef = useRef<boolean>(false);
@@ -634,6 +635,12 @@ function Call({ interview, responseToken }: InterviewProps) {
 
       // Now start the call (after call_id is saved)
       if (callResponse?.access_token) {
+        // Show loading spinner for 2 seconds before starting the call
+        setLoading(false);
+        setIsPreparingCall(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         await webClient
           .startCall({
             accessToken: callResponse.access_token,
@@ -644,8 +651,10 @@ function Call({ interview, responseToken }: InterviewProps) {
             toast.error(
               "Failed to start call. The interview link has been marked as used.",
             );
+            setIsPreparingCall(false);
             throw err;
           });
+        setIsPreparingCall(false);
         setIsCalling(true);
         setIsStarted(true);
       } else {
@@ -657,6 +666,7 @@ function Call({ interview, responseToken }: InterviewProps) {
     } catch (error) {
       console.error("Error starting conversation:", error);
       toast.error("Failed to start interview. Please try again.");
+      setIsPreparingCall(false);
     }
 
     setLoading(false);
@@ -781,6 +791,17 @@ function Call({ interview, responseToken }: InterviewProps) {
     saveResponseMutation,
     analyzeCallMutation,
   ]);
+
+  // Show loading spinner for 2 seconds before call starts
+  if (isPreparingCall) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-white">
+        <div className="flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen">

@@ -1,0 +1,54 @@
+# Robots.txt for HirinUp
+# Block all bots from sensitive areas
+
+User-agent: *
+Allow: /home
+Allow: /pricing
+Allow: /book-a-demo
+Allow: /job-tryouts
+Allow: /ai-candidate-screening
+Allow: /ethical-ai
+Allow: /terms-condition
+Allow: /privacy-policy
+
+# Block authentication and dashboard areas
+Disallow: /dashboard
+Disallow: /interviews
+Disallow: /signin
+Disallow: /signup
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /login
+Disallow: /register
+Disallow: /verification-page
+Disallow: /admin
+Disallow: /api/
+
+# Block common bot paths
+Disallow: /*.json$
+Disallow: /*?*
+
+# Crawl delay to prevent aggressive scraping
+Crawl-delay: 10
+
+# Block specific bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: SearchmetricsBot
+Disallow: /
+
+# Sitemap location
+Sitemap: https://hirinup.com/sitemap.xml

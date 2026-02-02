@@ -75,6 +75,7 @@ function InterviewHome() {
     useState<boolean>(false);
   const [isViewed, setIsViewed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const { organization } = useOrganization();
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [organizationNameSlug, setOrganizationNameSlug] = useState<string>("");
@@ -82,6 +83,15 @@ function InterviewHome() {
 
   const createResponseMutation = useCreateResponse();
   const { data: responsesData, isLoading: responsesLoading, refetch: refetchResponses } = useGetAllResponses(interviewId, true);
+
+  // Initial loading screen - show spinner for 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 2000); // 2 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Update local state when query data changes
   useEffect(() => {
@@ -314,6 +324,17 @@ function InterviewHome() {
   const emptyResponses = totalResponses - totalAnsweredLinks; // Responses that haven't been completed
   const totalFeedbacks = feedbacks?.length || 0;
   const totalLinks = responses?.length || 0; // Each response represents a generated link
+
+  // Show initial loading spinner for 2 seconds
+  if (isInitialLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen w-full bg-white">
+        <div className="flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-full m-2 bg-white">
