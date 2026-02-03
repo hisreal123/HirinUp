@@ -38,6 +38,11 @@ import { EndScreen } from "./EndScreen";
 const webClient = new RetellWebClient();
 setWebClientInstance(webClient);
 
+// Silence detection timing (in milliseconds)
+// Defaults: 15 seconds wait, 5 seconds message display
+const SILENCE_WAIT_TIME = (Number(process.env.NEXT_PUBLIC_SILENCE_WAIT_TIME) || 15) * 1000;
+const SILENCE_MESSAGE_TIME = (Number(process.env.NEXT_PUBLIC_SILENCE_MESSAGE_TIME) || 5) * 1000;
+
 type InterviewProps = {
   interview: Interview;
   responseToken?: string;
@@ -395,7 +400,7 @@ function Call({ interview, responseToken }: InterviewProps) {
 
     webClient.on("agent_stop_talking", () => {
       console.log(
-        "[Call] Agent stopped talking, starting 15-second response timer",
+        `[Call] Agent stopped talking, starting ${SILENCE_WAIT_TIME / 1000}-second response timer`,
       );
       setActiveTurn("user");
 
@@ -420,14 +425,14 @@ function Call({ interview, responseToken }: InterviewProps) {
 
         if (userResponded) {
           console.log(
-            "[Call] User responded during the 15 seconds, canceling silence detection",
+            `[Call] User responded during the ${SILENCE_WAIT_TIME / 1000} seconds, canceling silence detection`,
           );
 
           return;
         }
 
         console.log(
-          "[Call] 15 seconds passed without user response, showing message",
+          `[Call] ${SILENCE_WAIT_TIME / 1000} seconds passed without user response, showing message`,
         );
         setLastInterviewerResponse("I have not received any response from you, let's fix that.");
 
@@ -438,8 +443,8 @@ function Call({ interview, responseToken }: InterviewProps) {
           if (triggerSilenceDetectionRef.current) {
             triggerSilenceDetectionRef.current(true);
           }
-        }, 5000);
-      }, 15000);
+        }, SILENCE_MESSAGE_TIME);
+      }, SILENCE_WAIT_TIME);
     });
 
     webClient.on("error", (error) => {
@@ -458,7 +463,11 @@ function Call({ interview, responseToken }: InterviewProps) {
           roleContents[transcript?.role] = transcript?.content;
         });
 
-        setLastInterviewerResponse(roleContents["agent"]);
+        // Don't update interviewer response when modal is open (timer paused)
+        // This prevents the AI from repeating messages or asking new questions
+        if (!isTimerPausedRef.current) {
+          setLastInterviewerResponse(roleContents["agent"]);
+        }
         setLastUserResponse(roleContents["user"]);
       }
     });
