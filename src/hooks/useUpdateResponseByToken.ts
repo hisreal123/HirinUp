@@ -6,6 +6,7 @@ interface UpdateResponseParams {
   email?: string;
   name?: string;
   candidate_id?: number | null;
+  turnstile_verified?: boolean;
   [key: string]: any;
 }
 

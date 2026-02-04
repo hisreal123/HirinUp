@@ -13,6 +13,7 @@ export interface Response {
   analytics: any;
   candidate_status: string;
   tab_switch_count: number;
+  turnstile_verified: boolean;
 }
 
 export interface Analytics {

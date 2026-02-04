@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,26 @@ import { countries } from "@/lib/countries";
 import MiniLoader from "../loaders/mini-loader/miniLoader";
 import { Interview } from "@/types/interview";
 
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback?: (token: string) => void;
+          "expired-callback"?: () => void;
+          "error-callback"?: () => void;
+          theme?: "light" | "dark" | "auto";
+          size?: "normal" | "compact";
+        }
+      ) => string;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
+
 interface CandidateFormProps {
   interview: Interview;
   loading: boolean;
@@ -49,6 +69,8 @@ interface CandidateFormProps {
   isValidPhone: boolean;
   isValidTwitter: boolean;
   isValidLinkedin: boolean;
+  turnstileToken: string;
+  setTurnstileToken: (token: string) => void;
   onGoBack: () => void;
   onStartInterview: () => void;
   onExit: () => void;
@@ -77,10 +99,68 @@ export const CandidateForm = memo(function CandidateForm({
   isValidPhone,
   isValidTwitter,
   isValidLinkedin,
+  turnstileToken,
+  setTurnstileToken,
   onGoBack,
   onStartInterview,
   onExit,
 }: CandidateFormProps) {
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+
+  const handleTurnstileCallback = useCallback((token: string) => {
+    setTurnstileToken(token);
+  }, [setTurnstileToken]);
+
+  const handleTurnstileExpired = useCallback(() => {
+    setTurnstileToken("");
+  }, [setTurnstileToken]);
+
+  useEffect(() => {
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+    if (!siteKey || !turnstileRef.current || widgetIdRef.current) {
+      return;
+    }
+
+    // Wait for turnstile script to load
+    const renderWidget = () => {
+      if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
+        widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+          sitekey: siteKey,
+          callback: handleTurnstileCallback,
+          "expired-callback": handleTurnstileExpired,
+          "error-callback": handleTurnstileExpired,
+          theme: "light",
+          size: "normal",
+        });
+      }
+    };
+
+    // Check if turnstile is already loaded
+    if (window.turnstile) {
+      renderWidget();
+    } else {
+      // Wait for script to load
+      const checkInterval = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(checkInterval);
+          renderWidget();
+        }
+      }, 100);
+
+      // Cleanup interval after 10 seconds
+      setTimeout(() => clearInterval(checkInterval), 10000);
+    }
+
+    return () => {
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
+      }
+    };
+  }, [handleTurnstileCallback, handleTurnstileExpired]);
+
   const isFormValid =
     (interview?.is_anonymous || isValidEmail) &&
     fullName?.trim() &&
@@ -91,7 +171,8 @@ export const CandidateForm = memo(function CandidateForm({
     workExperienceYears?.trim() &&
     linkedin?.trim() &&
     isValidTwitter &&
-    isValidLinkedin;
+    isValidLinkedin &&
+    turnstileToken;
 
   return (
     <div className="relative w-[80%] mx-auto mt-2 shadow-lg rounded-md p-2 m-2 bg-slate-50 max-h-[calc(88vh-200px)] overflow-y-auto">
@@ -215,6 +296,10 @@ export const CandidateForm = memo(function CandidateForm({
               onChange={(e) => setWorkExperienceYears(e.target.value)}
             />
           </div>
+        </div>
+        {/* Turnstile Widget */}
+        <div className="col-span-2 flex justify-center mt-4">
+          <div ref={turnstileRef} />
         </div>
       </div>
       <div className="w-[80%] flex flex-row mx-auto justify-center items-center align-middle gap-2 mt-4">

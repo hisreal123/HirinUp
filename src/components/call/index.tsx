@@ -34,6 +34,7 @@ import { WelcomeSlide } from "./WelcomeSlide";
 import { CandidateForm } from "./CandidateForm";
 import { InterviewStage } from "./InterviewStage";
 import { EndScreen } from "./EndScreen";
+import { verifyTurnstile } from "@/actions/verify-turnstile";
 
 const webClient = new RetellWebClient();
 setWebClientInstance(webClient);
@@ -503,6 +504,24 @@ function Call({ interview, responseToken }: InterviewProps) {
   };
 
   const startConversation = async () => {
+    setLoading(true);
+
+    // Verify Turnstile token first
+    if (candidateForm.turnstileToken) {
+      const turnstileResult = await verifyTurnstile(candidateForm.turnstileToken);
+      if (!turnstileResult.success) {
+        toast.error(turnstileResult.error || "Verification failed. Please try again.");
+        setLoading(false);
+        // Reset the turnstile token so user needs to complete again
+        candidateForm.setTurnstileToken("");
+        return;
+      }
+    } else {
+      toast.error("Please complete the verification challenge.");
+      setLoading(false);
+      return;
+    }
+
     const data = {
       mins: interview?.time_duration,
       objective: interview?.objective,
@@ -515,7 +534,6 @@ function Call({ interview, responseToken }: InterviewProps) {
       "[TIMER DEBUG] Interview time_duration:",
       interview?.time_duration,
     );
-    setLoading(true);
 
     // Check if user is old using cached emails data
     const oldUserEmails: string[] = (emailsData || []).map(
@@ -622,6 +640,7 @@ function Call({ interview, responseToken }: InterviewProps) {
               email: candidateForm.email,
               name: candidateForm.fullName,
               candidate_id: newCandidateId,
+              turnstile_verified: true,
             },
             token: responseToken,
           });
@@ -642,6 +661,7 @@ function Call({ interview, responseToken }: InterviewProps) {
             email: candidateForm.email,
             name: candidateForm.fullName,
             candidate_id: newCandidateId ?? undefined,
+            turnstile_token: candidateForm.turnstileToken,
           });
         }
       } else {
@@ -659,6 +679,7 @@ function Call({ interview, responseToken }: InterviewProps) {
           email: candidateForm.email,
           name: candidateForm.fullName,
           candidate_id: newCandidateId ?? undefined,
+          turnstile_token: candidateForm.turnstileToken,
         });
       }
 
@@ -1015,6 +1036,8 @@ function Call({ interview, responseToken }: InterviewProps) {
                   isValidPhone={candidateForm.isValidPhone}
                   isValidTwitter={candidateForm.isValidTwitter}
                   isValidLinkedin={candidateForm.isValidLinkedin}
+                  turnstileToken={candidateForm.turnstileToken}
+                  setTurnstileToken={candidateForm.setTurnstileToken}
                   onGoBack={() => setCurrentSlide("welcome")}
                   onStartInterview={startConversation}
                   onExit={onEndCallClick}

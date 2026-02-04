@@ -12,6 +12,7 @@ export const useCandidateForm = () => {
   const [twitter, setTwitter] = useState<string>("");
   const [linkedin, setLinkedin] = useState<string>("");
   const [workExperienceYears, setWorkExperienceYears] = useState<string>("");
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   const [isValidEmail, setIsValidEmail] = useState<boolean>(false);
   const [isValidPhone, setIsValidPhone] = useState<boolean>(true);
@@ -139,6 +140,8 @@ export const useCandidateForm = () => {
     setLinkedin,
     workExperienceYears,
     setWorkExperienceYears,
+    turnstileToken,
+    setTurnstileToken,
     isValidEmail,
     isValidPhone,
     isValidTwitter,
