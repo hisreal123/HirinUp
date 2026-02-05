@@ -40,8 +40,10 @@ const webClient = new RetellWebClient();
 setWebClientInstance(webClient);
 
 // Silence detection timing (in milliseconds)
-// Defaults: 15 seconds wait, 5 seconds message display
-const SILENCE_WAIT_TIME = (Number(process.env.NEXT_PUBLIC_SILENCE_WAIT_TIME) || 15) * 1000;
+// First phase: 10 seconds (quick verification that user is present)
+// Second phase (after resume): 40 seconds (normal interview behavior)
+const FIRST_SILENCE_TIME = (Number(process.env.NEXT_PUBLIC_FIRST_SILENCE_TIME) || 10) * 1000;
+const SECOND_SILENCE_TIME = (Number(process.env.NEXT_PUBLIC_SECOND_SILENCE_TIME) || 40) * 1000;
 const SILENCE_MESSAGE_TIME = (Number(process.env.NEXT_PUBLIC_SILENCE_MESSAGE_TIME) || 5) * 1000;
 
 type InterviewProps = {
@@ -112,6 +114,9 @@ function Call({ interview, responseToken }: InterviewProps) {
   const messageTimerRef = useRef<NodeJS.Timeout | null>(null);
   const agentStoppedTalkingTimeRef = useRef<number | null>(null);
   const lastUserResponseLengthRef = useRef<number>(0);
+  
+  // Track if user has resumed at least once (switches from 10s to 40s silence detection)
+  const hasResumedOnceRef = useRef<boolean>(false);
 
   // Refs to track values without causing re-registration of listeners
   const lastUserResponseRef2 = useRef<string>("");
@@ -180,6 +185,12 @@ function Call({ interview, responseToken }: InterviewProps) {
         console.log("[Call] Resuming timer, resetting audioNotDetected");
         setAudioNotDetected(false);
         audioNotDetectedRef.current = false;
+        
+        // Switch to second phase (40-second silence detection) after first resume
+        if (!hasResumedOnceRef.current) {
+          console.log("[Call] First resume detected, switching to 40-second silence timer");
+          hasResumedOnceRef.current = true;
+        }
       }
     },
     [modalStartTime],
@@ -400,8 +411,11 @@ function Call({ interview, responseToken }: InterviewProps) {
     });
 
     webClient.on("agent_stop_talking", () => {
+      // Use 10 seconds for first phase (verification), 40 seconds after resume (real interview)
+      const currentSilenceTime = hasResumedOnceRef.current ? SECOND_SILENCE_TIME : FIRST_SILENCE_TIME;
+      
       console.log(
-        `[Call] Agent stopped talking, starting ${SILENCE_WAIT_TIME / 1000}-second response timer`,
+        `[Call] Agent stopped talking, starting ${currentSilenceTime / 1000}-second response timer (phase: ${hasResumedOnceRef.current ? 'interview' : 'verification'})`,
       );
       setActiveTurn("user");
 
@@ -426,14 +440,14 @@ function Call({ interview, responseToken }: InterviewProps) {
 
         if (userResponded) {
           console.log(
-            `[Call] User responded during the ${SILENCE_WAIT_TIME / 1000} seconds, canceling silence detection`,
+            `[Call] User responded during the ${currentSilenceTime / 1000} seconds, canceling silence detection`,
           );
 
           return;
         }
 
         console.log(
-          `[Call] ${SILENCE_WAIT_TIME / 1000} seconds passed without user response, showing message`,
+          `[Call] ${currentSilenceTime / 1000} seconds passed without user response, showing message`,
         );
         setLastInterviewerResponse("I have not received any response from you, let's fix that.");
 
@@ -445,7 +459,7 @@ function Call({ interview, responseToken }: InterviewProps) {
             triggerSilenceDetectionRef.current(true);
           }
         }, SILENCE_MESSAGE_TIME);
-      }, SILENCE_WAIT_TIME);
+      }, currentSilenceTime);
     });
 
     webClient.on("error", (error) => {
