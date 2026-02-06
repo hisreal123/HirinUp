@@ -154,8 +154,17 @@ function InterviewInterface() {
           setIsValidating(false);
 
           return;
+        } else if (flowState.second_call_started) {
+          // Second call was started but not completed — user refreshed during second call
+          // Treat as expired to prevent refresh abuse
+          console.log("[Flow State] Second call was started (refresh detected), redirecting to expired");
+          setIsExpired(true);
+          setExpirationChecked(true);
+          setIsValidating(false);
+
+          return;
         } else if (flowState.modal_closed) {
-          // Modal was closed, resume from second call
+          // Modal was closed but second call not yet started — resume from second call
           console.log("[Flow State] Resuming from second call");
           setInitialCallPhase('second_call');
         } else if (flowState.first_call_started) {

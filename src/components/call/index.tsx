@@ -993,6 +993,25 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
           throw err;
         });
 
+      // Mark second call as started - prevents refresh from resuming
+      // If user refreshes after this point, they'll be redirected to expired page
+      const secondCallStartedTs = new Date().toISOString();
+      if (responseToken) {
+        setLocalFlowState(responseToken, { second_call_started: secondCallStartedTs });
+        const localState = getLocalFlowState(responseToken);
+        console.log("[Second Call] localStorage UPDATED (second_call_started):", JSON.stringify(localState));
+        
+        // Update DB with second_call_started flag
+        ResponseService.updateResponseByToken(
+          { call_flow_state: localState },
+          responseToken,
+        ).then(() => {
+          console.log("[Second Call] DB UPDATED (second_call_started)");
+        }).catch((err) => {
+          console.error("[Second Call] DB update FAILED (second_call_started):", err);
+        });
+      }
+
       setIsPreparingCall(false);
       setIsCalling(true);
     } catch (error) {
