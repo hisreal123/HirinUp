@@ -27,9 +27,14 @@ import {
   ArrowLeft,
   CircleDot,
   Router,
+  Copy,
 } from 'lucide-react';
 import { AudioCheckStatus } from '@/hooks/useAudioDetection';
 import { useRef } from 'react';
+import { toast } from 'sonner';
+
+const siteDomain =
+  process.env.NEXT_PUBLIC_SITE_DOMAIN || 'interview.yourdomain.com';
 
 interface AudioDetectionModalProps {
   open: boolean;
@@ -116,7 +121,7 @@ export function AudioDetectionModal({
             </div>
           </AlertDialogTitle>
 
-          <div className="border-b-4 border-blue-800 pb-2"></div>
+          <div className="border-b-4 border-blue-800 pb-2" />
 
           <AlertDialogDescription className="text-base mt-2 px-4">
             <div className="flex justify-center">
@@ -151,9 +156,9 @@ export function AudioDetectionModal({
             <div className="space-y-4 py-4 border border-gray-200 rounded-md p-4 shadow-sm">
               <div className="text-sm text-gray-500">
                 <p className="font-medium text-blue-800 italic mt-4 text-sm">
-                  "Please check that the correct microphone is selected and not
+                  Please check that the correct microphone is selected and not
                   muted. <br /> You should see the audio bar moving when you
-                  speak."
+                  speak.
                 </p>
               </div>
 
@@ -180,7 +185,7 @@ export function AudioDetectionModal({
                   </div>
 
                   {/* seperator */}
-                  <div className="h-px bg-gray-200 my-2"></div>
+                  <div className="h-px bg-gray-200 my-2" />
                   <div className="flex items-center gap-2 w-full relative justify-between">
                     <span>Browser compatible</span>
                     <div className="flex items-center space-x-2">
@@ -193,7 +198,7 @@ export function AudioDetectionModal({
                   </div>
 
                   {/* seperator */}
-                  <div className="h-px bg-gray-200 my-2"></div>
+                  <div className="h-px bg-gray-200 my-2" />
                   <div className="flex items-center gap-2 w-full relative justify-between">
                     <span>Audio device available</span>
                     <div className="flex items-center space-x-2">
@@ -206,7 +211,7 @@ export function AudioDetectionModal({
                   </div>
 
                   {/* seperator */}
-                  <div className="h-px bg-gray-200 my-2"></div>
+                  <div className="h-px bg-gray-200 my-2" />
                   <div className="flex items-center gap-2 w-full relative justify-between">
                     <span>
                       Audio level:{' '}
@@ -297,43 +302,63 @@ export function AudioDetectionModal({
             <div className="space-y-4 py-4 border border-gray-200 rounded-md p-4 shadow-sm">
               <div className="text-sm text-gray-500">
                 <p className="font-medium text-blue-800 italic mt-4 text-sm">
-                  "if you'd like, we can run a couple of optional connectivity
-                  checks. <br /> These do not change your system."
+                  "if you&lsquo;d like, we can run a couple of optional
+                  connectivity checks. <br /> These do not change your system."
                 </p>
               </div>
 
               {/* Network Diagnostics Checklist */}
               {/* Seperator */}
-              <div className="h-px bg-gray-200 my-2"></div>
-              <div className="flex items-center gap-2">
-                <div className="space-y-2 border shadow-sm border-gray-200 rounded-md p-2">
+              <div className="h-px bg-gray-200 my-2" />
+              <div className="flex flex-col gap-2">
+                <div className="space-y-1 border shadow-sm border-gray-200 rounded-md p-2">
                   <h4 className="text-sm font-bold text-gray-900 border-b flex items-center space-x-2">
-                    <CircleDot className="h-4 w-4 text-blue-500" />
+                    <CircleDot className="mr-2 h-4 w-4 text-blue-500" />
                     Ping Test
                   </h4>
-                  <p>
-                    ping{' '}
-                    <span className="text-blue-500">
-                      <code>interview.yourdomain.com</code>
-                    </span>
-                  </p>
+                  <div className="text-gray-600 h-fit  mt-2 bg-[#1b1f230d] overflow-x-auto pt-2 relative rounded">
+                    <pre className="w-full">
+                      <code className="cursor-text pl-1 pr-4 whitespace-nowrap text-sm">
+                        {siteDomain}
+                      </code>
+                    </pre>
+                    <button
+                      className="absolute top-2 right-2 p-1 rounded hover:bg-gray-200 transition-colors"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`ping ${siteDomain}`);
+                        toast.success('Link has been copied');
+                      }}
+                    >
+                      <Copy className="h-4 w-4 text-gray-500" />
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-2 border shadow-sm border-gray-200 rounded-md p-2">
+                <div className="space-y-1 border shadow-sm border-gray-200 rounded-md p-2">
                   <h4 className="text-sm font-bold text-gray-900 border-b flex items-center space-x-2">
                     <Router className="h-4 w-4 text-blue-500 mr-2" />
                     DNS Test
                   </h4>
-                  <p>
-                    nslookup{' '}
-                    <span className="text-blue-500">
-                      <code> interview.yourdomain.com</code>
-                    </span>
-                  </p>
+                  <div className="text-gray-600 h-fit mt-2 bg-[#1b1f230d] overflow-x-auto pt-3 relative rounded">
+                    <pre className="w-full">
+                      <code className="cursor-text pl-1 pr-4 whitespace-nowrap text-sm">
+                        {siteDomain}
+                      </code>
+                    </pre>
+                    <button
+                      className="absolute top-2 right-2 p-1 rounded hover:bg-gray-200 transition-colors"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`nslookup ${siteDomain}`);
+                        toast.success('Link has been copied');
+                      }}
+                    >
+                      <Copy className="h-4 w-4 text-gray-500" />
+                    </button>
+                  </div>
                 </div>
               </div>
               {/* seperator line */}
-              <div className="h-px bg-gray-200 my-2"></div>
+              <div className="h-px bg-gray-200 my-2" />
             </div>
           ) : (
             <div className="space-y-4 py-4 border border-gray-200 rounded-md p-4 shadow-sm">
@@ -347,7 +372,7 @@ export function AudioDetectionModal({
 
               {/* OS-Level Checks */}
               {/* Seperator */}
-              <div className="h-px bg-gray-200 my-2"></div>
+              <div className="h-px bg-gray-200 my-2" />
 
               <div className="flex items-center gap-2">
                 <ul className="list-disc list-inside flex flex-col space-y-4 text-gray-800 font-medium">
@@ -356,7 +381,7 @@ export function AudioDetectionModal({
                   <li>Device driver or audio route issue may be present</li>
                 </ul>
               </div>
-              <div className="h-px bg-gray-200 my-2"></div>
+              <div className="h-px bg-gray-200 my-2" />
             </div>
           )}
 

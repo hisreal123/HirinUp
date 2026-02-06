@@ -99,7 +99,7 @@ function InterviewHome() {
       setResponses(responsesData);
     }
   }, [responsesData]);
-
+ 
   const generateAndSetSharedLink = async () => {
     return new Promise<string | null>((resolve) => {
       createResponseMutation.mutate(
@@ -108,25 +108,25 @@ function InterviewHome() {
           onSuccess: (data) => {
             if (data?.response_id) {
               const responseId = data.response_id;
-              const orgName = organizationNameSlug || interview?.readable_slug || "organization";
-              const generatedUrl = `${base_url}/join/${orgName}/${interviewId}/${responseId}`;
-              setSharedGeneratedLink(generatedUrl);
+        const orgName = organizationNameSlug || interview?.readable_slug || "organization";
+        const generatedUrl = `${base_url}/join/${orgName}/${interviewId}/${responseId}`;
+        setSharedGeneratedLink(generatedUrl);
               // Refetch responses to update the list
               refetchResponses();
               resolve(generatedUrl);
-            } else {
-              toast.error("Failed to generate link", {
-                position: "bottom-right",
-                duration: 3000,
-              });
+      } else {
+        toast.error("Failed to generate link", {
+          position: "bottom-right",
+          duration: 3000,
+        });
               resolve(null);
-            }
+      }
           },
           onError: () => {
-            toast.error("Failed to generate link", {
-              position: "bottom-right",
-              duration: 3000,
-            });
+      toast.error("Failed to generate link", {
+        position: "bottom-right",
+        duration: 3000,
+      });
             resolve(null);
           },
         },
@@ -204,10 +204,10 @@ function InterviewHome() {
   // Update loading state based on responses query
   useEffect(() => {
     if (responsesLoading) {
-      setLoading(true);
+        setLoading(true);
     } else {
-      setLoading(false);
-    }
+        setLoading(false);
+      }
   }, [responsesLoading]);
 
   useEffect(() => {
@@ -231,8 +231,8 @@ function InterviewHome() {
   const handleDeleteResponse = (deletedCallId: string) => {
     // Refetch responses to get updated list
     refetchResponses();
-    if (callId === deletedCallId) {
-      router.push(`/interviews/${interviewId}`);
+      if (callId === deletedCallId) {
+        router.push(`/interviews/${interviewId}`);
     }
   };
 
