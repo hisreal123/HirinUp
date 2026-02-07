@@ -34,13 +34,24 @@ import { WelcomeSlide } from "./WelcomeSlide";
 import { CandidateForm } from "./CandidateForm";
 import { InterviewStage } from "./InterviewStage";
 import { EndScreen } from "./EndScreen";
+import { verifyTurnstile } from "@/actions/verify-turnstile";
 
 const webClient = new RetellWebClient();
 setWebClientInstance(webClient);
 
+// First call duration (in milliseconds) - auto-ends after this time
+const FIRST_CALL_DURATION = (Number(process.env.NEXT_PUBLIC_FIRST_CALL_DURATION) || 10) * 1000;
+
+// Silence detection timing for second call (in milliseconds)
+const SILENCE_WAIT_TIME = (Number(process.env.NEXT_PUBLIC_SILENCE_WAIT_TIME) || 40) * 1000;
+const SILENCE_MESSAGE_TIME = (Number(process.env.NEXT_PUBLIC_SILENCE_MESSAGE_TIME) || 5) * 1000;
+
+type CallPhase = 'first_call' | 'verification_modal' | 'second_call';
+
 type InterviewProps = {
   interview: Interview;
   responseToken?: string;
+  initialCallPhase?: CallPhase;
 };
 
 type registerCallResponseType = {
@@ -57,7 +68,33 @@ type transcriptType = {
   content: string;
 };
 
-function Call({ interview, responseToken }: InterviewProps) {
+// localStorage helpers for call flow state
+function getLocalFlowState(token?: string): Record<string, string> {
+  if (!token) {
+    return {};
+  }
+  try {
+    const stored = localStorage.getItem(`call_flow_state_${token}`);
+
+    return stored ? JSON.parse(stored) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function setLocalFlowState(token: string | undefined, updates: Record<string, string>) {
+  if (!token) {
+    return;
+  }
+  try {
+    const current = getLocalFlowState(token);
+    localStorage.setItem(`call_flow_state_${token}`, JSON.stringify({ ...current, ...updates }));
+  } catch (e) {
+    // ignore localStorage errors
+  }
+}
+
+function Call({ interview, responseToken, initialCallPhase = 'first_call' }: InterviewProps) {
   const { createResponse } = useResponses();
   const createResponseMutation = useCreateResponse();
   const { data: emailsData } = useGetAllEmails(interview?.id, !!interview?.id);
@@ -94,21 +131,45 @@ function Call({ interview, responseToken }: InterviewProps) {
   const [micPermissionDenied, setMicPermissionDenied] =
     useState<boolean>(false);
   const [isTimerPaused, setIsTimerPaused] = useState<boolean>(false);
+  const [isPreparingCall, setIsPreparingCall] = useState<boolean>(false);
+
+  // Two-call system: tracks which phase we're in
+  const [callPhase, setCallPhase] = useState<CallPhase>(initialCallPhase);
+  const callPhaseRef = useRef<CallPhase>(initialCallPhase);
 
   // Refs to track pause states for the timer interval
   const isTimerPausedRef = useRef<boolean>(false);
   const audioNotDetectedRef = useRef<boolean>(false);
   const hasSavedEndedRef = useRef<boolean>(false);
 
-  // Refs for silence detection after agent stops talking
+  // Refs for silence detection after agent stops talking (second call only)
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const messageTimerRef = useRef<NodeJS.Timeout | null>(null);
   const agentStoppedTalkingTimeRef = useRef<number | null>(null);
   const lastUserResponseLengthRef = useRef<number>(0);
 
+  // Timer for auto-ending first call
+  const firstCallTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Guard to prevent multiple auto-starts on resume
+  const hasAutoStartedRef = useRef<boolean>(false);
+
+  // Detect page unload (refresh/close) to prevent call_ended from writing completion state
+  const isPageUnloadingRef = useRef<boolean>(false);
+
+  // Refs to track values without causing re-registration of listeners
+  const lastUserResponseRef2 = useRef<string>("");
+  const audioNotDetectedStateRef = useRef<boolean>(false);
+  
+  // Ref to track responseToken for use in event handlers (avoids stale closure)
+  const responseTokenRef = useRef<string | undefined>(responseToken);
+  
+  // Keep responseTokenRef updated when prop changes
+  useEffect(() => {
+    responseTokenRef.current = responseToken;
+  }, [responseToken]);
+
   const candidateForm = useCandidateForm();
-  const audioMessage =
-    "I have not received any response from you, let's fix that.";
 
   // Audio detection state - managed by InterviewStage when mounted
   const [audioNotDetected, setAudioNotDetected] = useState(false);
@@ -142,6 +203,7 @@ function Call({ interview, responseToken }: InterviewProps) {
   const handleAudioNotDetectedChange = useCallback((detected: boolean) => {
     setAudioNotDetected(detected);
     audioNotDetectedRef.current = detected;
+    audioNotDetectedStateRef.current = detected;
   }, []);
 
   const handleTimerPausedChange = useCallback(
@@ -167,17 +229,27 @@ function Call({ interview, responseToken }: InterviewProps) {
 
       // Also reset audioNotDetected when resuming
       if (!paused) {
-        console.log("[Call] Resuming timer, resetting audioNotDetected");
         setAudioNotDetected(false);
         audioNotDetectedRef.current = false;
+
+        // If resuming from verification modal, start the second call
+        if (callPhaseRef.current === 'verification_modal') {
+          console.log("=== [USER CLICKED RESUME] ===");
+          console.log("[Resume] Starting SECOND CALL...");
+          setCallPhase('second_call');
+          callPhaseRef.current = 'second_call';
+          startSecondCall();
+        }
       }
     },
     [modalStartTime],
   );
 
   // Clear silence timer when user actually responds (transcript changes)
+  // Also keep ref in sync for use in event listeners
   useEffect(() => {
-    const currentResponseLength = lastUserResponse?.length;
+    const currentResponseLength = lastUserResponse?.length || 0;
+    lastUserResponseRef2.current = lastUserResponse || "";
 
     if (
       currentResponseLength > lastUserResponseLengthRef.current &&
@@ -267,7 +339,9 @@ function Call({ interview, responseToken }: InterviewProps) {
     setCurrentTimeDuration(String(currentDuration));
 
     // Add logging to debug timer issues
-    const timeLimit = Number(interviewTimeDuration) * 60;
+    const rawTimeLimit = Number(interviewTimeDuration) * 60;
+    // Safety: if timeLimit is 0 or NaN, fall back to 30 minutes
+    const timeLimit = (rawTimeLimit > 0) ? rawTimeLimit : 1800;
 
     // Log every 10 seconds for debugging
     if (currentDuration > 0 && currentDuration % 10 === 0) {
@@ -291,7 +365,15 @@ function Call({ interview, responseToken }: InterviewProps) {
     }
 
     // FORCE END CALL when time limit is reached
+    // BUT don't end if modal is open (timer is paused) - give user time to respond
     if (currentDuration >= timeLimit && !isEnded && isCalling) {
+      // Safety check: don't end while timer is paused (modal is open)
+      if (isTimerPausedRef.current) {
+        console.log("[Timer] Time limit reached but timer is paused (modal open), waiting...");
+
+        return;
+      }
+
       console.error("[Timer] *** FORCE ENDING CALL NOW ***", {
         currentDuration,
         timeLimit,
@@ -300,6 +382,7 @@ function Call({ interview, responseToken }: InterviewProps) {
         expectedMinutes: Number(interviewTimeDuration),
         reason: "Timer enforcement - exact timing",
         timestamp: new Date().toISOString(),
+        isTimerPaused,
       });
       webClient.stopCall();
       setIsEnded(true);
@@ -315,51 +398,178 @@ function Call({ interview, responseToken }: InterviewProps) {
     audioNotDetected,
   ]);
 
+  // Handle resuming from a saved call phase (page refresh)
+  useEffect(() => {
+    if (initialCallPhase === 'verification_modal') {
+      // User refreshed during verification modal — show modal immediately
+      console.log("[Resume] Starting from verification modal phase");
+      setIsStarted(true);
+      setIsTimerPaused(true);
+      isTimerPausedRef.current = true;
+      // Trigger modal after InterviewStage mounts
+      setTimeout(() => {
+        if (triggerSilenceDetectionRef.current) {
+          triggerSilenceDetectionRef.current(true);
+      }
+      }, 500);
+    } else if (initialCallPhase === 'second_call') {
+      // User refreshed during second call — skip first call and modal, start second call
+      console.log("[Resume] Starting from second call phase");
+      setIsStarted(true);
+      setCallPhase('second_call');
+      callPhaseRef.current = 'second_call';
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-start second call when resuming from second_call phase (page refresh)
+  // Uses hasAutoStartedRef to ensure it only fires ONCE
+  useEffect(() => {
+    if (
+      initialCallPhase === 'second_call' &&
+      isStarted &&
+      !isCalling &&
+      !isEnded &&
+      !isPreparingCall &&
+      !hasAutoStartedRef.current
+    ) {
+      hasAutoStartedRef.current = true;
+      console.log("[Resume] Auto-starting second call (once)");
+      startSecondCall();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCallPhase, isStarted, isCalling, isEnded, isPreparingCall]);
+
+  // Detect page unload/refresh to prevent call_ended from writing completion state
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      isPageUnloadingRef.current = true;
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   useEffect(() => {
     webClient.on("call_started", () => {
       const startTime = Date.now();
-      console.log("Call started at:", new Date(startTime).toISOString());
+      const phase = callPhaseRef.current;
       setIsCalling(true);
-      setCallStartTime(startTime); // Track real start time
-      console.log("[Timer Setup] Call started, startTime set to:", startTime);
+      setCallStartTime(startTime);
 
-      const requestMicPermission = async () => {
-        if (hasRequestedPermission.current) {
-          if (!audioNotDetected && performAudioChecksRef.current) {
-            performAudioChecksRef.current();
-          }
+      if (phase === 'first_call') {
+        console.log("=== [FIRST CALL] STARTED ===");
+        console.log(`[First Call] Started at: ${new Date(startTime).toISOString()}`);
+        console.log(`[First Call] Will auto-end in ${FIRST_CALL_DURATION / 1000} seconds`);
+        
+        // First call: auto-end after FIRST_CALL_DURATION, no audio detection
+        firstCallTimerRef.current = setTimeout(() => {
+          console.log("[First Call] 10 seconds reached, stopping call...");
+          webClient.stopCall();
+        }, FIRST_CALL_DURATION);
 
-          return;
-        }
-        hasRequestedPermission.current = true;
+        // Still request mic permission for second call, but don't start audio detection
+    const requestMicPermission = async () => {
+      if (hasRequestedPermission.current) return;
+      hasRequestedPermission.current = true;
 
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-          });
-          stream.getTracks().forEach((track) => track.stop());
-          setMicPermissionDenied(false);
-          if (performAudioChecksRef.current) {
-            performAudioChecksRef.current();
-          }
-        } catch (error) {
-          console.error("Microphone permission denied or error:", error);
-          setMicPermissionDenied(true);
-          if (performAudioChecksRef.current) {
-            performAudioChecksRef.current();
-          }
-        }
-      };
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach((track) => track.stop());
+        setMicPermissionDenied(false);
+            console.log("[First Call] Mic permission granted");
+      } catch (error) {
+            console.error("[First Call] Microphone permission denied:", error);
+        setMicPermissionDenied(true);
+      }
+    };
 
-      requestMicPermission();
+    requestMicPermission();
+      } else if (phase === 'second_call') {
+        console.log("=== [SECOND CALL] STARTED ===");
+        console.log(`[Second Call] Started at: ${new Date(startTime).toISOString()}`);
+        console.log("[Second Call] 40-second silence detection is now ACTIVE");
+      }
     });
 
     webClient.on("call_ended", () => {
-      console.log("Call ended");
+      const phase = callPhaseRef.current;
+      const token = responseTokenRef.current; // Use ref to get current value
       setIsCalling(false);
+
+      if (phase === 'first_call') {
+        console.log("=== [FIRST CALL] ENDED ===");
+        console.log("[First Call] Token:", token);
+        
+        if (firstCallTimerRef.current) {
+          clearTimeout(firstCallTimerRef.current);
+          firstCallTimerRef.current = null;
+        }
+
+        setCallPhase('verification_modal');
+        callPhaseRef.current = 'verification_modal';
+
+        // Pause timer and trigger the audio detection modal
+        setIsTimerPaused(true);
+        isTimerPausedRef.current = true;
+        console.log("[First Call] Showing VERIFICATION MODAL...");
+        if (triggerSilenceDetectionRef.current) {
+          triggerSilenceDetectionRef.current(true);
+        }
+
+        // Update localStorage immediately + async DB update
+        const firstCallTs = new Date().toISOString();
+        if (token) {
+          // Write to localStorage immediately
+          setLocalFlowState(token, { first_call_started: firstCallTs });
+          const localState = getLocalFlowState(token);
+          console.log("[First Call] localStorage UPDATED:", JSON.stringify(localState));
+          
+          // Also update DB for persistence
+          ResponseService.updateResponseByToken(
+            { call_flow_state: localState },
+            token,
+          ).then(() => {
+            console.log("[First Call] DB UPDATED successfully");
+          }).catch((err) => {
+            console.error("[First Call] DB update FAILED:", err);
+          });
+        } else {
+          console.error("[First Call] ERROR: No token available!");
+        }
+      } else {
+        // Second call ended
+        console.log("=== [SECOND CALL] ENDED ===");
+        
+        // If page is unloading (refresh/close), skip completion logic
+        if (isPageUnloadingRef.current) {
+          console.log("[Second Call] Page unloading, skipping completion state write");
+          return;
+        }
+
+        console.log("[Second Call] Interview COMPLETE");
       setIsEnded(true);
-      if (stopAudioLevelDetectionRef.current) {
-        stopAudioLevelDetectionRef.current();
+        if (stopAudioLevelDetectionRef.current) {
+          stopAudioLevelDetectionRef.current();
+        }
+
+        // Update localStorage immediately + async DB update
+        const completedTs = new Date().toISOString();
+        if (token) {
+          setLocalFlowState(token, { second_call_completed: completedTs });
+          const localState = getLocalFlowState(token);
+          console.log("[Second Call] localStorage UPDATED:", JSON.stringify(localState));
+          
+          ResponseService.updateResponseByToken(
+            { call_flow_state: localState },
+            token,
+          ).then(() => {
+            console.log("[Second Call] DB UPDATED successfully");
+          }).catch((err) => {
+            console.error("[Second Call] DB update FAILED:", err);
+          });
+        }
       }
     });
 
@@ -379,10 +589,17 @@ function Call({ interview, responseToken }: InterviewProps) {
     });
 
     webClient.on("agent_stop_talking", () => {
-      console.log(
-        "[Call] Agent stopped talking, starting 5-second response timer",
-      );
       setActiveTurn("user");
+
+      // No silence detection during first call — it auto-ends via timer
+      if (callPhaseRef.current === 'first_call') {
+        console.log("[First Call] Agent stopped talking, no silence detection");
+
+        return;
+      }
+
+      // Second call: 40-second silence detection (no modal — just show message)
+      console.log(`[Second Call] Agent stopped talking, starting ${SILENCE_WAIT_TIME / 1000}-second SILENCE TIMER`);
 
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
@@ -394,34 +611,24 @@ function Call({ interview, responseToken }: InterviewProps) {
       }
 
       agentStoppedTalkingTimeRef.current = Date.now();
-      lastUserResponseLengthRef.current = lastUserResponse?.length;
+      const capturedLength = lastUserResponseRef2.current?.length || 0;
+      lastUserResponseLengthRef.current = capturedLength;
 
       silenceTimerRef.current = setTimeout(() => {
-        const userResponded =
-          lastUserResponse?.length > lastUserResponseLengthRef?.current;
+        const currentLength = lastUserResponseRef2.current?.length || 0;
+        const userResponded = currentLength > capturedLength;
 
         if (userResponded) {
-          console.log(
-            "[Call] User responded during the 5 seconds, canceling silence detection",
-          );
-
+          console.log("[Second Call] User responded, canceling silence timer");
           return;
         }
 
-        console.log(
-          "[Call] 5 seconds passed without user response, showing message",
-        );
-        setLastInterviewerResponse(audioMessage);
-
-        messageTimerRef.current = setTimeout(() => {
-          console.log("[Call] Showing modal and pausing timer");
-          setIsTimerPaused(true);
-          isTimerPausedRef.current = true;
-          if (triggerSilenceDetectionRef.current) {
-            triggerSilenceDetectionRef.current(true);
-          }
-        }, 2000);
-      }, 5000);
+        console.log("=== [SILENCE DETECTION] 40 SECONDS REACHED ===");
+        console.log("[Second Call] User silent for 40 seconds — ENDING MEETING");
+        
+        // End the meeting after 40 seconds of silence
+        webClient.stopCall();
+      }, SILENCE_WAIT_TIME);
     });
 
     webClient.on("error", (error) => {
@@ -440,7 +647,11 @@ function Call({ interview, responseToken }: InterviewProps) {
           roleContents[transcript?.role] = transcript?.content;
         });
 
+        // Don't update interviewer response when modal is open (timer paused)
+        // This prevents the AI from repeating messages or asking new questions
+        if (!isTimerPausedRef.current) {
         setLastInterviewerResponse(roleContents["agent"]);
+        }
         setLastUserResponse(roleContents["user"]);
       }
     });
@@ -458,8 +669,15 @@ function Call({ interview, responseToken }: InterviewProps) {
         clearTimeout(messageTimerRef.current);
         messageTimerRef.current = null;
       }
+      if (firstCallTimerRef.current) {
+        clearTimeout(firstCallTimerRef.current);
+        firstCallTimerRef.current = null;
+      }
     };
-  }, [audioNotDetected, audioMessage, lastUserResponse?.length]);
+    // IMPORTANT: Empty dependency array - only register listeners ONCE on mount
+    // State values are accessed via refs to avoid stale closures
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onEndCallClick = async () => {
     if (isStarted) {
@@ -473,6 +691,24 @@ function Call({ interview, responseToken }: InterviewProps) {
   };
 
   const startConversation = async () => {
+    setLoading(true);
+
+    // Verify Turnstile token first
+    if (candidateForm.turnstileToken) {
+      const turnstileResult = await verifyTurnstile(candidateForm.turnstileToken);
+      if (!turnstileResult.success) {
+        toast.error(turnstileResult.error || "Verification failed. Please try again.");
+        setLoading(false);
+        // Reset the turnstile token so user needs to complete again
+        candidateForm.setTurnstileToken("");
+        return;
+      }
+    } else {
+      toast.error("Please complete the verification challenge.");
+      setLoading(false);
+      return;
+    }
+
     const data = {
       mins: interview?.time_duration,
       objective: interview?.objective,
@@ -485,7 +721,6 @@ function Call({ interview, responseToken }: InterviewProps) {
       "[TIMER DEBUG] Interview time_duration:",
       interview?.time_duration,
     );
-    setLoading(true);
 
     // Check if user is old using cached emails data
     const oldUserEmails: string[] = (emailsData || []).map(
@@ -576,7 +811,7 @@ function Call({ interview, responseToken }: InterviewProps) {
 
       // IMPORTANT: Save call_id to response IMMEDIATELY after registration
       // This ensures the link is marked as "used" even if the call fails to start
-      if (responseToken) {
+        if (responseToken) {
         // Update response by token using TanStack Query
         try {
           console.log(
@@ -592,6 +827,7 @@ function Call({ interview, responseToken }: InterviewProps) {
               email: candidateForm.email,
               name: candidateForm.fullName,
               candidate_id: newCandidateId,
+              turnstile_verified: true,
             },
             token: responseToken,
           });
@@ -612,9 +848,10 @@ function Call({ interview, responseToken }: InterviewProps) {
             email: candidateForm.email,
             name: candidateForm.fullName,
             candidate_id: newCandidateId ?? undefined,
+            turnstile_token: candidateForm.turnstileToken,
           });
         }
-      } else {
+        } else {
         // Create response using TanStack Query
         console.log(
           "[Call] Creating new response (no token, before call start):",
@@ -626,14 +863,30 @@ function Call({ interview, responseToken }: InterviewProps) {
         await createResponseMutation.mutateAsync({
           interview_id: interview.id,
           call_id: retellCallId,
-          email: candidateForm.email,
-          name: candidateForm.fullName,
+            email: candidateForm.email,
+            name: candidateForm.fullName,
           candidate_id: newCandidateId ?? undefined,
-        });
+          turnstile_token: candidateForm.turnstileToken,
+          });
+        }
+
+      // Store candidate name for resume scenarios
+      if (responseToken && candidateForm.fullName) {
+        try {
+          localStorage.setItem(`candidate_name_${responseToken}`, candidateForm.fullName);
+        } catch (e) {
+          // ignore
+        }
       }
 
       // Now start the call (after call_id is saved)
       if (callResponse?.access_token) {
+        // Show loading spinner for 2 seconds before starting the call
+        setLoading(false);
+        setIsPreparingCall(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         await webClient
           .startCall({
             accessToken: callResponse.access_token,
@@ -644,8 +897,10 @@ function Call({ interview, responseToken }: InterviewProps) {
             toast.error(
               "Failed to start call. The interview link has been marked as used.",
             );
+            setIsPreparingCall(false);
             throw err;
           });
+        setIsPreparingCall(false);
         setIsCalling(true);
         setIsStarted(true);
       } else {
@@ -657,9 +912,113 @@ function Call({ interview, responseToken }: InterviewProps) {
     } catch (error) {
       console.error("Error starting conversation:", error);
       toast.error("Failed to start interview. Please try again.");
+      setIsPreparingCall(false);
     }
 
     setLoading(false);
+  };
+
+  const startSecondCall = async () => {
+    console.log("[Second Call] Registering new call with Retell...");
+    setIsPreparingCall(true);
+
+    try {
+      // Retrieve stored name for resume scenarios
+      let candidateName = candidateForm.fullName;
+      if (!candidateName && responseToken) {
+        try {
+          candidateName = localStorage.getItem(`candidate_name_${responseToken}`) || "";
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      const data = {
+        mins: interview?.time_duration,
+        objective: interview?.objective,
+        questions: interview?.questions?.map((q) => q?.question).join(", ") || "",
+        name: candidateName || "not provided",
+      };
+
+      // Register a new call with Retell
+      const registerCallResponse = await registerCallMutation.mutateAsync({
+        dynamic_data: data,
+        interviewer_id: interview?.interviewer_id
+          ? Number(interview.interviewer_id)
+          : 0,
+      });
+
+      const callResponse = registerCallResponse?.registerCallResponse;
+
+      if (!callResponse?.call_id || !callResponse?.access_token) {
+        console.error("[Second Call] Failed to register call");
+        toast.error("Failed to start second call. Please try again.");
+        setIsPreparingCall(false);
+
+        return;
+      }
+
+      const newCallId = callResponse.call_id;
+      setCallId(newCallId);
+      console.log("[Second Call] New call_id:", newCallId);
+
+      // Update localStorage immediately + await DB update
+      const modalClosedTs = new Date().toISOString();
+      if (responseToken) {
+        setLocalFlowState(responseToken, { modal_closed: modalClosedTs });
+        const localState = getLocalFlowState(responseToken);
+        console.log("[Second Call] localStorage UPDATED (modal_closed):", JSON.stringify(localState));
+        
+        // Await DB update for call_id
+        await updateResponseByTokenMutation.mutateAsync({
+          payload: {
+            call_id: newCallId,
+            call_flow_state: localState,
+          },
+          token: responseToken,
+        });
+      }
+
+      // Reset saved-end ref for the new call
+      hasSavedEndedRef.current = false;
+      hasFetchedDetailsRef.current = false;
+
+      // Start the second call
+      await webClient
+        .startCall({ accessToken: callResponse.access_token })
+        .catch((err) => {
+          console.error("[Second Call] Error starting call:", err);
+          toast.error("Failed to start call.");
+          setIsPreparingCall(false);
+          throw err;
+        });
+
+      // Mark second call as started - prevents refresh from resuming
+      // If user refreshes after this point, they'll be redirected to expired page
+      const secondCallStartedTs = new Date().toISOString();
+      if (responseToken) {
+        setLocalFlowState(responseToken, { second_call_started: secondCallStartedTs });
+        const localState = getLocalFlowState(responseToken);
+        console.log("[Second Call] localStorage UPDATED (second_call_started):", JSON.stringify(localState));
+        
+        // Update DB with second_call_started flag
+        ResponseService.updateResponseByToken(
+          { call_flow_state: localState },
+          responseToken,
+        ).then(() => {
+          console.log("[Second Call] DB UPDATED (second_call_started)");
+        }).catch((err) => {
+          console.error("[Second Call] DB update FAILED (second_call_started):", err);
+        });
+      }
+
+      setIsPreparingCall(false);
+      setIsCalling(true);
+    } catch (error) {
+      console.error("[Second Call] Error:", error);
+      toast.error("Failed to start second call.");
+      setIsPreparingCall(false);
+    }
   };
 
   useEffect(() => {
@@ -708,7 +1067,7 @@ function Call({ interview, responseToken }: InterviewProps) {
       // Use TanStack Query mutation to save response and invalidate cache
       saveResponseMutation.mutate({
         payload: { is_ended: true, tab_switch_count: tabSwitchCount },
-        callId,
+          callId,
       });
 
       // Also fetch and save call details as a fallback (in case webhook doesn't fire)
@@ -782,6 +1141,17 @@ function Call({ interview, responseToken }: InterviewProps) {
     analyzeCallMutation,
   ]);
 
+  // Show loading spinner for 2 seconds before call starts
+  if (isPreparingCall) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-white">
+        <div className="flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-center items-center min-h-screen">
       {isStarted && <TabSwitchWarning />}
@@ -836,16 +1206,16 @@ function Call({ interview, responseToken }: InterviewProps) {
                             ? "bg-secondary"
                             : "bg-secondary"
                     }`}
-                    style={{
-                      width: isEnded
-                        ? "100%"
-                        : `${
-                            (Number(currentTimeDuration) /
-                              (Number(interviewTimeDuration) * 60)) *
-                            100
-                          }%`,
-                    }}
-                  />
+                  style={{
+                    width: isEnded
+                      ? "100%"
+                      : `${
+                          (Number(currentTimeDuration) /
+                            (Number(interviewTimeDuration) * 60)) *
+                          100
+                        }%`,
+                  }}
+                />
                   {isTimeUp && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="text-[8px] font-bold text-white drop-shadow-md">
@@ -930,46 +1300,48 @@ function Call({ interview, responseToken }: InterviewProps) {
               !isEnded &&
               !isOldUser &&
               currentSlide === "welcome" && (
-                <WelcomeSlide
-                  interview={interview}
-                  loading={loading}
-                  onProceed={() => setCurrentSlide("candidateForm")}
-                  onExit={onEndCallClick}
-                />
-              )}
+              <WelcomeSlide
+                interview={interview}
+                loading={loading}
+                onProceed={() => setCurrentSlide("candidateForm")}
+                onExit={onEndCallClick}
+              />
+            )}
 
             {!isStarted &&
               !isEnded &&
               !isOldUser &&
               currentSlide === "candidateForm" && (
-                <CandidateForm
-                  interview={interview}
-                  loading={loading}
-                  email={candidateForm.email}
-                  setEmail={candidateForm.setEmail}
-                  fullName={candidateForm.fullName}
-                  setFullName={candidateForm.setFullName}
-                  phone={candidateForm.phone}
-                  setPhone={candidateForm.setPhone}
-                  gender={candidateForm.gender}
-                  setGender={candidateForm.setGender}
-                  country={candidateForm.country}
-                  setCountry={candidateForm.setCountry}
-                  twitter={candidateForm.twitter}
-                  setTwitter={candidateForm.setTwitter}
-                  linkedin={candidateForm.linkedin}
-                  setLinkedin={candidateForm.setLinkedin}
-                  workExperienceYears={candidateForm.workExperienceYears}
-                  setWorkExperienceYears={candidateForm.setWorkExperienceYears}
-                  isValidEmail={candidateForm.isValidEmail}
-                  isValidPhone={candidateForm.isValidPhone}
-                  isValidTwitter={candidateForm.isValidTwitter}
-                  isValidLinkedin={candidateForm.isValidLinkedin}
-                  onGoBack={() => setCurrentSlide("welcome")}
-                  onStartInterview={startConversation}
-                  onExit={onEndCallClick}
-                />
-              )}
+              <CandidateForm
+                interview={interview}
+                loading={loading}
+                email={candidateForm.email}
+                setEmail={candidateForm.setEmail}
+                fullName={candidateForm.fullName}
+                setFullName={candidateForm.setFullName}
+                phone={candidateForm.phone}
+                setPhone={candidateForm.setPhone}
+                gender={candidateForm.gender}
+                setGender={candidateForm.setGender}
+                country={candidateForm.country}
+                setCountry={candidateForm.setCountry}
+                twitter={candidateForm.twitter}
+                setTwitter={candidateForm.setTwitter}
+                linkedin={candidateForm.linkedin}
+                setLinkedin={candidateForm.setLinkedin}
+                workExperienceYears={candidateForm.workExperienceYears}
+                setWorkExperienceYears={candidateForm.setWorkExperienceYears}
+                isValidEmail={candidateForm.isValidEmail}
+                isValidPhone={candidateForm.isValidPhone}
+                isValidTwitter={candidateForm.isValidTwitter}
+                isValidLinkedin={candidateForm.isValidLinkedin}
+                  turnstileToken={candidateForm.turnstileToken}
+                  setTurnstileToken={candidateForm.setTurnstileToken}
+                onGoBack={() => setCurrentSlide("welcome")}
+                onStartInterview={startConversation}
+                onExit={onEndCallClick}
+              />
+            )}
 
             {/* Interview stage - audio detection only runs when this is mounted */}
             {isStarted && !isEnded && !isOldUser && (

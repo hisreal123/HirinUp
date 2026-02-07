@@ -17,7 +17,7 @@ function InterviewListItem({ name, interviewerId, id, readableSlug }: Props) {
   const { data: responses, isLoading: responsesLoading } = useGetAllResponses(id);
   const analyzeCallMutation = useAnalyzeCall();
   const [isFetching, setIsFetching] = useState(false);
-  
+
   // Track which calls we've already analyzed to prevent loops
   const analyzedCallsRef = useRef<Set<string>>(new Set());
 
@@ -33,7 +33,7 @@ function InterviewListItem({ name, interviewerId, id, readableSlug }: Props) {
     );
     
     if (unanalyzedResponses.length > 0) {
-      setIsFetching(true);
+          setIsFetching(true);
       
       // Mark as analyzing to prevent duplicate calls
       unanalyzedResponses.forEach((response) => {
@@ -46,10 +46,10 @@ function InterviewListItem({ name, interviewerId, id, readableSlug }: Props) {
       Promise.all(
         unanalyzedResponses.map((response) =>
           analyzeCallMutation.mutateAsync({ id: response.call_id! }).catch((error) => {
-            console.error(
+                console.error(
               `Failed to analyze call for response id ${response.call_id}:`,
-              error,
-            );
+                  error,
+                );
             // Remove from set on error so it can be retried
             if (response.call_id) {
               analyzedCallsRef.current.delete(response.call_id);
@@ -57,9 +57,9 @@ function InterviewListItem({ name, interviewerId, id, readableSlug }: Props) {
           })
         )
       ).finally(() => {
-        setIsFetching(false);
+          setIsFetching(false);
       });
-    }
+        }
   }, [responses, analyzeCallMutation]);
 
   const responseCount = responses?.length || null;

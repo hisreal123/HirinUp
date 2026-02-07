@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
-import { ResponseService } from "@/services/responses.service";
 import { logger } from "@/lib/logger";
 import { nanoid } from "nanoid";
 import { createClient } from "@supabase/supabase-js";
+import { verifyTurnstile } from "@/actions/verify-turnstile";
 
 /**
  * Creates a response record early (before the call starts)
  * This allows us to track candidates and generate unique links per response
+ * Requires Turnstile verification for security
  */
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { interview_id, email, name, call_id, candidate_id } = body;
+    const { interview_id, email, name, call_id, candidate_id, turnstile_token } = body;
 
     if (!interview_id) {
       return NextResponse.json(
@@ -20,7 +21,35 @@ export async function POST(req: Request) {
       );
     }
 
-    logger.info("create-response request received", { interview_id, email });
+    // Determine if this is a candidate submission (has call_id) or admin link generation
+    const isCandidateSubmission = !!call_id;
+    let turnstileVerified = false;
+
+    // Verify Turnstile token - required for candidate submissions
+    if (isCandidateSubmission) {
+      if (!turnstile_token) {
+        logger.warn("Candidate submission without turnstile_token", { interview_id, call_id });
+        return NextResponse.json(
+          { error: "Verification required" },
+          { status: 403 },
+        );
+      }
+
+      const turnstileResult = await verifyTurnstile(turnstile_token);
+      if (!turnstileResult.success) {
+        logger.warn("Turnstile verification failed", { interview_id, error: turnstileResult.error });
+        return NextResponse.json(
+          { error: "Verification failed", details: turnstileResult.error },
+          { status: 403 },
+        );
+      }
+      turnstileVerified = true;
+      logger.info("create-response request received (candidate verified)", { interview_id, email });
+    } else {
+      // Admin link generation - no Turnstile required
+      // TODO: Add admin authentication check here for additional security
+      logger.info("create-response request received (admin link generation)", { interview_id });
+    }
 
     // Generate a random token for the response (similar to interview IDs)
     const responseToken = nanoid();
@@ -53,6 +82,7 @@ export async function POST(req: Request) {
         is_ended: false,
         is_analysed: false,
         is_viewed: false,
+        turnstile_verified: turnstileVerified,
       })
       .select("id, token")
       .single();

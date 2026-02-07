@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Switch} from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React, { useState, useEffect } from "react";
 import { useOrganization } from "@clerk/nextjs";
@@ -75,6 +75,7 @@ function InterviewHome() {
     useState<boolean>(false);
   const [isViewed, setIsViewed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const { organization } = useOrganization();
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [organizationNameSlug, setOrganizationNameSlug] = useState<string>("");
@@ -83,13 +84,22 @@ function InterviewHome() {
   const createResponseMutation = useCreateResponse();
   const { data: responsesData, isLoading: responsesLoading, refetch: refetchResponses } = useGetAllResponses(interviewId, true);
 
+  // Initial loading screen - show spinner for 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 2000); // 2 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Update local state when query data changes
   useEffect(() => {
     if (responsesData) {
       setResponses(responsesData);
     }
   }, [responsesData]);
-
+ 
   const generateAndSetSharedLink = async () => {
     return new Promise<string | null>((resolve) => {
       createResponseMutation.mutate(
@@ -98,25 +108,25 @@ function InterviewHome() {
           onSuccess: (data) => {
             if (data?.response_id) {
               const responseId = data.response_id;
-              const orgName = organizationNameSlug || interview?.readable_slug || "organization";
-              const generatedUrl = `${base_url}/join/${orgName}/${interviewId}/${responseId}`;
-              setSharedGeneratedLink(generatedUrl);
+        const orgName = organizationNameSlug || interview?.readable_slug || "organization";
+        const generatedUrl = `${base_url}/join/${orgName}/${interviewId}/${responseId}`;
+        setSharedGeneratedLink(generatedUrl);
               // Refetch responses to update the list
               refetchResponses();
               resolve(generatedUrl);
-            } else {
-              toast.error("Failed to generate link", {
-                position: "bottom-right",
-                duration: 3000,
-              });
+      } else {
+        toast.error("Failed to generate link", {
+          position: "bottom-right",
+          duration: 3000,
+        });
               resolve(null);
-            }
+      }
           },
           onError: () => {
-            toast.error("Failed to generate link", {
-              position: "bottom-right",
-              duration: 3000,
-            });
+      toast.error("Failed to generate link", {
+        position: "bottom-right",
+        duration: 3000,
+      });
             resolve(null);
           },
         },
@@ -138,7 +148,9 @@ function InterviewHome() {
 
 
   useEffect(() => {
-    if (!interviewId) return;
+    if (!interviewId) {
+      return;
+    }
 
     const fetchInterview = async () => {
       try {
@@ -192,10 +204,10 @@ function InterviewHome() {
   // Update loading state based on responses query
   useEffect(() => {
     if (responsesLoading) {
-      setLoading(true);
+        setLoading(true);
     } else {
-      setLoading(false);
-    }
+        setLoading(false);
+      }
   }, [responsesLoading]);
 
   useEffect(() => {
@@ -219,8 +231,8 @@ function InterviewHome() {
   const handleDeleteResponse = (deletedCallId: string) => {
     // Refetch responses to get updated list
     refetchResponses();
-    if (callId === deletedCallId) {
-      router.push(`/interviews/${interviewId}`);
+      if (callId === deletedCallId) {
+        router.push(`/interviews/${interviewId}`);
     }
   };
 
@@ -312,6 +324,17 @@ function InterviewHome() {
   const emptyResponses = totalResponses - totalAnsweredLinks; // Responses that haven't been completed
   const totalFeedbacks = feedbacks?.length || 0;
   const totalLinks = responses?.length || 0; // Each response represents a generated link
+
+  // Show initial loading spinner for 2 seconds
+  if (isInitialLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen w-full bg-white">
+        <div className="flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-full m-2 bg-white">
@@ -666,7 +689,7 @@ function InterviewHome() {
                         </CardContent>
                       </Card>
                     </div>
-                    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "responses" | "links")} className="w-full">
+                    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "responses" | "links" | "feedback")} className="w-full">
                       <TabsList>
                         <TabsTrigger value="details">Details</TabsTrigger>
                         <TabsTrigger value="responses">

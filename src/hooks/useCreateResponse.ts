@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { toast } from "sonner";
 
 interface CreateResponseParams {
   interview_id: string;
@@ -8,6 +7,7 @@ interface CreateResponseParams {
   name?: string;
   call_id?: string;
   candidate_id?: number;
+  turnstile_token?: string; // Required for candidate submissions, optional for admin link generation
 }
 
 interface CreateResponseResponse {

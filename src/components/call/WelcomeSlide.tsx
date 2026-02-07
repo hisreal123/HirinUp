@@ -37,12 +37,19 @@ export function WelcomeSlide({ interview, loading, onProceed, onExit }: WelcomeS
         )}
         <div className="p-2 font-normal overflow-hidden relative h-fit text-sm w-[80%] mx-auto mb-4 whitespace-pre-line">
           {interview?.description}
-          <p className="font-bold text-sm bg-orange-400 rounded-md mt-2 p-2">
-            Ensure your volume is up and grant microphone access
-            when prompted. Additionally, please make sure you are in a
-            quiet environment.
-            {"\n\n"}Note: Tab switching will be recorded.
-          </p>
+          <div className="font-bold text-sm bg-amber-100 text-amber-800 rounded-md mt-2 p-3 border border-amber-300">
+            <p>
+              ⚠️ Ensure your volume is up and grant microphone access
+              when prompted. Please make sure you are in a quiet environment.
+            </p>
+            <p className="mt-2">
+              ⚠️ Do not refresh or close this page during the interview. 
+              Doing so will end your session permanently.
+            </p>
+            <p className="mt-2 text-amber-700">
+              Note: Tab switching will be recorded.
+            </p>
+          </div>
         </div>
       </div>
       <div className="w-[80%] flex flex-row mx-auto justify-center items-center align-middle gap-2">

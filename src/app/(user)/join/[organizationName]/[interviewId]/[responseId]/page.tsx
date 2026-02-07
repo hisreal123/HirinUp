@@ -95,6 +95,7 @@ function InterviewInterface() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isExpired, setIsExpired] = useState(false);
   const [expirationChecked, setExpirationChecked] = useState(false);
+  const [initialCallPhase, setInitialCallPhase] = useState<'first_call' | 'verification_modal' | 'second_call'>('first_call');
 
   useEffect(() => {
     if (interview) {
@@ -102,8 +103,9 @@ function InterviewInterface() {
     }
   }, [interview, interviewId]);
 
-  // PRIORITY: Early expiration check - MUST happen FIRST before anything else
+  // PRIORITY: Early expiration check + call flow state check + isLoaded logging
   // This prevents users from seeing interview details or candidate form if link is expired
+  // Also determines which call phase to resume from on refresh
   useEffect(() => {
     if (!responseId) {
       return;
@@ -111,6 +113,7 @@ function InterviewInterface() {
 
     const checkExpiration = async () => {
       setIsValidating(true);
+
       try {
         const response = await ResponseService.getResponseByToken(responseId);
         if (response && response.is_ended === true) {
@@ -118,14 +121,82 @@ function InterviewInterface() {
           setIsExpired(true);
           setExpirationChecked(true);
           setIsValidating(false);
+
           return;
         }
-        // If not expired, mark as checked and allow other operations to proceed
+
+        // DB is source of truth - localStorage is just a cache
+        const dbFlowState = (response?.call_flow_state as Record<string, string>) || {};
+        
+        // Always sync localStorage from DB (clear if DB is empty, update if DB has data)
+        try {
+          if (Object.keys(dbFlowState).length > 0) {
+            localStorage.setItem(`call_flow_state_${responseId}`, JSON.stringify(dbFlowState));
+            console.log("[Flow State] Synced localStorage from DB");
+          } else {
+            // DB is empty (new response) - clear ALL stale localStorage for this response
+            localStorage.removeItem(`call_flow_state_${responseId}`);
+            localStorage.removeItem(`candidate_name_${responseId}`);
+            console.log("[Flow State] Cleared all localStorage (new response)");
+          }
+        } catch (e) {
+          // ignore localStorage errors
+        }
+
+        // Use DB state as the source of truth
+        const flowState = dbFlowState;
+
+        if (flowState.second_call_completed) {
+          // All done — treat as expired
+          console.log("[Flow State] Second call completed, redirecting to expired");
+          setIsExpired(true);
+          setExpirationChecked(true);
+          setIsValidating(false);
+
+          return;
+        } else if (flowState.second_call_started) {
+          // Second call was started but not completed — user refreshed during second call
+          // Treat as expired to prevent refresh abuse
+          console.log("[Flow State] Second call was started (refresh detected), redirecting to expired");
+          setIsExpired(true);
+          setExpirationChecked(true);
+          setIsValidating(false);
+
+          return;
+        } else if (flowState.modal_closed) {
+          // Modal was closed but second call not yet started — resume from second call
+          console.log("[Flow State] Resuming from second call");
+          setInitialCallPhase('second_call');
+        } else if (flowState.first_call_started) {
+          // First call done, show modal directly
+          console.log("[Flow State] Resuming from verification modal");
+          setInitialCallPhase('verification_modal');
+        }
+
+        // Log isLoaded to DB first (DB is source of truth), then sync to localStorage
+        if (!flowState.is_loaded) {
+          const isLoadedTs = new Date().toISOString();
+          const updatedState = { ...dbFlowState, is_loaded: isLoadedTs };
+          
+          // Write to DB first
+          await ResponseService.updateResponseByToken(
+            { call_flow_state: updatedState },
+            responseId,
+          );
+          
+          // Then sync localStorage from updated DB state
+          try {
+            localStorage.setItem(`call_flow_state_${responseId}`, JSON.stringify(updatedState));
+          } catch (e) {
+            // ignore localStorage errors
+          }
+          console.log("[Flow State] Logged isLoaded to DB, synced to localStorage");
+        }
+
         setExpirationChecked(true);
         setIsValidating(false);
       } catch (error) {
         console.error("Error checking expiration:", error);
-        // On error, assume not expired to allow normal flow (will be caught in validation)
         setExpirationChecked(true);
         setIsValidating(false);
       }
@@ -340,7 +411,7 @@ function InterviewInterface() {
             image="/closed.png"
           />
         ) : (
-          <Call interview={interview} responseToken={responseId} />
+          <Call interview={interview} responseToken={responseId} initialCallPhase={initialCallPhase} />
         )}
       </div>
     </div>

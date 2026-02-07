@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import Image from 'next/image';
 import NavDropdown from '@/components/ui/NavDropdown';
@@ -42,9 +41,9 @@ export default function Header() {
             </li>
 
             <li>
-              <SignInButton mode="modal">
-                <button className="cursor-pointer ">Sign In</button>
-              </SignInButton>
+              <Link href="/signin" className="cursor-pointer">
+                Sign In
+              </Link>
             </li>
           </ul>
 
@@ -56,11 +55,12 @@ export default function Header() {
             >
               Book a Demo
             </Link>
-            <SignUpButton mode="modal">
-              <button className="rounded-full bg-[#6300ff] px-3 py-3 text-xs font-medium hover:bg-white hover:text-purple-600">
-                Sign up
-              </button>
-            </SignUpButton>
+            <Link
+              href="/signup"
+              className="rounded-full bg-[#6300ff] px-3 py-3 text-xs font-medium hover:bg-white hover:text-purple-600"
+            >
+              Sign up
+            </Link>
           </div>
         </div>
         {/* Mobile menu button */}
@@ -116,35 +116,28 @@ export default function Header() {
               className="cursor-pointer hover:underline"
               onClick={() => setIsMenuOpen(false)}
             >
-              Pricing
+              <Link href="/pricing">Pricing</Link>
             </li>
-            <li>
-              <SignInButton mode="modal">
-                <button
-                  className="cursor-pointer hover:underline"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Sign In
-                </button>
-              </SignInButton>
+            <li onClick={() => setIsMenuOpen(false)}>
+              <Link href="/signin" className="cursor-pointer hover:underline">
+                Sign In
+              </Link>
             </li>
-            <li>
-              <button
+            <li onClick={() => setIsMenuOpen(false)}>
+              <Link
+                href="/book-a-demo"
                 className="rounded-full border border-white/20 px-6 py-2 text-sm hover:bg-white/10"
-                onClick={() => setIsMenuOpen(false)}
               >
                 Book a Demo
-              </button>
+              </Link>
             </li>
-            <li>
-              <SignUpButton mode="modal">
-                <button
-                  className="rounded-full bg-purple-600 px-6 py-2 font-medium hover:bg-purple-700"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Sign up
-                </button>
-              </SignUpButton>
+            <li onClick={() => setIsMenuOpen(false)}>
+              <Link
+                href="/signup"
+                className="rounded-full bg-purple-600 px-6 py-2 font-medium hover:bg-purple-700"
+              >
+                Sign up
+              </Link>
             </li>
           </ul>
         </div>

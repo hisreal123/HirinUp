@@ -13,6 +13,16 @@ export interface Response {
   analytics: any;
   candidate_status: string;
   tab_switch_count: number;
+  turnstile_verified: boolean;
+  call_flow_state: CallFlowState;
+}
+
+export interface CallFlowState {
+  is_loaded?: string;
+  first_call_started?: string;
+  modal_closed?: string;
+  second_call_completed?: string;
+  [key: string]: string | undefined;
 }
 
 export interface Analytics {

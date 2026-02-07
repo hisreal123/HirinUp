@@ -43,26 +43,26 @@ function GenerateLinkModal({
           isGeneratingRef.current = false;
           if (data?.response_id) {
             const responseId = data.response_id;
-            // New format: /join/[organization_name]/[interview_id]/[response_id]
-            const link = `${base_url}/join/${organizationName}/${interviewId}/${responseId}`;
-            setGeneratedLink(link);
-            setSharedLink(link); // Update shared link state
-            toast.success("Interview link generated successfully!", {
-              position: "bottom-right",
-              duration: 3000,
-            });
-          } else {
-            toast.error("Failed to generate link", {
-              position: "bottom-right",
-              duration: 3000,
-            });
-          }
+        // New format: /join/[organization_name]/[interview_id]/[response_id]
+        const link = `${base_url}/join/${organizationName}/${interviewId}/${responseId}`;
+        setGeneratedLink(link);
+        setSharedLink(link); // Update shared link state
+        toast.success("Interview link generated successfully!", {
+          position: "bottom-right",
+          duration: 3000,
+        });
+      } else {
+        toast.error("Failed to generate link", {
+          position: "bottom-right",
+          duration: 3000,
+        });
+      }
         },
         onError: () => {
           isGeneratingRef.current = false;
         },
-      },
-    );
+        },
+      );
   };
 
   const copyToClipboard = () => {
@@ -90,8 +90,8 @@ function GenerateLinkModal({
   useEffect(() => {
     // Use shared link if available when modal opens
     if (open && sharedLink) {
-      setGeneratedLink(sharedLink);
-    }
+        setGeneratedLink(sharedLink);
+      }
     // Reset generated link when modal closes
     if (!open) {
       setGeneratedLink("");

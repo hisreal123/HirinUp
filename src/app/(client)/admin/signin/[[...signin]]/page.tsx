@@ -1,10 +1,10 @@
-import { SignUp } from "@clerk/nextjs";
+import { SignIn } from "@clerk/nextjs";
 
-function SignUpPage() {
+function AdminSignInPage() {
   return (
     <div className="flex items-center justify-center h-screen w-full bg-white absolute top-0 left-0 z-50">
-      <div className="hidden md:block align-middle my-auto">
-        <SignUp forceRedirectUrl="/dashboard" />
+      <div className="hidden md:block align-middle my-auto mx-auto">
+        <SignIn forceRedirectUrl="/dashboard" />
       </div>
       <div className="block md:hidden px-3 h-[60%] my-auto">
         <h1 className="text-2xl font-bold text-center text-gray-800">
@@ -21,4 +21,4 @@ function SignUpPage() {
     </div>
   );
 }
-export default SignUpPage;
+export default AdminSignInPage;

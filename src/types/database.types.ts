@@ -201,6 +201,7 @@ export type Database = {
           is_viewed: boolean | null;
           name: string | null;
           tab_switch_count: number | null;
+          call_flow_state: Json | null;
         };
         Insert: {
           analytics?: Json | null;
@@ -217,6 +218,7 @@ export type Database = {
           is_viewed?: boolean | null;
           name?: string | null;
           tab_switch_count?: number | null;
+          call_flow_state?: Json | null;
         };
         Update: {
           analytics?: Json | null;
@@ -233,6 +235,7 @@ export type Database = {
           is_viewed?: boolean | null;
           name?: string | null;
           tab_switch_count?: number | null;
+          call_flow_state?: Json | null;
         };
         Relationships: [
           {
