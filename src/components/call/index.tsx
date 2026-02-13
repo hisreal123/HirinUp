@@ -25,6 +25,8 @@ import {
   TabSwitchWarning,
   useTabSwitchPrevention,
 } from "./tabSwitchPrevention";
+import { useSessionSecurity } from "@/hooks/useSessionSecurity";
+import { SessionBlocked } from "./SessionBlocked";
 import { InterviewerService } from "@/services/interviewers.service";
 import { ResponseService } from "@/services/responses.service";
 import { CandidateService } from "@/services/candidates.service";
@@ -118,6 +120,21 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
   const [callId, setCallId] = useState<string>("");
   const [candidateId, setCandidateId] = useState<number | null>(null);
   const { tabSwitchCount } = useTabSwitchPrevention();
+
+  // Session security: Multi-tab/device prevention (4 layers)
+  const {
+    sessionId,
+    isBlocked: isSessionBlocked,
+    blockedReason: sessionBlockedReason,
+    isChecking: isSessionChecking,
+  } = useSessionSecurity({
+    responseToken: responseToken || "",
+    enabled: !!responseToken && !isEnded,
+    onSessionBlocked: (reason) => {
+      console.log("[Call] Session blocked:", reason);
+    },
+  });
+
   const [isFeedbackSubmitted, setIsFeedbackSubmitted] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [interviewerImg, setInterviewerImg] = useState("");
@@ -784,6 +801,8 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
         interviewer_id: interview?.interviewer_id
           ? Number(interview.interviewer_id)
           : 0,
+        token: responseToken,
+        session_id: sessionId,
       });
 
       const callResponse = registerCallResponse?.registerCallResponse;
@@ -946,6 +965,8 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
         interviewer_id: interview?.interviewer_id
           ? Number(interview.interviewer_id)
           : 0,
+        token: responseToken,
+        session_id: sessionId,
       });
 
       const callResponse = registerCallResponse?.registerCallResponse;
@@ -1147,6 +1168,28 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       <div className="flex flex-col items-center justify-center min-h-screen w-full bg-white">
         <div className="flex flex-col items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show session blocked screen if multi-tab/device detected
+  if (isSessionBlocked) {
+    return (
+      <SessionBlocked
+        reason={sessionBlockedReason}
+        onRetry={() => window.location.reload()}
+      />
+    );
+  }
+
+  // Show loading while checking session
+  if (isSessionChecking && responseToken) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-white">
+        <div className="flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+          <p className="mt-4 text-gray-600 text-sm">Verifying session...</p>
         </div>
       </div>
     );

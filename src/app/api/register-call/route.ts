@@ -2,10 +2,14 @@ import { logger } from "@/lib/logger";
 import { InterviewerService } from "@/services/interviewers.service";
 import { NextResponse } from "next/server";
 import Retell from "retell-sdk";
+import { createClient } from "@supabase/supabase-js";
 
 const retellClient = new Retell({
   apiKey: process.env.RETELL_API_KEY || "",
 });
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(req: Request) {
   try {
@@ -14,13 +18,47 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const interviewerId = body.interviewer_id;
-    
+
     if (!interviewerId || interviewerId === 0) {
       logger.error("Missing or invalid interviewer_id in request");
       return NextResponse.json(
         { error: "Missing or invalid interviewer_id" },
         { status: 400 },
       );
+    }
+
+    // Server-side session validation: if token and session_id are provided,
+    // verify this session is the active one before allowing call registration
+    const { token, session_id } = body;
+    if (token && session_id) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const { data: response } = await supabase
+        .from("response")
+        .select("active_session_id, is_ended")
+        .eq("token", token)
+        .single();
+
+      if (response) {
+        if (response.is_ended) {
+          logger.warn("[register-call] Interview already ended", { token });
+          return NextResponse.json(
+            { error: "Interview has already ended" },
+            { status: 410 },
+          );
+        }
+
+        if (response.active_session_id && response.active_session_id !== session_id) {
+          logger.warn("[register-call] Session mismatch — blocking call registration", {
+            token,
+            expected: session_id,
+            active: response.active_session_id,
+          });
+          return NextResponse.json(
+            { error: "Session conflict", message: "This interview is active on another device" },
+            { status: 409 },
+          );
+        }
+      }
     }
 
     if (!process.env.RETELL_API_KEY) {

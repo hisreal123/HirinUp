@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware, clerkClient, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse, NextRequest } from "next/server";
 
 // ============ BOT DETECTION ============
@@ -55,6 +55,7 @@ function checkRateLimit(
 
   if (!entry || entry.resetTime < now) {
     rateLimitStore.set(ip, { count: 1, resetTime: now + windowMs });
+    
     return true;
   }
 
@@ -63,6 +64,7 @@ function checkRateLimit(
   }
 
   entry.count++;
+
   return true;
 }
 
@@ -77,6 +79,7 @@ function getClientIP(req: NextRequest): string {
 
 // ============ SECURITY HEADERS ============
 const SECURITY_HEADERS = {
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "X-XSS-Protection": "1; mode=block",
@@ -89,7 +92,7 @@ const SECURITY_HEADERS = {
     "img-src 'self' data: blob: https: http:",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://*.clerk.accounts.dev https://clerk.hirinup.com https://api.clerk.dev wss://*.clerk.accounts.dev",
-    "frame-src 'self' https://challenges.cloudflare.com https://*.clerk.accounts.dev",
+    "frame-src 'self' https://challenges.cloudflare.com https://*.clerk.accounts.dev https://player.vimeo.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -128,6 +131,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/create-response(.*)",
   "/api/analyze-communication(.*)",
   "/api/response-webhook(.*)",
+  "/api/check-allowlist(.*)",
+  "/not-allowed(.*)",
 ]);
 
 const isProtectedRoute = createRouteMatcher([
@@ -136,6 +141,45 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 const isApiRoute = createRouteMatcher(["/api/(.*)"]);
+
+// ============ EMAIL ALLOWLIST ============
+const allowlistCache = new Map<string, { allowed: boolean; expiry: number }>();
+const ALLOWLIST_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function isEmailAllowed(email: string): boolean {
+  const allow = (process.env.ALLOWLIST_EMAILS || "")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+
+  return allow.includes(email.trim().toLowerCase());
+}
+
+async function checkUserAllowlist(userId: string): Promise<boolean> {
+  // Check cache first
+  const cached = allowlistCache.get(userId);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.allowed;
+  }
+
+  try {
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    const primaryEmail = user.emailAddresses.find(
+      (e) => e.id === user.primaryEmailAddressId
+    )?.emailAddress;
+
+    const allowed = primaryEmail ? isEmailAllowed(primaryEmail) : false;
+
+    // Cache result
+    allowlistCache.set(userId, { allowed, expiry: Date.now() + ALLOWLIST_CACHE_TTL });
+
+    return allowed;
+  } catch {
+    // Fail open on errors to prevent lockouts
+    return true;
+  }
+}
 
 // ============ CLERK HANDLER ============
 const clerkHandler = clerkMiddleware(async (auth, req) => {
@@ -147,6 +191,15 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
     const authResult = await auth();
     if (!authResult.userId) {
       return authResult.redirectToSignIn({ returnBackUrl: req.url });
+    }
+
+    // Allowlist enforcement (Approach B)
+    const allowed = await checkUserAllowlist(authResult.userId);
+
+    if (!allowed) {
+      const notAllowedUrl = new URL("/not-allowed", req.url);
+
+      return NextResponse.redirect(notAllowedUrl);
     }
   }
 });
@@ -164,7 +217,7 @@ export default function middleware(req: NextRequest) {
 
   // 2. Rate limiting for API routes (stricter)
   if (isApiRoute(req)) {
-    const allowed = checkRateLimit(clientIP, 60, 60000); // 60 req/min for API
+    const allowed = checkRateLimit(clientIP, 180, 60000); // 180 req/min for API
     if (!allowed) {
       return new NextResponse(
         JSON.stringify({ error: "Too many requests" }),
@@ -189,6 +242,7 @@ export default function middleware(req: NextRequest) {
     Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
       response.headers.set(key, value);
     });
+
     return response;
   }
 

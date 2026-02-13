@@ -9,6 +9,8 @@ interface RegisterCallParams {
     name: string;
   };
   interviewer_id: string | number;
+  token?: string;
+  session_id?: string;
 }
 
 interface RegisterCallResponse {
