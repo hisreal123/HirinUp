@@ -8,6 +8,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import Newsletter from './layout/newsletter';
+import { ConsentButton } from '@/components/consent-modal';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,6 +32,8 @@ export default function MarketingLayout({
         {children}
         <Newsletter />
         <Footer />
+
+        <ConsentButton />
       </main>
     </ClerkProvider>
   );

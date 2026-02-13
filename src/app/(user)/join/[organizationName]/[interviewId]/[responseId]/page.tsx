@@ -293,7 +293,7 @@ function InterviewInterface() {
           .replace(/\s+/g, "-")
           .replace(/[^a-z0-9-]/g, "");
         
-        if (orgNameSlug !== organizationName) {
+        if (orgNameSlug !== organizationName && !organizationName?.startsWith(orgNameSlug)) {
           console.error("Organization name mismatch:", {
             urlOrgName: organizationName,
             dbOrgName: orgNameSlug,

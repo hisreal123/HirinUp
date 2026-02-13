@@ -35,7 +35,8 @@ export default function ClientLayout({
               !pathname.includes("/login") &&
               !pathname.includes("/register") &&
               !pathname.includes("/forgot-password") &&
-              !pathname.includes("/verification-page") && <Navbar />}
+              !pathname.includes("/verification-page") &&
+              !pathname.includes("/not-allowed") && <Navbar />}
             <div className="flex flex-row h-screen bg-floral-white">
               {!pathname.includes("/sign-in") &&
                 !pathname.includes("/sign-up") &&
@@ -44,7 +45,8 @@ export default function ClientLayout({
                 !pathname.includes("/login") &&
                 !pathname.includes("/register") &&
                 !pathname.includes("/forgot-password") &&
-                !pathname.includes("/verification-page") && <SideMenu />}
+                !pathname.includes("/verification-page") &&
+                !pathname.includes("/not-allowed") && <SideMenu />}
               {!pathname.includes("/sign-in") &&
                 !pathname.includes("/sign-up") &&
                 !pathname.includes("/signin") &&
@@ -52,7 +54,8 @@ export default function ClientLayout({
                 !pathname.includes("/login") &&
                 !pathname.includes("/register") &&
                 !pathname.includes("/forgot-password") &&
-                !pathname.includes("/verification-page") ? (
+                !pathname.includes("/verification-page") &&
+                !pathname.includes("/not-allowed") ? (
                 <ContentWrapper>{children}</ContentWrapper>
               ) : (
                 <div className="pt-[64px] h-full overflow-y-auto flex-grow">

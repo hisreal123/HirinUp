@@ -123,31 +123,31 @@ export function AudioDetectionModal({
 
           <div className="border-b-4 border-blue-800 pb-2" />
 
-          <AlertDialogDescription className="text-base mt-2 px-4">
-            <div className="flex justify-center">
+          <AlertDialogDescription className="text-base mt-2 px-4" asChild>
+            <span className="flex justify-center">
               {currentStep === 1 ? (
-                <p className="font-bold text-sm flex text-blue-800">
+                <span className="font-bold text-sm flex text-blue-800">
                   <span>Step 1:</span> Browser & Device Checks{' '}
                   <span className="text-blue-500 text-sm ml-2 italic">
                     (Primary Path)
                   </span>
-                </p>
+                </span>
               ) : currentStep === 2 ? (
-                <p className="font-bold text-sm flex text-blue-800">
+                <span className="font-bold text-sm flex text-blue-800">
                   <span>Step 2:</span> Advanced Network Diagnostics{' '}
                   <span className="text-blue-500 text-sm ml-2 italic">
                     (Optional)
                   </span>
-                </p>
+                </span>
               ) : (
-                <p className="font-bold text-md flex text-blue-800">
+                <span className="font-bold text-md flex text-blue-800">
                   <span>Step 3:</span> OS-Level Checks{' '}
                   <span className="text-blue-500 text-sm ml-2 italic">
                     (No Terminal)
                   </span>
-                </p>
+                </span>
               )}
-            </div>
+            </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
 

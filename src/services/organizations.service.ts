@@ -12,12 +12,14 @@ const getOrganizationById = async (organizationId: string) => {
 
     if (error) {
       console.error("Error fetching organization:", error);
+
       return null;
     }
 
     return data;
   } catch (error) {
     console.error("Exception in getOrganizationById:", error);
+    
     return null;
   }
 };
