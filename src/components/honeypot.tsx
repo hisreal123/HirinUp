@@ -6,15 +6,6 @@ interface HoneypotProps {
   onBotDetected?: () => void;
 }
 
-/**
- * Honeypot component to detect bot submissions.
- * Renders hidden fields that bots typically fill out but humans don't see.
- *
- * Usage:
- * 1. Add <Honeypot ref={honeypotRef} /> to your form
- * 2. In your submit handler, call honeypotRef.current?.checkHoneypot()
- * 3. If it returns true, a bot was detected - reject the submission
- */
 export interface HoneypotRef {
   checkHoneypot: () => boolean;
   getValues: () => { website: string; email2: string; phone: string };
@@ -148,7 +139,7 @@ export function useHoneypot() {
         autoComplete="off"
       />
       <input
-        ref={phoneRef}
+        ref={phoneRef} 
         type="tel"
         name="phone_number"
         tabIndex={-1}

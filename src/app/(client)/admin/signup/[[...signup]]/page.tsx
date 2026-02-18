@@ -5,12 +5,48 @@ import { SignUp } from "@clerk/nextjs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mail, ShieldX, Loader2 } from "lucide-react";
+import { usePathname } from "next/navigation";
+
+function ClerkSignUpView({ lockedEmail }: { lockedEmail?: string }) {
+  return (
+    <div className="flex items-center justify-center h-screen w-full bg-white absolute top-0 left-0 z-50">
+      <div className="hidden md:block align-middle my-auto">
+        <SignUp
+          routing="path"
+          path="/admin/signup"
+          forceRedirectUrl="/dashboard"
+          initialValues={lockedEmail ? { emailAddress: lockedEmail } : undefined}
+        />
+      </div>
+      <div className="block md:hidden px-3 h-[60%] my-auto">
+        <h1 className="text-2xl font-bold text-center text-gray-800">
+          Welcome to Hirin<span className="text-indigo-600">Up</span>
+        </h1>
+        <h1 className="text-md my-3 text-center text-gray-800">
+          Mobile version is currently under construction. 🚧
+        </h1>
+        <p className="text-center text-gray-600 mt-3">
+          Please sign in using a PC for the best experience. Sorry for the
+          inconvenience.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function AdminSignUpPage() {
+  const pathname = usePathname();
   const [email, setEmail] = useState("");
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
+
+  // Clerk navigates to sub-paths like /admin/signup/verify-email-address
+  // during multi-step sign-up. Render the Clerk component directly so the
+  // email gate doesn't override Clerk's own UI.
+  if (pathname !== "/admin/signup") {
+    return <ClerkSignUpView />;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,30 +83,9 @@ function AdminSignUpPage() {
     }
   }
 
-  // Email verified via API — show Clerk SignUp
+  // Email verified via API — show Clerk SignUp with the verified email locked in
   if (verifiedEmail) {
-    return (
-      <div className="flex items-center justify-center h-screen w-full bg-white absolute top-0 left-0 z-50">
-        <div className="hidden md:block align-middle my-auto">
-          <SignUp
-            forceRedirectUrl="/dashboard"
-            initialValues={{ emailAddress: verifiedEmail }}
-          />
-        </div>
-        <div className="block md:hidden px-3 h-[60%] my-auto">
-          <h1 className="text-2xl font-bold text-center text-gray-800">
-            Welcome to Hirin<span className="text-indigo-600">Up</span>
-          </h1>
-          <h1 className="text-md my-3 text-center text-gray-800">
-            Mobile version is currently under construction. 🚧
-          </h1>
-          <p className="text-center text-gray-600 mt-3">
-            Please sign in using a PC for the best experience. Sorry for the
-            inconvenience.
-          </p>
-        </div>
-      </div>
-    );
+    return <ClerkSignUpView lockedEmail={verifiedEmail} />;
   }
 
   // Show the email gate form

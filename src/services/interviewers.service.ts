@@ -1,6 +1,13 @@
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClientComponentClient();
+// Server (API routes): service role key bypasses RLS
+// Browser (client contexts): anon key, subject to RLS
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  (typeof window === "undefined"
+    ? process.env.SUPABASE_SERVICE_ROLE_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!
+);
 
 const getAllInterviewers = async (clientId: string = "") => {
   try {

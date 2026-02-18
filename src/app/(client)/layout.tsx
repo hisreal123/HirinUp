@@ -25,7 +25,7 @@ export default function ClientLayout({
           signInUrl="/signin"
           signUpUrl="/signup"
           signInFallbackRedirectUrl={"/dashboard"}
-          afterSignOutUrl={"/signin"}
+          afterSignOutUrl={"/admin/signin"}
         >
           <Providers>
             {!pathname.includes("/sign-in") &&
