@@ -111,11 +111,14 @@ export function useSessionSecurity({
         }
 
         if (type === "SESSION_PING") {
-          channel.postMessage({
-            type: "SESSION_PONG",
-            sessionId: sessionIdRef.current,
-            timestamp: Date.now(),
-          });
+          // Only pong if this tab actually owns the session (not blocked)
+          if (statusRef.current === "active") {
+            channel.postMessage({
+              type: "SESSION_PONG",
+              sessionId: sessionIdRef.current,
+              timestamp: Date.now(),
+            });
+          }
         }
 
         if (type === "SESSION_PONG" && incomingSessionId !== sessionIdRef.current) {

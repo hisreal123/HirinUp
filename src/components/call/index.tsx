@@ -185,6 +185,11 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
   // Detect page unload (refresh/close) to prevent call_ended from writing completion state
   const isPageUnloadingRef = useRef<boolean>(false);
 
+  // Signals that the verification modal should fire as soon as InterviewStage mounts.
+  // Used when resuming from verification_modal phase — InterviewStage may not be mounted
+  // yet when the resume useEffect fires (e.g. session check spinner is still showing).
+  const pendingModalTriggerRef = useRef<boolean>(false);
+
   // Refs to track values without causing re-registration of listeners
   const lastUserResponseRef2 = useRef<string>("");
   const audioNotDetectedStateRef = useRef<boolean>(false);
@@ -224,6 +229,12 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
   const handleTriggerSilenceDetection = useCallback(
     (fn: (skipMessage?: boolean) => void) => {
       triggerSilenceDetectionRef.current = fn;
+      // If we were waiting for InterviewStage to mount before showing the
+      // verification modal (e.g. session check was still in progress), fire now.
+      if (pendingModalTriggerRef.current) {
+        pendingModalTriggerRef.current = false;
+        fn(true);
+      }
     },
     [],
   );
@@ -434,12 +445,19 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       setIsStarted(true);
       setIsTimerPaused(true);
       isTimerPausedRef.current = true;
-      // Trigger modal after InterviewStage mounts
-      setTimeout(() => {
-        if (triggerSilenceDetectionRef.current) {
-          triggerSilenceDetectionRef.current(true);
+      // Restore timer to reflect the first call duration that already elapsed.
+      // time unit = 10 per 100ms, so ms → units = ms / 10.
+      setTime(FIRST_CALL_DURATION / 10);
+      // InterviewStage may not be mounted yet (session check spinner could still be
+      // showing). Set the pending flag so handleTriggerSilenceDetection fires the
+      // modal the instant InterviewStage registers its function.
+      if (triggerSilenceDetectionRef.current) {
+        // Already mounted (fast path — no session check delay)
+        triggerSilenceDetectionRef.current(true);
+      } else {
+        // Slow path — InterviewStage not mounted yet; will fire via pendingModalTriggerRef
+        pendingModalTriggerRef.current = true;
       }
-      }, 500);
     } else if (initialCallPhase === 'second_call') {
       // User refreshed during second call — skip first call and modal, start second call
       console.log("[Resume] Starting from second call phase");
