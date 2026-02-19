@@ -167,8 +167,9 @@ export function useSessionSecurity({
 
     isClaimingRef.current = true;
 
-    try {
-      const response = await fetch("/api/session/claim", {
+    // Single fetch attempt — extracted so we can retry on 409
+    const attemptClaim = async () =>
+      fetch("/api/session/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -177,6 +178,19 @@ export function useSessionSecurity({
           fingerprint: await getBrowserFingerprint(),
         }),
       });
+
+    try {
+      let response = await attemptClaim();
+
+      // On 409, wait 700ms then retry once.
+      // This covers the refresh race condition where sendBeacon (session release)
+      // hasn't been processed by the server before the new claim arrives.
+      // A genuine multi-device conflict will still return 409 on the retry.
+      if (response.status === 409) {
+        console.log("[SessionSecurity L2] 409 on first claim — waiting for sendBeacon then retrying");
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        response = await attemptClaim();
+      }
 
       const data = await response.json();
 

@@ -190,6 +190,9 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
   // yet when the resume useEffect fires (e.g. session check spinner is still showing).
   const pendingModalTriggerRef = useRef<boolean>(false);
 
+  // Mirrors the `time` state so beforeunload can read the latest value synchronously.
+  const timeRef = useRef<number>(0);
+
   // Refs to track values without causing re-registration of listeners
   const lastUserResponseRef2 = useRef<string>("");
   const audioNotDetectedStateRef = useRef<boolean>(false);
@@ -358,6 +361,11 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
     };
   }, [isCalling, isEnded]);
 
+  // Keep timeRef in sync so beforeunload can read the latest timer value synchronously
+  useEffect(() => {
+    timeRef.current = time;
+  }, [time]);
+
   // Helper function to format seconds to MM:SS
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -464,6 +472,17 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       setIsStarted(true);
       setCallPhase('second_call');
       callPhaseRef.current = 'second_call';
+      // Restore the elapsed timer that was saved on beforeunload
+      if (responseToken) {
+        try {
+          const saved = localStorage.getItem(`elapsed_timer_${responseToken}`);
+          if (saved) {
+            const savedTime = Number(saved);
+            console.log("[Resume] Restoring second-call timer to:", savedTime);
+            setTime(savedTime);
+          }
+        } catch (e) { /* ignore */ }
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -486,10 +505,17 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCallPhase, isStarted, isCalling, isEnded, isPreparingCall]);
 
-  // Detect page unload/refresh to prevent call_ended from writing completion state
+  // Detect page unload/refresh to prevent call_ended from writing completion state.
+  // Also saves the current timer value so second call can restore it on resume.
   useEffect(() => {
     const handleBeforeUnload = () => {
       isPageUnloadingRef.current = true;
+      // Persist elapsed timer so it can be restored if second call is resumed after refresh
+      if (callPhaseRef.current === 'second_call' && responseTokenRef.current) {
+        try {
+          localStorage.setItem(`elapsed_timer_${responseTokenRef.current}`, String(timeRef.current));
+        } catch (e) { /* ignore */ }
+      }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
