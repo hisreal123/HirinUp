@@ -120,7 +120,6 @@ export async function decryptResponse(
   return JSON.parse(new TextDecoder().decode(plaintext));
 }
 
-// ─── Server (Next.js API routes) ─────────────────────────────────────────────
 
 /**
  * Decrypt an incoming encrypted payload.
