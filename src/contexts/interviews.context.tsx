@@ -4,6 +4,7 @@ import React, { useState, useContext, ReactNode, useEffect } from "react";
 import { Interview } from "@/types/interview";
 import { InterviewService } from "@/services/interviews.service";
 import { useClerk, useOrganization } from "@clerk/nextjs";
+import { encryptedApiCall } from "@/lib/encrypted-api";
 
 interface InterviewContextProps {
   interviews: Interview[];
@@ -36,12 +37,11 @@ export function InterviewProvider({ children }: InterviewProviderProps) {
   const fetchInterviews = async () => {
     try {
       setInterviewsLoading(true);
-      const response = await InterviewService.getAllInterviews(
-        user?.id as string,
-        organization?.id as string,
-      );
-      setInterviewsLoading(false);
-      setInterviews(response);
+      const response = await encryptedApiCall<Interview[]>("/api/get-interviews", {
+        userId: user?.id,
+        organizationId: organization?.id,
+      });
+      setInterviews(response || []);
     } catch (error) {
       console.error(error);
     }

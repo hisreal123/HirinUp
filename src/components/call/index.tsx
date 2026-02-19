@@ -10,12 +10,15 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { useResponses } from "@/contexts/responses.context";
 import { RetellWebClient } from "retell-client-js-sdk";
-import { useGetAllEmails } from "@/hooks/useGetAllEmails";
+// import { useGetAllEmails } from "@/hooks/useGetAllEmails"; // replaced with encrypted API call
+import { encryptedApiCall } from "@/lib/encrypted-api";
 import { useCreateOrUpdateCandidate } from "@/hooks/useCreateOrUpdateCandidate";
-import { useRegisterCall } from "@/hooks/useRegisterCall";
+// import { useRegisterCall } from "@/hooks/useRegisterCall";
 import { useUpdateResponseByToken } from "@/hooks/useUpdateResponseByToken";
-import { useCreateResponse } from "@/hooks/useCreateResponse";
+// import { useCreateResponse } from "@/hooks/useCreateResponse";
 import { useSaveResponse } from "@/hooks/useSaveResponse";
+import { useEncryptedCreateResponse } from "@/hooks/useEncryptedCreateResponse";
+import { useEncryptedRegisterCall } from "@/hooks/useEncryptedRegisterCall";
 import { useAnalyzeCall } from "@/hooks/useAnalyzeCall";
 import { toast } from "sonner";
 import { Interview } from "@/types/interview";
@@ -27,7 +30,7 @@ import {
 } from "./tabSwitchPrevention";
 import { useSessionSecurity } from "@/hooks/useSessionSecurity";
 import { SessionBlocked } from "./SessionBlocked";
-import { InterviewerService } from "@/services/interviewers.service";
+// import { InterviewerService } from "@/services/interviewers.service"; // replaced with encrypted API call
 import { ResponseService } from "@/services/responses.service";
 import { CandidateService } from "@/services/candidates.service";
 import { setWebClientInstance } from "@/hooks/useAudioDetection";
@@ -98,10 +101,18 @@ function setLocalFlowState(token: string | undefined, updates: Record<string, st
 
 function Call({ interview, responseToken, initialCallPhase = 'first_call' }: InterviewProps) {
   const { createResponse } = useResponses();
-  const createResponseMutation = useCreateResponse();
-  const { data: emailsData } = useGetAllEmails(interview?.id, !!interview?.id);
+  const createResponseMutation = useEncryptedCreateResponse();
+  const [emailsData, setEmailsData] = useState<Array<{ email: string }>>([]);
+
+  // Fetch previous candidate emails via encrypted API (replaces direct Supabase call)
+  useEffect(() => {
+    if (!interview?.id) return;
+    encryptedApiCall<Array<{ email: string }>>("/api/get-emails", { interview_id: interview.id })
+      .then((data) => setEmailsData(data || []))
+      .catch((err) => console.error("[Call] Failed to fetch emails:", err));
+  }, [interview?.id]);
   const createOrUpdateCandidateMutation = useCreateOrUpdateCandidate();
-  const registerCallMutation = useRegisterCall();
+  const registerCallMutation = useEncryptedRegisterCall();
   const updateResponseByTokenMutation = useUpdateResponseByToken();
   const saveResponseMutation = useSaveResponse();
   const analyzeCallMutation = useAnalyzeCall();
@@ -1068,11 +1079,11 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
   }, [interview]);
 
   useEffect(() => {
+    if (!interview.interviewer_id) { return; }
     const fetchInterviewer = async () => {
-      const interviewer = await InterviewerService.getInterviewer(
-        interview.interviewer_id,
-      );
-      setInterviewerImg(interviewer.image || "/interviewers/default.png");
+      const interviewer = await encryptedApiCall("/api/get-interviewer", { id: interview.interviewer_id })
+        .catch(() => null);
+      setInterviewerImg(interviewer?.image || "/interviewers/default.png");
     };
     fetchInterviewer();
   }, [interview.interviewer_id]);

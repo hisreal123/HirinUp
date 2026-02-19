@@ -3,6 +3,7 @@ import { InterviewerService } from "@/services/interviewers.service";
 import { NextResponse } from "next/server";
 import Retell from "retell-sdk";
 import { createClient } from "@supabase/supabase-js";
+import { serverDecryptPayload, serverEncryptResponse } from "@/lib/crypto";
 
 const retellClient = new Retell({
   apiKey: process.env.RETELL_API_KEY || "",
@@ -15,20 +16,29 @@ export async function POST(req: Request) {
   try {
     logger.info("register-call request received");
 
-    const body = await req.json();
+    const raw = await req.json();
 
+    // Decrypt payload if encrypted (has data + iv + cpk)
+    let body: any;
+    if (raw.data && raw.iv && raw.cpk) {
+      body = await serverDecryptPayload(raw.data, raw.iv, raw.cpk);
+    } else {
+      body = raw;
+    }
+
+    const clientPublicKey = raw.cpk ?? null;
     const interviewerId = body.interviewer_id;
 
     if (!interviewerId || interviewerId === 0) {
       logger.error("Missing or invalid interviewer_id in request");
+
       return NextResponse.json(
         { error: "Missing or invalid interviewer_id" },
         { status: 400 },
       );
     }
 
-    // Server-side session validation: if token and session_id are provided,
-    // verify this session is the active one before allowing call registration
+    // Server-side session validation
     const { token, session_id } = body;
     if (token && session_id) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -41,6 +51,7 @@ export async function POST(req: Request) {
       if (response) {
         if (response.is_ended) {
           logger.warn("[register-call] Interview already ended", { token });
+
           return NextResponse.json(
             { error: "Interview has already ended" },
             { status: 410 },
@@ -53,6 +64,7 @@ export async function POST(req: Request) {
             expected: session_id,
             active: response.active_session_id,
           });
+
           return NextResponse.json(
             { error: "Session conflict", message: "This interview is active on another device" },
             { status: 409 },
@@ -63,21 +75,22 @@ export async function POST(req: Request) {
 
     if (!process.env.RETELL_API_KEY) {
       logger.error("RETELL_API_KEY is not configured");
+
       return NextResponse.json(
         { error: "Retell API key not configured" },
         { status: 500 },
       );
     }
 
-    // Convert to bigint if needed (getInterviewer expects bigint)
-    const interviewerIdBigInt = typeof interviewerId === 'bigint' 
-      ? interviewerId 
+    const interviewerIdBigInt = typeof interviewerId === "bigint"
+      ? interviewerId
       : BigInt(interviewerId);
 
     const interviewer = await InterviewerService.getInterviewer(interviewerIdBigInt);
 
     if (!interviewer) {
       logger.error(`Interviewer not found for id: ${interviewerId}`);
+
       return NextResponse.json(
         { error: "Interviewer not found" },
         { status: 404 },
@@ -86,6 +99,7 @@ export async function POST(req: Request) {
 
     if (!interviewer.agent_id) {
       logger.error(`Interviewer ${interviewerId} has no agent_id`);
+
       return NextResponse.json(
         { error: "Interviewer has no agent_id configured" },
         { status: 400 },
@@ -103,32 +117,34 @@ export async function POST(req: Request) {
       call_id: registerCallResponse?.call_id,
     });
 
+    // Encrypt response if client sent a public key
+    if (clientPublicKey) {
+      const encrypted = await serverEncryptResponse(
+        { registerCallResponse },
+        clientPublicKey
+      );
+
+      return NextResponse.json(encrypted, { status: 200 });
+    }
+
     return NextResponse.json(
-      {
-        registerCallResponse,
-      },
+      { registerCallResponse },
       { status: 200 },
     );
   } catch (error: any) {
     logger.error("Error registering call:", error);
-    
-    // Check if it's a Retell API error
+
     if (error?.response?.data) {
       logger.error("Retell API error:", error.response.data);
+
       return NextResponse.json(
-        {
-          error: "Retell API error",
-          details: error.response.data,
-        },
+        { error: "Retell API error", details: error.response.data },
         { status: error.response.status || 500 },
       );
     }
 
     return NextResponse.json(
-      {
-        error: "Failed to register call",
-        message: error?.message || "Unknown error",
-      },
+      { error: "Failed to register call", message: error?.message || "Unknown error" },
       { status: 500 },
     );
   }

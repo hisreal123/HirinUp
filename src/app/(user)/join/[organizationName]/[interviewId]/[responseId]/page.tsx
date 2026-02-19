@@ -1,6 +1,6 @@
 "use client";
 
-import { useInterviews } from "@/contexts/interviews.context";
+// import { useInterviews } from "@/contexts/interviews.context";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Call from "@/components/call";
@@ -9,7 +9,8 @@ import { ArrowUpRightSquareIcon } from "lucide-react";
 import { Interview } from "@/types/interview";
 import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
 import { ResponseService } from "@/services/responses.service";
-import { OrganizationService } from "@/services/organizations.service";
+// import { OrganizationService } from "@/services/organizations.service"; // replaced with encrypted API call
+import { encryptedApiCall } from "@/lib/encrypted-api";
 
 type PopupProps = {
   title: string;
@@ -87,7 +88,7 @@ function InterviewInterface() {
 
   const [interview, setInterview] = useState<Interview>();
   const [isActive, setIsActive] = useState(true);
-  const { getInterviewById } = useInterviews();
+  // const { getInterviewById } = useInterviews();
   const [interviewNotFound, setInterviewNotFound] = useState(false);
   const [responseNotFound, setResponseNotFound] = useState(false);
   const [organizationNotFound, setOrganizationNotFound] = useState(false);
@@ -115,7 +116,7 @@ function InterviewInterface() {
       setIsValidating(true);
 
       try {
-        const response = await ResponseService.getResponseByToken(responseId);
+        const response = await encryptedApiCall("/api/get-response", { token: responseId });
         if (response && response.is_ended === true) {
           console.log("Link expired - response has ended");
           setIsExpired(true);
@@ -231,7 +232,7 @@ function InterviewInterface() {
 
         // Step 1: Validate Response exists and belongs to interview
         console.log("Step 1: Validating response...");
-        const response = await ResponseService.getResponseByToken(responseId);
+        const response = await encryptedApiCall("/api/get-response", { token: responseId });
         
         if (!response) {
           console.error("Response not found for token:", responseId);
@@ -274,9 +275,9 @@ function InterviewInterface() {
           return;
         }
 
-        const organization = await OrganizationService.getOrganizationById(
-          interview.organization_id
-        );
+        const organization = await encryptedApiCall("/api/get-organization", {
+          id: interview.organization_id,
+        }).catch(() => null);
 
         if (!organization) {
           console.error("Organization not found:", interview.organization_id);
@@ -330,7 +331,7 @@ function InterviewInterface() {
 
     const fetchinterview = async () => {
       try {
-        const response = await getInterviewById(interviewId);
+        const response = await encryptedApiCall<Interview>("/api/get-interview", { id: interviewId });
         if (response) {
           setInterview(response);
           document.title = response.name;

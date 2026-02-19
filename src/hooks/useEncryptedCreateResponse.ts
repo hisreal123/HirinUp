@@ -1,5 +1,7 @@
+"use client";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import { useEncryptedFetch } from "./useEncryptedFetch";
 
 interface CreateResponseParams {
   interview_id: string;
@@ -14,17 +16,23 @@ interface CreateResponseResponse {
   response_id: string;
 }
 
-export const useCreateResponse = () => {
+/**
+ * Encrypted version of useCreateResponse — for use in the candidate interview flow only.
+ * Payload and response are ECDH + AES-GCM encrypted.
+ * Admin link generation uses the plain useCreateResponse instead.
+ */
+export const useEncryptedCreateResponse = () => {
   const queryClient = useQueryClient();
+  const { encryptedFetch, isReady } = useEncryptedFetch();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async (params: CreateResponseParams): Promise<CreateResponseResponse> => {
-      const response = await axios.post("/api/create-response", params);
-
-      return response.data;
+      return encryptedFetch("/api/create-response", params);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["responses"] });
     },
   });
+
+  return { ...mutation, isReady };
 };

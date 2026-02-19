@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ResponseService } from "@/services/responses.service";
 import { Response } from "@/types/response";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { OrganizationService } from "@/services/organizations.service";
+// import { OrganizationService } from "@/services/organizations.service"; // replaced with encrypted API call
+import { encryptedApiCall } from "@/lib/encrypted-api";
 import { useInterviews } from "@/contexts/interviews.context";
 import {
   Tabs,
@@ -30,6 +31,12 @@ function InterviewResponses() {
   const [organizationNameSlug, setOrganizationNameSlug] = useState<string>("");
   const { getInterviewById } = useInterviews();
 
+  const fetchResponses = useCallback(async () => {
+    if (!interviewId) return;
+    const responsesData = await ResponseService.getAllResponses(interviewId);
+    setResponses(responsesData || []);
+  }, [interviewId]);
+
   useEffect(() => {
     if (!interviewId) return;
 
@@ -44,9 +51,7 @@ function InterviewResponses() {
 
         // Fetch organization slug
         if (interview?.organization_id) {
-          const orgData = await OrganizationService.getOrganizationById(
-            interview.organization_id
-          );
+          const orgData = await encryptedApiCall("/api/get-organization", { id: interview.organization_id });
           if (orgData?.name) {
             const slug = orgData.name
               .toLowerCase()
@@ -188,6 +193,7 @@ function InterviewResponses() {
                   data={allLinks}
                   interviewId={interviewId}
                   organizationNameSlug={organizationNameSlug}
+                  onDelete={fetchResponses}
                 />
               </TabsContent>
             </Tabs>

@@ -3,18 +3,30 @@ import { logger } from "@/lib/logger";
 import { nanoid } from "nanoid";
 import { createClient } from "@supabase/supabase-js";
 import { verifyTurnstile } from "@/actions/verify-turnstile";
+import { serverDecryptPayload, serverEncryptResponse } from "@/lib/crypto";
 
 /**
  * Creates a response record early (before the call starts)
- * This allows us to track candidates and generate unique links per response
- * Requires Turnstile verification for security
+ * Requires Turnstile verification for security.
+ * Payload and response are ECDH + AES-GCM encrypted end-to-end.
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const raw = await req.json();
+
+    // Decrypt payload if encrypted (has data + iv + cpk)
+    let body: any;
+    if (raw.data && raw.iv && raw.cpk) {
+      body = await serverDecryptPayload(raw.data, raw.iv, raw.cpk);
+    } else {
+      body = raw;
+    }
+
+    const clientPublicKey = raw.cpk ?? null;
     const { interview_id, email, name, call_id, candidate_id, turnstile_token } = body;
 
     if (!interview_id) {
+
       return NextResponse.json(
         { error: "interview_id is required" },
         { status: 400 },
@@ -29,6 +41,7 @@ export async function POST(req: Request) {
     if (isCandidateSubmission) {
       if (!turnstile_token) {
         logger.warn("Candidate submission without turnstile_token", { interview_id, call_id });
+
         return NextResponse.json(
           { error: "Verification required" },
           { status: 403 },
@@ -38,6 +51,7 @@ export async function POST(req: Request) {
       const turnstileResult = await verifyTurnstile(turnstile_token);
       if (!turnstileResult.success) {
         logger.warn("Turnstile verification failed", { interview_id, error: turnstileResult.error });
+
         return NextResponse.json(
           { error: "Verification failed", details: turnstileResult.error },
           { status: 403 },
@@ -47,20 +61,19 @@ export async function POST(req: Request) {
       logger.info("create-response request received (candidate verified)", { interview_id, email });
     } else {
       // Admin link generation - no Turnstile required
-      // TODO: Add admin authentication check here for additional security
       logger.info("create-response request received (admin link generation)", { interview_id });
     }
 
-    // Generate a random token for the response (similar to interview IDs)
+    // Generate a random token for the response
     const responseToken = nanoid();
     logger.info("Generated token", { token: responseToken });
 
-    // Create server-side Supabase client for API route
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
+
     if (!supabaseUrl || !supabaseAnonKey) {
       logger.error("Supabase credentials not configured");
+
       return NextResponse.json(
         { error: "Server configuration error" },
         { status: 500 },
@@ -69,14 +82,13 @@ export async function POST(req: Request) {
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Insert response directly to ensure token is saved
     const { data: responseData, error: insertError } = await supabase
       .from("response")
       .insert({
         interview_id,
         email: email || null,
         name: name || null,
-        token: responseToken, // Add the random token
+        token: responseToken,
         call_id: call_id || null,
         candidate_id: candidate_id || null,
         is_ended: false,
@@ -89,7 +101,7 @@ export async function POST(req: Request) {
 
     if (insertError) {
       logger.error("Error inserting response:", insertError);
-      logger.error("Payload:", { interview_id, token: responseToken, email, name });
+
       return NextResponse.json(
         { error: "Failed to create response", details: insertError.message },
         { status: 500 },
@@ -98,6 +110,7 @@ export async function POST(req: Request) {
 
     if (!responseData) {
       logger.error("No data returned from insert");
+
       return NextResponse.json(
         { error: "Failed to create response", details: "No data returned" },
         { status: 500 },
@@ -105,48 +118,41 @@ export async function POST(req: Request) {
     }
 
     const responseId = responseData.id;
-    
+
     if (!responseId) {
       logger.error("Failed to create response - responseId is null");
+
       return NextResponse.json(
         { error: "Failed to create response", details: "No response ID returned" },
         { status: 500 },
       );
     }
 
-    // Verify token was saved correctly
-    logger.info("Response insert result:", {
+    logger.info("Response created successfully", {
       responseId,
-      tokenInResponse: responseData.token,
-      expectedToken: responseToken,
-      fullResponseData: responseData
+      token: responseData.token,
     });
 
-    if (!responseData.token || responseData.token !== responseToken) {
-      logger.error("Token not saved correctly!", { 
-        expected: responseToken, 
-        actual: responseData.token,
-        responseData: responseData
-      });
-      // Still return success since the response was created, but log the issue
+    // Encrypt response if client sent a public key
+    if (clientPublicKey) {
+      const encrypted = await serverEncryptResponse(
+        { response_id: responseToken },
+        clientPublicKey
+      );
+
+      return NextResponse.json(encrypted, { status: 200 });
     }
 
-    logger.info("Response created successfully", { 
-      responseId, 
-      token: responseData.token,
-      expectedToken: responseToken 
-    });
-
     return NextResponse.json(
-      { response_id: responseToken }, // Return the token instead of numeric ID
+      { response_id: responseToken },
       { status: 200 },
     );
   } catch (err: any) {
     logger.error("Error creating response", { error: err.message });
+
     return NextResponse.json(
       { error: "Internal server error", details: err.message },
       { status: 500 },
     );
   }
 }
-

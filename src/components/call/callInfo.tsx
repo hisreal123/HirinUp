@@ -9,6 +9,7 @@ import { DownloadIcon, TrashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ResponseService } from "@/services/responses.service";
+import { encryptedApiCall } from "@/lib/encrypted-api";
 import { useRouter } from "next/navigation";
 import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -79,7 +80,7 @@ function CallInfo({
     const fetchEmail = async () => {
       setIsLoading(true);
       try {
-        const response = await ResponseService.getResponseByCallId(call_id);
+        const response = await encryptedApiCall("/api/get-response-by-call", { call_id });
         setEmail(response.email);
         setName(response.name);
         setCandidateStatus(response.candidate_status);
@@ -119,7 +120,7 @@ function CallInfo({
 
   const onDeleteResponseClick = async () => {
     try {
-      const response = await ResponseService.getResponseByCallId(call_id);
+      const response = await encryptedApiCall("/api/get-response-by-call", { call_id });
 
       if (response) {
         const interview_id = response.interview_id;

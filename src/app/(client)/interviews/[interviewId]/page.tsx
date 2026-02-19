@@ -10,8 +10,9 @@ import { Share2, Filter, Pencil, UserIcon, Eye, Link2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { ResponseService } from "@/services/responses.service";
-import { ClientService } from "@/services/clients.service";
-import { OrganizationService } from "@/services/organizations.service";
+// import { ClientService } from "@/services/clients.service"; // replaced with encrypted API call
+// import { OrganizationService } from "@/services/organizations.service"; // replaced with encrypted API call
+import { encryptedApiCall } from "@/lib/encrypted-api";
 import { FeedbackService } from "@/services/feedback.service";
 import { Interview } from "@/types/interview";
 import { Response } from "@/types/response";
@@ -162,7 +163,7 @@ function InterviewHome() {
 
         // Fetch organization from database and create slug
         if (response.organization_id) {
-          const orgData = await OrganizationService.getOrganizationById(response.organization_id);
+          const orgData = await encryptedApiCall("/api/get-organization", { id: response.organization_id });
           if (orgData?.name) {
             const slug = orgData.name
               .toLowerCase()
@@ -188,7 +189,7 @@ function InterviewHome() {
     const fetchOrganizationData = async () => {
       try {
         if (organization?.id) {
-          const data = await ClientService.getOrganizationById(organization.id);
+          const data = await encryptedApiCall("/api/get-organization", { id: organization.id });
           if (data?.plan) {
             setCurrentPlan(data.plan);
           }
