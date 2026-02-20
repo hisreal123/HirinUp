@@ -104,7 +104,6 @@ export function useSessionSecurity({
           );
 
           if (timestamp < ourTimestamp) {
-            console.log("[SessionSecurity L1] Session conflict - this tab is blocked");
             setStatus("blocked", "Interview is open in another tab");
             onSessionBlockedRef.current?.("Interview is open in another tab");
           }
@@ -122,7 +121,6 @@ export function useSessionSecurity({
         }
 
         if (type === "SESSION_PONG" && incomingSessionId !== sessionIdRef.current) {
-          console.log("[SessionSecurity L1] Another active tab detected via pong");
           setStatus("blocked", "Interview is already open in another tab");
           onSessionBlockedRef.current?.("Interview is already open in another tab");
         }
@@ -142,7 +140,6 @@ export function useSessionSecurity({
             sessionId: sessionIdRef.current,
             timestamp: Date.now(),
           });
-          console.log("[SessionSecurity L1] Session claimed via BroadcastChannel");
         }
       }, 300);
 
@@ -187,7 +184,6 @@ export function useSessionSecurity({
       // hasn't been processed by the server before the new claim arrives.
       // A genuine multi-device conflict will still return 409 on the retry.
       if (response.status === 409) {
-        console.log("[SessionSecurity L2] 409 on first claim — waiting for sendBeacon then retrying");
         await new Promise((resolve) => setTimeout(resolve, 700));
         response = await attemptClaim();
       }
@@ -211,7 +207,6 @@ export function useSessionSecurity({
       }
 
       setStatus("active");
-      console.log("[SessionSecurity L2] Session claimed via API");
 
       return true;
     } catch (error) {
@@ -304,19 +299,16 @@ export function useSessionSecurity({
             newData.active_session_id &&
             newData.active_session_id !== sessionIdRef.current
           ) {
-            console.log("[SessionSecurity L4] Realtime: Session taken over");
             setStatus("blocked", "Session was taken over by another device");
             onSessionBlockedRef.current?.("Session was taken over by another device");
           }
 
           if (newData.is_ended === true) {
-            console.log("[SessionSecurity L4] Realtime: Interview ended");
             setStatus("expired", "Interview has ended");
           }
         }
       )
       .subscribe((status) => {
-        console.log("[SessionSecurity L4] Realtime subscription status:", status);
       });
 
     realtimeChannelRef.current = channel;

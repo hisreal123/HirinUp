@@ -19,7 +19,6 @@ function SignUpPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement sign up logic
-    console.log('Sign up:', { name, email, password, confirmPassword });
     router.push('/verification-page');
   };
 

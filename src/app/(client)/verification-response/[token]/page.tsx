@@ -30,7 +30,6 @@ function VerificationSuccessPage() {
       const decoded = atob(urlDecoded);
       const data = JSON.parse(decoded) as DecodedData;
       
-      console.log('Decoded data:', data);
       
       // Validate that we have the required fields
       if (data.name && data.email && data.name.trim() && data.email.trim()) {

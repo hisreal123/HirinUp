@@ -13,7 +13,6 @@ function CreateInterviewerButton() {
   const createInterviewers = async () => {
     setIsLoading(true);
     const response = await axios.get("/api/create-interviewer", {});
-    console.log(response);
     setIsLoading(false);
     encryptedApiCall("/api/get-interviewers", {});
   };
