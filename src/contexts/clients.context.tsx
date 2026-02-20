@@ -43,7 +43,11 @@ export function ClientProvider({ children }: ClientProviderProps) {
   const fetchOrganization = async () => {
     try {
       setClientLoading(true);
-      await encryptedApiCall("/api/get-organization", { id: organization?.id });
+      await encryptedApiCall("/api/sync-organization", {
+        id: organization?.id,
+        name: organization?.name,
+        image_url: organization?.imageUrl,
+      });
     } catch (error) {
       console.error(error);
     }
