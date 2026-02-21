@@ -93,7 +93,7 @@ export const useAudioDetection = (
     "good" | "poor" | "unknown"
   > => {
     try {
-      if (!webClientInstance) return "unknown";
+      if (!webClientInstance) { return "unknown"; }
       const connection = (webClientInstance as any).peerConnection;
       if (connection) {
         const stats = await connection.getStats();
@@ -146,7 +146,7 @@ export const useAudioDetection = (
         const noAudioThresholdMs = 10000; // 10 seconds
 
         const checkAudioLevel = () => {
-          if (!analyserRef.current) return;
+          if (!analyserRef.current) { return; }
 
           analyserRef.current.getByteFrequencyData(dataArray);
           const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
@@ -199,8 +199,10 @@ export const useAudioDetection = (
                 }
                 setShowAudioModal(false);
                 modalShownRef.current = false; // Reset flag when audio is detected
+
                 return false;
               }
+
               return prevNotDetected;
             });
           }
@@ -290,10 +292,12 @@ export const useAudioDetection = (
       audioContext.close();
 
       setIsTestingMic(false);
+
       return maxLevel > 5;
     } catch (error) {
       console.error("Error testing microphone:", error);
       setIsTestingMic(false);
+
       return false;
     }
   }, [selectedDeviceId]);
@@ -365,14 +369,7 @@ export const useAudioDetection = (
   // Function to trigger silence detection from external sources (e.g., Retell SDK)
   const triggerSilenceDetection = useCallback(
     (skipMessage = false) => {
-      console.log(
-        "[useAudioDetection] triggerSilenceDetection called, isStarted:",
-        isStarted,
-        "skipMessage:",
-        skipMessage,
-      );
       if (isStarted) {
-        console.log("[useAudioDetection] Setting up silence detection...");
         // Always allow triggering, but reset the flag if audio is detected again
         modalShownRef.current = true;
         setAudioNotDetected(true);
@@ -383,15 +380,9 @@ export const useAudioDetection = (
 
         // Only set message if not skipped (message might already be set)
         if (!skipMessage) {
-          console.log(
-            "[useAudioDetection] Calling onAudioMessage with:",
-            audioMessage,
-          );
           if (onAudioMessage) {
             onAudioMessage(audioMessage);
           }
-        } else {
-          console.log("[useAudioDetection] Skipping message (already set)");
         }
 
         // Clear any existing timeout
@@ -400,12 +391,7 @@ export const useAudioDetection = (
         }
 
         // Show modal immediately when triggered externally
-        console.log("[useAudioDetection] Showing modal immediately");
         setShowAudioModal(true);
-      } else {
-        console.log(
-          "[useAudioDetection] Not started yet, ignoring silence detection",
-        );
       }
     },
     [isStarted, onAudioMessage, audioMessage],

@@ -1,15 +1,17 @@
 "use client";
 
-import { useInterviews } from "@/contexts/interviews.context";
+// import { useInterviews } from "@/contexts/interviews.context";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useDevToolsDetection } from "@/hooks/useDevToolsDetection";
+import { DevToolsBlocker } from "@/components/call/DevToolsBlocker";
 import Call from "@/components/call";
 import Image from "next/image";
 import { ArrowUpRightSquareIcon } from "lucide-react";
 import { Interview } from "@/types/interview";
 import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
 import { ResponseService } from "@/services/responses.service";
-import { OrganizationService } from "@/services/organizations.service";
+import { encryptedApiCall } from "@/lib/encrypted-api";
 
 type PopupProps = {
   title: string;
@@ -78,6 +80,8 @@ function PopUpMessage({ title, description, image }: PopupProps) {
 }
 
 function InterviewInterface() {
+  const { isDevToolsOpen } = useDevToolsDetection();
+
   // Use useParams hook for client components (Next.js 16 compatible)
   const params = useParams();
   const router = useRouter();
@@ -87,7 +91,7 @@ function InterviewInterface() {
 
   const [interview, setInterview] = useState<Interview>();
   const [isActive, setIsActive] = useState(true);
-  const { getInterviewById } = useInterviews();
+  // const { getInterviewById } = useInterviews();
   const [interviewNotFound, setInterviewNotFound] = useState(false);
   const [responseNotFound, setResponseNotFound] = useState(false);
   const [organizationNotFound, setOrganizationNotFound] = useState(false);
@@ -115,9 +119,8 @@ function InterviewInterface() {
       setIsValidating(true);
 
       try {
-        const response = await ResponseService.getResponseByToken(responseId);
+        const response = await encryptedApiCall("/api/get-response", { token: responseId });
         if (response && response.is_ended === true) {
-          console.log("Link expired - response has ended");
           setIsExpired(true);
           setExpirationChecked(true);
           setIsValidating(false);
@@ -132,12 +135,10 @@ function InterviewInterface() {
         try {
           if (Object.keys(dbFlowState).length > 0) {
             localStorage.setItem(`call_flow_state_${responseId}`, JSON.stringify(dbFlowState));
-            console.log("[Flow State] Synced localStorage from DB");
           } else {
             // DB is empty (new response) - clear ALL stale localStorage for this response
             localStorage.removeItem(`call_flow_state_${responseId}`);
             localStorage.removeItem(`candidate_name_${responseId}`);
-            console.log("[Flow State] Cleared all localStorage (new response)");
           }
         } catch (e) {
           // ignore localStorage errors
@@ -148,28 +149,19 @@ function InterviewInterface() {
 
         if (flowState.second_call_completed) {
           // All done — treat as expired
-          console.log("[Flow State] Second call completed, redirecting to expired");
           setIsExpired(true);
           setExpirationChecked(true);
           setIsValidating(false);
 
           return;
         } else if (flowState.second_call_started) {
-          // Second call was started but not completed — user refreshed during second call
-          // Treat as expired to prevent refresh abuse
-          console.log("[Flow State] Second call was started (refresh detected), redirecting to expired");
-          setIsExpired(true);
-          setExpirationChecked(true);
-          setIsValidating(false);
-
-          return;
+          // Second call was in progress — resume it from the second call phase
+          setInitialCallPhase('second_call');
         } else if (flowState.modal_closed) {
           // Modal was closed but second call not yet started — resume from second call
-          console.log("[Flow State] Resuming from second call");
           setInitialCallPhase('second_call');
         } else if (flowState.first_call_started) {
           // First call done, show modal directly
-          console.log("[Flow State] Resuming from verification modal");
           setInitialCallPhase('verification_modal');
         }
 
@@ -190,7 +182,6 @@ function InterviewInterface() {
           } catch (e) {
             // ignore localStorage errors
           }
-          console.log("[Flow State] Logged isLoaded to DB, synced to localStorage");
         }
 
         setExpirationChecked(true);
@@ -223,15 +214,9 @@ function InterviewInterface() {
       setValidationError(null);
 
       try {
-        console.log("Starting comprehensive validation...");
-        console.log("Organization Name (from URL):", organizationName);
-        console.log("Interview ID (from URL):", interviewId);
-        console.log("Response ID (token):", responseId);
-        console.log("Interview data:", interview);
 
         // Step 1: Validate Response exists and belongs to interview
-        console.log("Step 1: Validating response...");
-        const response = await ResponseService.getResponseByToken(responseId);
+        const response = await encryptedApiCall("/api/get-response", { token: responseId });
         
         if (!response) {
           console.error("Response not found for token:", responseId);
@@ -256,16 +241,13 @@ function InterviewInterface() {
         
         // Double-check expiration (in case early check didn't catch it)
         if (response.is_ended === true) {
-          console.log("Response has ended - link expired");
           setIsExpired(true);
           setIsValidating(false);
           return;
         }
         
-        console.log("✓ Response validation passed");
 
         // Step 2: Validate Organization exists and matches URL
-        console.log("Step 2: Validating organization...");
         if (!interview.organization_id) {
           console.error("Interview has no organization_id");
           setValidationError("Interview organization not found");
@@ -274,9 +256,9 @@ function InterviewInterface() {
           return;
         }
 
-        const organization = await OrganizationService.getOrganizationById(
-          interview.organization_id
-        );
+        const organization = await encryptedApiCall("/api/get-organization", {
+          id: interview.organization_id,
+        }).catch(() => null);
 
         if (!organization) {
           console.error("Organization not found:", interview.organization_id);
@@ -305,8 +287,6 @@ function InterviewInterface() {
           return;
         }
 
-        console.log("✓ Organization validation passed");
-        console.log("Organization name:", organization.name);
 
    
         setIsValidating(false);
@@ -330,7 +310,7 @@ function InterviewInterface() {
 
     const fetchinterview = async () => {
       try {
-        const response = await getInterviewById(interviewId);
+        const response = await encryptedApiCall<Interview>("/api/get-interview", { id: interviewId });
         if (response) {
           setInterview(response);
           document.title = response.name;
@@ -393,6 +373,7 @@ function InterviewInterface() {
 
   return (
     <div>
+      {isDevToolsOpen && <DevToolsBlocker />}
       <div className="hidden md:block p-8 mx-auto form-container">
         {!interview ? (
           interviewNotFound ? (

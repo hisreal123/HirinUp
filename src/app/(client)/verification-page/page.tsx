@@ -30,21 +30,12 @@ function VerificationPage() {
 
     // Check for bot submission
     if (checkHoneypot()) {
-      console.log('Bot detected - rejecting submission');
       return;
     }
 
     setIsSubmitting(true);
 
     // TODO: Implement verification logic
-    console.log('Verification:', {
-      professionalEmail,
-      legalName,
-      socialMediaLinks,
-      reason,
-      notIllegal,
-      agreeTerms,
-    });
 
     // Encode name and email to pass to success page
     const dataToEncode = {
@@ -58,7 +49,6 @@ function VerificationPage() {
       const base64Encoded = btoa(jsonString);
       const urlSafeToken = encodeURIComponent(base64Encoded);
       
-      console.log('Encoded token:', urlSafeToken);
       
       // Redirect to response page with encoded token
       router.push(`/verification-response/${urlSafeToken}`);

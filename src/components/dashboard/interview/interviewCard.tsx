@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import MiniLoader from "@/components/loaders/mini-loader/miniLoader";
-import { InterviewerService } from "@/services/interviewers.service";
+// import { InterviewerService } from "@/services/interviewers.service"; // replaced with encrypted API call
+import { encryptedApiCall } from "@/lib/encrypted-api";
 import { useGetAllResponses } from "@/hooks/useGetAllResponses";
 import { useAnalyzeCall } from "@/hooks/useAnalyzeCall";
 
@@ -24,7 +25,7 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
   useEffect(() => {
     const fetchInterviewer = async () => {
       const interviewer =
-        await InterviewerService.getInterviewer(interviewerId);
+        await encryptedApiCall("/api/get-interviewer", { id: interviewerId });
       setImg(interviewer.image);
     };
     fetchInterviewer();

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CandidateService } from "@/services/candidates.service";
+// import { CandidateService } from "@/services/candidates.service"; // replaced with encrypted API call
+import { encryptedApiCall } from "@/lib/encrypted-api";
 import CandidatesTable from "@/components/dashboard/candidate/candidatesTable";
 import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
 import { Input } from "@/components/ui/input";
@@ -16,7 +17,7 @@ function Candidates() {
     const fetchCandidates = async () => {
       setLoading(true);
       try {
-        const data = await CandidateService.getAllCandidates();
+        const data = await encryptedApiCall<any[]>("/api/get-candidates", {});
         setCandidates(data);
       } catch (error) {
         console.error("Error fetching candidates:", error);

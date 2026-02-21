@@ -37,7 +37,6 @@ export function InterviewStage({
   const audioMessage = "I can see you, but I'm not receiving any audio yet. Let's quickly check a few things together.";
 
   const handleAudioMessage = useCallback((message: string) => {
-    console.log('[Audio Detection] Setting interviewer message:', message);
     setLastInterviewerResponse(message);
   }, [setLastInterviewerResponse]);
 
@@ -78,7 +77,6 @@ export function InterviewStage({
       wasModalOpenRef.current = true;
     } else if (wasModalOpenRef.current) {
       // Modal was open and is now closing
-      console.log('[InterviewStage] Modal closed, calling onTimerPausedChange(false)');
       onTimerPausedChange(false);
       wasModalOpenRef.current = false;
     }
@@ -97,7 +95,6 @@ export function InterviewStage({
         isTestingMic={isTestingMic}
         onCheckAgain={performAudioChecks}
         onOpenChange={(open) => {
-          console.log('[InterviewStage] Modal onOpenChange called with:', open);
           setShowAudioModal(open);
         }}
         onDeviceChange={changeDevice}

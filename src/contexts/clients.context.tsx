@@ -3,7 +3,8 @@
 import React, { useState, useContext, ReactNode, useEffect } from "react";
 import { User } from "@/types/user";
 import { useClerk, useOrganization } from "@clerk/nextjs";
-import { ClientService } from "@/services/clients.service";
+// import { ClientService } from "@/services/clients.service"; // replaced with encrypted API call
+import { encryptedApiCall } from "@/lib/encrypted-api";
 
 interface ClientContextProps {
   client?: User;
@@ -27,11 +28,11 @@ export function ClientProvider({ children }: ClientProviderProps) {
   const fetchClient = async () => {
     try {
       setClientLoading(true);
-      const response = await ClientService.getClientById(
-        user?.id as string,
-        user?.emailAddresses[0]?.emailAddress as string,
-        organization?.id as string,
-      );
+      const response = await encryptedApiCall("/api/sync-user", {
+        id: user?.id,
+        email: user?.emailAddresses[0]?.emailAddress,
+        organization_id: organization?.id,
+      });
       setClient(response);
     } catch (error) {
       console.error(error);
@@ -42,10 +43,11 @@ export function ClientProvider({ children }: ClientProviderProps) {
   const fetchOrganization = async () => {
     try {
       setClientLoading(true);
-      const response = await ClientService.getOrganizationById(
-        organization?.id as string,
-        organization?.name as string,
-      );
+      await encryptedApiCall("/api/sync-organization", {
+        id: organization?.id,
+        name: organization?.name,
+        image_url: organization?.imageUrl,
+      });
     } catch (error) {
       console.error(error);
     }

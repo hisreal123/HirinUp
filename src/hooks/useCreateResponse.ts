@@ -7,7 +7,7 @@ interface CreateResponseParams {
   name?: string;
   call_id?: string;
   candidate_id?: number;
-  turnstile_token?: string; // Required for candidate submissions, optional for admin link generation
+  turnstile_token?: string;
 }
 
 interface CreateResponseResponse {
@@ -20,12 +20,11 @@ export const useCreateResponse = () => {
   return useMutation({
     mutationFn: async (params: CreateResponseParams): Promise<CreateResponseResponse> => {
       const response = await axios.post("/api/create-response", params);
+
       return response.data;
     },
     onSuccess: () => {
-      // Invalidate relevant queries if needed
       queryClient.invalidateQueries({ queryKey: ["responses"] });
     },
   });
 };
-

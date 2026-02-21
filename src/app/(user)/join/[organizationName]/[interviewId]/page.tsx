@@ -1,6 +1,6 @@
 "use client";
 
-import { useInterviews } from "@/contexts/interviews.context";
+// import { useInterviews } from "@/contexts/interviews.context";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { ArrowUpRightSquareIcon } from "lucide-react";
 import { Interview } from "@/types/interview";
 import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
 import axios from "axios";
+import { encryptedApiCall } from "@/lib/encrypted-api";
 
 type PopupProps = {
   title: string;
@@ -87,7 +88,7 @@ function InterviewLanding() {
 
   const [interview, setInterview] = useState<Interview>();
   const [isActive, setIsActive] = useState(true);
-  const { getInterviewById } = useInterviews();
+  // const { getInterviewById } = useInterviews();
   const [interviewNotFound, setInterviewNotFound] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,7 +107,7 @@ function InterviewLanding() {
 
     const fetchinterview = async () => {
       try {
-        const response = await getInterviewById(interviewId);
+        const response = await encryptedApiCall<Interview>("/api/get-interview", { id: interviewId });
         if (response) {
           setInterview(response);
           document.title = response.name;

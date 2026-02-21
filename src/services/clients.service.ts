@@ -1,6 +1,11 @@
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClientComponentClient();
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  (typeof window === "undefined"
+    ? process.env.SUPABASE_SERVICE_ROLE_KEY
+    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!
+);
 
 const updateOrganization = async (payload: any, id: string) => {
   const { error, data } = await supabase
@@ -30,7 +35,11 @@ const getClientById = async (
     if (!data || (data.length === 0 && email)) {
       const { error, data } = await supabase
         .from("user")
-        .insert({ id: id, email: email, organization_id: organization_id });
+        .upsert(
+          { id: id, email: email, organization_id: organization_id },
+          { onConflict: "id", ignoreDuplicates: true }
+        )
+        .select();
 
       if (error) {
         console.log(error);
@@ -77,7 +86,11 @@ const getOrganizationById = async (
     if (!data || data.length === 0) {
       const { error, data } = await supabase
         .from("organization")
-        .insert({ id: organization_id, name: organization_name });
+        .upsert(
+          { id: organization_id, name: organization_name },
+          { onConflict: "id", ignoreDuplicates: true }
+        )
+        .select();
 
       if (error) {
         console.log(error);

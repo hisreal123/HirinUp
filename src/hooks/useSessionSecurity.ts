@@ -35,7 +35,7 @@ const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 export function useSessionSecurity({
   responseToken,
   enabled = true,
-  heartbeatInterval = 10000, // 10 seconds
+  heartbeatInterval = 20000, // 20 seconds (was 10s — reduces DB writes by 50%)
   onSessionBlocked,
 }: UseSessionSecurityOptions) {
   const [state, setState] = useState<SessionSecurityState>({
@@ -44,10 +44,22 @@ export function useSessionSecurity({
   });
 
   const sessionIdRef = useRef<string>("");
+  const statusRef = useRef<SessionStatus>("checking"); // Ref so callbacks don't recreate on status change
   const channelRef = useRef<BroadcastChannel | null>(null);
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isClaimingRef = useRef<boolean>(false);
+  const onSessionBlockedRef = useRef(onSessionBlocked);
+
+  // Keep callback ref up to date without causing re-renders
+  useEffect(() => {
+    onSessionBlockedRef.current = onSessionBlocked;
+  }, [onSessionBlocked]);
+
+  const setStatus = useCallback((status: SessionStatus, blockedReason?: string) => {
+    statusRef.current = status;
+    setState((prev) => ({ ...prev, status, blockedReason }));
+  }, []);
 
   // Generate unique session ID on mount
   useEffect(() => {
@@ -64,6 +76,7 @@ export function useSessionSecurity({
 
   // ==========================================
   // LAYER 1: BroadcastChannel (Same Browser)
+  // Runs once — uses statusRef instead of state.status
   // ==========================================
   useEffect(() => {
     if (!enabled || !responseToken || !sessionIdRef.current) return;
@@ -78,10 +91,6 @@ export function useSessionSecurity({
         const { type, sessionId: incomingSessionId, timestamp } = event.data;
 
         if (type === "SESSION_CLAIM" && incomingSessionId !== sessionIdRef.current) {
-          // Another tab is claiming this session
-          console.log("[SessionSecurity L1] Another tab claimed session:", incomingSessionId);
-
-          // Respond that we already have it
           channel.postMessage({
             type: "SESSION_CONFLICT",
             sessionId: sessionIdRef.current,
@@ -90,61 +99,47 @@ export function useSessionSecurity({
         }
 
         if (type === "SESSION_CONFLICT" && incomingSessionId !== sessionIdRef.current) {
-          // Conflict detected - this tab loses if it's newer
           const ourTimestamp = parseInt(
             localStorage.getItem(`session_ts_${responseToken}`) || "0"
           );
 
           if (timestamp < ourTimestamp) {
-            // Other tab was first - we're blocked
-            console.log("[SessionSecurity L1] Session conflict - this tab is blocked");
-            setState((prev) => ({
-              ...prev,
-              status: "blocked",
-              blockedReason: "Interview is open in another tab",
-            }));
-            onSessionBlocked?.("Interview is open in another tab");
+            setStatus("blocked", "Interview is open in another tab");
+            onSessionBlockedRef.current?.("Interview is open in another tab");
           }
         }
 
         if (type === "SESSION_PING") {
-          // Respond to ping to confirm we're active
-          channel.postMessage({
-            type: "SESSION_PONG",
-            sessionId: sessionIdRef.current,
-            timestamp: Date.now(),
-          });
+          // Only pong if this tab actually owns the session (not blocked)
+          if (statusRef.current === "active") {
+            channel.postMessage({
+              type: "SESSION_PONG",
+              sessionId: sessionIdRef.current,
+              timestamp: Date.now(),
+            });
+          }
         }
 
         if (type === "SESSION_PONG" && incomingSessionId !== sessionIdRef.current) {
-          // Another tab is active - block this one
-          console.log("[SessionSecurity L1] Another active tab detected via pong");
-          setState((prev) => ({
-            ...prev,
-            status: "blocked",
-            blockedReason: "Interview is already open in another tab",
-          }));
-          onSessionBlocked?.("Interview is already open in another tab");
+          setStatus("blocked", "Interview is already open in another tab");
+          onSessionBlockedRef.current?.("Interview is already open in another tab");
         }
       };
 
-      // Check for existing sessions by pinging
       channel.postMessage({
         type: "SESSION_PING",
         sessionId: sessionIdRef.current,
         timestamp: Date.now(),
       });
 
-      // After a short delay, if no conflict, claim the session
       const claimTimeout = setTimeout(() => {
-        if (state.status !== "blocked") {
+        if (statusRef.current !== "blocked") {
           localStorage.setItem(`session_ts_${responseToken}`, Date.now().toString());
           channel.postMessage({
             type: "SESSION_CLAIM",
             sessionId: sessionIdRef.current,
             timestamp: Date.now(),
           });
-          console.log("[SessionSecurity L1] Session claimed via BroadcastChannel");
         }
       }, 300);
 
@@ -154,23 +149,24 @@ export function useSessionSecurity({
         channelRef.current = null;
       };
     } catch (error) {
-      // BroadcastChannel not supported
       console.warn("[SessionSecurity L1] BroadcastChannel not supported:", error);
     }
-  }, [enabled, responseToken, onSessionBlocked, state.status]);
+  }, [enabled, responseToken, setStatus]); // No state.status — uses statusRef
 
   // ==========================================
   // LAYER 2 & 3: API Session Claim & Heartbeat
   // ==========================================
   const claimSession = useCallback(async () => {
     if (!enabled || !responseToken || !sessionIdRef.current || isClaimingRef.current) {
+
       return false;
     }
 
     isClaimingRef.current = true;
 
-    try {
-      const response = await fetch("/api/session/claim", {
+    // Single fetch attempt — extracted so we can retry on 409
+    const attemptClaim = async () =>
+      fetch("/api/session/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -180,47 +176,52 @@ export function useSessionSecurity({
         }),
       });
 
+    try {
+      let response = await attemptClaim();
+
+      // On 409, wait 700ms then retry once.
+      // This covers the refresh race condition where sendBeacon (session release)
+      // hasn't been processed by the server before the new claim arrives.
+      // A genuine multi-device conflict will still return 409 on the retry.
+      if (response.status === 409) {
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        response = await attemptClaim();
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
         if (response.status === 409) {
-          // Session already claimed by another client
-          setState((prev) => ({
-            ...prev,
-            status: "blocked",
-            blockedReason: data.message || "Session active on another device/browser",
-          }));
-          onSessionBlocked?.(data.message || "Session active on another device/browser");
+          setStatus("blocked", data.message || "Session active on another device/browser");
+          onSessionBlockedRef.current?.(data.message || "Session active on another device/browser");
+
           return false;
         }
         if (response.status === 410) {
-          // Interview ended
-          setState((prev) => ({
-            ...prev,
-            status: "expired",
-            blockedReason: data.message || "Interview has ended",
-          }));
-          onSessionBlocked?.(data.message || "Interview has ended");
+          setStatus("expired", data.message || "Interview has ended");
+          onSessionBlockedRef.current?.(data.message || "Interview has ended");
+
           return false;
         }
         throw new Error(data.error || "Failed to claim session");
       }
 
-      setState((prev) => ({ ...prev, status: "active" }));
-      console.log("[SessionSecurity L2] Session claimed via API");
+      setStatus("active");
+
       return true;
     } catch (error) {
       console.error("[SessionSecurity L2] Failed to claim session:", error);
-      // Don't block on network errors - allow offline usage
-      setState((prev) => ({ ...prev, status: "active" }));
+      // Don't block on network errors
+      setStatus("active");
+
       return true;
     } finally {
       isClaimingRef.current = false;
     }
-  }, [enabled, responseToken, onSessionBlocked]);
+  }, [enabled, responseToken, setStatus]); // No state.status — uses statusRef
 
   const sendHeartbeat = useCallback(async () => {
-    if (!enabled || !responseToken || !sessionIdRef.current || state.status !== "active") {
+    if (!enabled || !responseToken || !sessionIdRef.current || statusRef.current !== "active") {
       return;
     }
 
@@ -238,38 +239,31 @@ export function useSessionSecurity({
         const data = await response.json();
 
         if (response.status === 409 || response.status === 401) {
-          // Session was taken over or expired
-          setState((prev) => ({
-            ...prev,
-            status: "blocked",
-            blockedReason: data.message || "Session invalidated",
-          }));
-          onSessionBlocked?.(data.message || "Session invalidated");
+          setStatus("blocked", data.message || "Session invalidated");
+          onSessionBlockedRef.current?.(data.message || "Session invalidated");
         }
       }
     } catch (error) {
-      // Network error - don't block, just log
       console.warn("[SessionSecurity L2] Heartbeat failed (network):", error);
     }
-  }, [enabled, responseToken, state.status, onSessionBlocked]);
+  }, [enabled, responseToken, setStatus]); // No state.status — uses statusRef
 
-  // Claim session on mount
+  // Claim session once on mount — not re-triggered by status changes
   useEffect(() => {
     if (!enabled || !responseToken || !sessionIdRef.current) return;
 
-    // Small delay to let Layer 1 check first
     const claimTimeout = setTimeout(() => {
-      if (state.status !== "blocked") {
+      if (statusRef.current !== "blocked") {
         claimSession();
       }
     }, 400);
 
     return () => clearTimeout(claimTimeout);
-  }, [enabled, responseToken, claimSession, state.status]);
+  }, [enabled, responseToken, claimSession]); // No state.status
 
-  // Start heartbeat interval
+  // Start heartbeat — only restarts if interval value changes, not on status changes
   useEffect(() => {
-    if (!enabled || state.status !== "active") return;
+    if (!enabled) return;
 
     heartbeatIntervalRef.current = setInterval(sendHeartbeat, heartbeatInterval);
 
@@ -279,17 +273,15 @@ export function useSessionSecurity({
         heartbeatIntervalRef.current = null;
       }
     };
-  }, [enabled, state.status, heartbeatInterval, sendHeartbeat]);
+  }, [enabled, heartbeatInterval, sendHeartbeat]); // No state.status
 
   // ==========================================
   // LAYER 4: Supabase Realtime
+  // Subscribes once — not re-triggered by status changes
   // ==========================================
   useEffect(() => {
-    if (!enabled || !responseToken || !sessionIdRef.current || state.status === "blocked") {
-      return;
-    }
+    if (!enabled || !responseToken || !sessionIdRef.current) return;
 
-    // Subscribe to changes on the response row
     const channel = supabaseClient
       .channel(`session:${responseToken}`)
       .on(
@@ -303,33 +295,20 @@ export function useSessionSecurity({
         (payload) => {
           const newData = payload.new as any;
 
-          // Check if session was taken over
           if (
             newData.active_session_id &&
             newData.active_session_id !== sessionIdRef.current
           ) {
-            console.log("[SessionSecurity L4] Realtime: Session taken over by:", newData.active_session_id);
-            setState((prev) => ({
-              ...prev,
-              status: "blocked",
-              blockedReason: "Session was taken over by another device",
-            }));
-            onSessionBlocked?.("Session was taken over by another device");
+            setStatus("blocked", "Session was taken over by another device");
+            onSessionBlockedRef.current?.("Session was taken over by another device");
           }
 
-          // Check if interview ended
           if (newData.is_ended === true) {
-            console.log("[SessionSecurity L4] Realtime: Interview ended");
-            setState((prev) => ({
-              ...prev,
-              status: "expired",
-              blockedReason: "Interview has ended",
-            }));
+            setStatus("expired", "Interview has ended");
           }
         }
       )
       .subscribe((status) => {
-        console.log("[SessionSecurity L4] Realtime subscription status:", status);
       });
 
     realtimeChannelRef.current = channel;
@@ -340,14 +319,13 @@ export function useSessionSecurity({
         realtimeChannelRef.current = null;
       }
     };
-  }, [enabled, responseToken, state.status, onSessionBlocked]);
+  }, [enabled, responseToken, setStatus]); // No state.status — subscribes once
 
   // ==========================================
   // CLEANUP: Release session on unmount
   // ==========================================
   useEffect(() => {
     const handleBeforeUnload = () => {
-      // Release session when page is closing
       if (responseToken && sessionIdRef.current) {
         navigator.sendBeacon(
           "/api/session/release",
@@ -364,7 +342,6 @@ export function useSessionSecurity({
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
 
-      // Also release on component unmount
       if (responseToken && sessionIdRef.current) {
         fetch("/api/session/release", {
           method: "POST",
@@ -402,13 +379,12 @@ async function getBrowserFingerprint(): Promise<string> {
     screen.colorDepth,
     new Date().getTimezoneOffset(),
     navigator.hardwareConcurrency || "unknown",
-    // @ts-ignore - deviceMemory is not in all browsers
+    // @ts-ignore
     navigator.deviceMemory || "unknown",
   ];
 
   const fingerprint = components.join("|");
 
-  // Simple hash
   let hash = 0;
   for (let i = 0; i < fingerprint.length; i++) {
     const char = fingerprint.charCodeAt(i);

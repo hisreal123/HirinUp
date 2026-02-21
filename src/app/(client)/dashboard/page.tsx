@@ -8,6 +8,7 @@ import CreateInterviewCard from "@/components/dashboard/interview/createIntervie
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { InterviewService } from "@/services/interviews.service";
 import { ClientService } from "@/services/clients.service";
+import { encryptedApiCall } from "@/lib/encrypted-api";
 import { ResponseService } from "@/services/responses.service";
 import { useInterviews } from "@/contexts/interviews.context";
 import Modal from "@/components/dashboard/Modal";
@@ -40,7 +41,7 @@ function Interviews() {
     const fetchOrganizationData = async () => {
       try {
         if (organization?.id) {
-          const data = await ClientService.getOrganizationById(organization.id);
+          const data = await encryptedApiCall("/api/get-organization", { id: organization.id });
           if (data?.plan) {
             setCurrentPlan(data.plan);
             if (data.plan === "free_trial_over") {

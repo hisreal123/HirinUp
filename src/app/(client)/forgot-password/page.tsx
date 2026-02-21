@@ -13,7 +13,6 @@ function ForgotPasswordPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement forgot password logic
-    console.log('Forgot password:', { email });
     setIsSubmitted(true);
   };
 

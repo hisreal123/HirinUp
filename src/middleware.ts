@@ -1,4 +1,4 @@
-import { clerkMiddleware, clerkClient, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse, NextRequest } from "next/server";
 
 // ============ BOT DETECTION ============
@@ -31,12 +31,16 @@ function isMaliciousBot(userAgent: string): boolean {
 
   // Allow good bots
   for (const bot of ALLOWED_BOTS) {
-    if (ua.includes(bot)) return false;
+    if (ua.includes(bot)) {
+      return false;
+    } 
   }
 
   // Block bad bots
   for (const bot of BLOCKED_BOTS) {
-    if (ua.includes(bot)) return true;
+    if (ua.includes(bot)) { 
+      return true;
+    }
   }
 
   return false;
@@ -142,44 +146,6 @@ const isProtectedRoute = createRouteMatcher([
 
 const isApiRoute = createRouteMatcher(["/api/(.*)"]);
 
-// ============ EMAIL ALLOWLIST ============
-const allowlistCache = new Map<string, { allowed: boolean; expiry: number }>();
-const ALLOWLIST_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-function isEmailAllowed(email: string): boolean {
-  const allow = (process.env.ALLOWLIST_EMAILS || "")
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-
-  return allow.includes(email.trim().toLowerCase());
-}
-
-async function checkUserAllowlist(userId: string): Promise<boolean> {
-  // Check cache first
-  const cached = allowlistCache.get(userId);
-  if (cached && cached.expiry > Date.now()) {
-    return cached.allowed;
-  }
-
-  try {
-    const client = await clerkClient();
-    const user = await client.users.getUser(userId);
-    const primaryEmail = user.emailAddresses.find(
-      (e) => e.id === user.primaryEmailAddressId
-    )?.emailAddress;
-
-    const allowed = primaryEmail ? isEmailAllowed(primaryEmail) : false;
-
-    // Cache result
-    allowlistCache.set(userId, { allowed, expiry: Date.now() + ALLOWLIST_CACHE_TTL });
-
-    return allowed;
-  } catch {
-    // Fail open on errors to prevent lockouts
-    return true;
-  }
-}
 
 // ============ CLERK HANDLER ============
 const clerkHandler = clerkMiddleware(async (auth, req) => {
@@ -191,15 +157,6 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
     const authResult = await auth();
     if (!authResult.userId) {
       return authResult.redirectToSignIn({ returnBackUrl: req.url });
-    }
-
-    // Allowlist enforcement (Approach B)
-    const allowed = await checkUserAllowlist(authResult.userId);
-
-    if (!allowed) {
-      const notAllowedUrl = new URL("/not-allowed", req.url);
-
-      return NextResponse.redirect(notAllowedUrl);
     }
   }
 });
