@@ -44,7 +44,7 @@ const pricing = {
   annually: [
     {
       name: 'Startup',
-      price: 210,
+      price: '1,925',
       desc: 'Perfect for early-stage teams',
       features: [
         '50 interviews monthly',
@@ -55,7 +55,7 @@ const pricing = {
     },
     {
       name: 'Growth',
-      price: 390,
+      price: '3,575',
       desc: 'More interviews, more users, and more jobs',
       badge: 'Popular',
       features: [
@@ -68,7 +68,7 @@ const pricing = {
     },
     {
       name: 'Scaled',
-      price: 900,
+      price: '8,250',
       desc: 'Maximize hiring efficiency for recruitment',
       features: [
         '250 interviews monthly',
