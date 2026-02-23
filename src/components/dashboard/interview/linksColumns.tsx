@@ -125,8 +125,10 @@ export function getLinksColumns({
         const response = row.original;
         const isEnded = row.getValue("is_ended") as boolean;
         if (!isEnded && !response.call_id) return <span className="text-sm text-gray-500">-</span>;
-        if (isEnded && !response.details) return <span className="text-sm text-red-500">Expired</span>;
-        if (isEnded && response.details) return <span className="text-sm text-green-600">Completed</span>;
+        // Only show "Expired" for manually expired unused links (no call was made)
+        if (isEnded && !response.call_id) return <span className="text-sm text-red-500">Expired</span>;
+        // Call was used: show Completed (details may still be pending from Retell/webhook)
+        if (isEnded && response.call_id) return <span className="text-sm text-green-600">Completed</span>;
         return <span className="text-sm text-yellow-600">In Progress</span>;
       },
     },

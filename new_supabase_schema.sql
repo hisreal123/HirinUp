@@ -112,6 +112,7 @@ CREATE TABLE response (
     active_session_id TEXT,
     session_fingerprint TEXT,
     last_heartbeat TIMESTAMPTZ,
+    turnstile_verified BOOLEAN DEFAULT false NOT NULL,
     CONSTRAINT response_email_check CHECK (email IS NULL OR email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
 
