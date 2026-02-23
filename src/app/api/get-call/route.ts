@@ -11,11 +11,20 @@ const retell = new Retell({
 
 export async function POST(req: Request) {
   logger.info("get-call request received");
-  
-  try {
-    const body = await req.json();
 
-    if (!body.id) {
+  try {
+    let body: { id?: string };
+    try {
+      body = await req.json();
+    } catch {
+      logger.warn("get-call: invalid or empty JSON body");
+      return NextResponse.json(
+        { error: "Request body must be valid JSON with an id field" },
+        { status: 400 },
+      );
+    }
+
+    if (!body?.id) {
       logger.error("Call ID is required");
       return NextResponse.json(
         { error: "Call ID is required" },

@@ -110,7 +110,7 @@ function InterviewLanding() {
         const response = await encryptedApiCall<Interview>("/api/get-interview", { id: interviewId });
         if (response) {
           setInterview(response);
-          document.title = response.name;
+          document.title = "AI Recruiter for Voice Interviews";
         } else {
           setInterviewNotFound(true);
         }
