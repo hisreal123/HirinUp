@@ -313,7 +313,7 @@ function InterviewInterface() {
         const response = await encryptedApiCall<Interview>("/api/get-interview", { id: interviewId });
         if (response) {
           setInterview(response);
-          document.title = response.name;
+          document.title = `AI Recruiter for Voice Interviews - ${response.name ? response.name.charAt(0).toUpperCase() + response.name.slice(1) : ""}`;
         } else {
           setInterviewNotFound(true);
         }

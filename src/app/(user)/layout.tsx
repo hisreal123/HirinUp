@@ -16,8 +16,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>HirinUp - AI powered Interviews</title>
-        <meta name="description" content="AI powered Interviews" />
+        <title>AI Recruiter for Voice Interviews</title>
+        <meta name="description" content="AI Recruiter for Voice Interviews" />
         <link rel="icon" href="/browser-user-icon.ico" />
       </head>
       <body>

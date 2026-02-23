@@ -1180,7 +1180,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
                 </div>
               </div>
             )}
-            <CardHeader className="items-center p-1">
+            <CardHeader className="items-center px-1 py-4">
               {!isEnded && (
                 <CardTitle className="flex flex-row items-center text-lg md:text-xl font-bold mb-2">
                   {interview?.name}
