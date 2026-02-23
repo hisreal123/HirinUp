@@ -9,11 +9,14 @@ const supabase = createClient(
 
 const getAllInterviews = async (userId: string, organizationId: string) => {
   try {
-    const { data: clientData, error: clientError } = await supabase
+    // When in an org, show only that org's interviews. When personal, show only by user_id.
+    const query = supabase
       .from("interview")
       .select(`*`)
-      .or(`organization_id.eq.${organizationId},user_id.eq.${userId}`)
       .order("created_at", { ascending: false });
+    const { data: clientData, error: clientError } = organizationId
+      ? await query.eq("organization_id", organizationId)
+      : await query.eq("user_id", userId);
 
     return [...(clientData || [])];
   } catch (error) {

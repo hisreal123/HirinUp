@@ -25,11 +25,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "userId or organizationId is required" }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    // When in an org, show only that org's interviews. When personal, show only by user_id.
+    const query = supabase
       .from("interview")
       .select("*")
-      .or(`organization_id.eq.${organizationId},user_id.eq.${userId}`)
       .order("created_at", { ascending: false });
+
+    const { data, error } = organizationId
+      ? await query.eq("organization_id", organizationId)
+      : await query.eq("user_id", userId);
 
     if (error) {
       logger.warn("[get-interviews] Query error:", { error });
