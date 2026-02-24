@@ -12,10 +12,11 @@ export default function DemoForm() {
   }>(null);
 
   const validateForm = () => {
-    if (!name.trim()) return 'Name is required';
-    if (!email.trim()) return 'Email is required';
-    if (!/\S+@\S+\.\S+/.test(email)) return 'Invalid email address';
-    return null;
+    if (!name.trim()) {return 'Name is required';}
+    if (!email.trim()) {return 'Email is required';}
+    if (!/\S+@\S+\.\S+/.test(email)) {return 'Invalid email address';}
+    
+return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +26,8 @@ export default function DemoForm() {
     const error = validateForm();
     if (error) {
       setMessage({ type: 'error', text: error });
-      return;
+      
+return;
     }
 
     setLoading(true);
@@ -45,23 +47,23 @@ export default function DemoForm() {
 
   return (
     <form
-      onSubmit={handleSubmit}
       className="mt-6 space-y-4 max-w-xl mx-4 md:mx-10 text-black"
+      onSubmit={handleSubmit}
     >
       <input
         type="text"
         placeholder="Enter your full name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
         className="w-full rounded-xl border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        onChange={(e) => setName(e.target.value)}
       />
 
       <input
         type="email"
         placeholder="Enter your email address"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
         className="w-full rounded-xl border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        onChange={(e) => setEmail(e.target.value)}
       />
 
       <button
@@ -71,7 +73,7 @@ export default function DemoForm() {
           ${loading ? 'bg-[rgb(47,47,47,47)] cursor-not-allowed text-white' : 'bg-black hover:bg-[#ffffff] hover:text-black hover:border hover:border-black text-white'}`}
       >
         {loading && (
-          <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
         )}
         Send me the Video
       </button>

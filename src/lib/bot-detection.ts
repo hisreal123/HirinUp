@@ -1,27 +1,27 @@
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
 
 // Known bot user agents to block
 const BLOCKED_BOTS = [
-  "ahrefsbot",
-  "semrushbot",
-  "mj12bot",
-  "dotbot",
-  "blexbot",
-  "searchmetricsbot",
-  "sogou",
-  "exabot",
-  "facebot",
-  "ia_archiver",
-  "python-requests",
-  "python-urllib",
-  "curl",
-  "wget",
-  "scrapy",
-  "phantomjs",
-  "headlesschrome",
-  "selenium",
-  "puppeteer",
-  "playwright",
+  'ahrefsbot',
+  'semrushbot',
+  'mj12bot',
+  'dotbot',
+  'blexbot',
+  'searchmetricsbot',
+  'sogou',
+  'exabot',
+  'facebot',
+  'ia_archiver',
+  'python-requests',
+  'python-urllib',
+  'curl',
+  'wget',
+  'scrapy',
+  'phantomjs',
+  'headlesschrome',
+  'selenium',
+  'puppeteer',
+  'playwright',
 ];
 
 // Suspicious patterns in user agents
@@ -37,12 +37,12 @@ const SUSPICIOUS_PATTERNS = [
 
 // Good bots we want to allow (search engines)
 const ALLOWED_BOTS = [
-  "googlebot",
-  "bingbot",
-  "slurp", // Yahoo
-  "duckduckbot",
-  "baiduspider",
-  "yandexbot",
+  'googlebot',
+  'bingbot',
+  'slurp', // Yahoo
+  'duckduckbot',
+  'baiduspider',
+  'yandexbot',
 ];
 
 export function isBot(req: NextRequest): {
@@ -50,17 +50,17 @@ export function isBot(req: NextRequest): {
   isMalicious: boolean;
   reason?: string;
 } {
-  const userAgent = req.headers.get("user-agent")?.toLowerCase() || "";
+  const userAgent = req.headers.get('user-agent')?.toLowerCase() || '';
 
   // No user agent is suspicious
   if (!userAgent) {
-    return { isBot: true, isMalicious: true, reason: "Missing user agent" };
+    return { isBot: true, isMalicious: true, reason: 'Missing user agent' };
   }
 
   // Check for allowed bots first
   for (const bot of ALLOWED_BOTS) {
     if (userAgent.includes(bot)) {
-      return { isBot: true, isMalicious: false, reason: "Allowed bot" };
+      return { isBot: true, isMalicious: false, reason: 'Allowed bot' };
     }
   }
 
@@ -91,29 +91,29 @@ export function isBot(req: NextRequest): {
 
 export function getClientIP(req: NextRequest): string {
   // Check various headers for the real IP
-  const forwardedFor = req.headers.get("x-forwarded-for");
+  const forwardedFor = req.headers.get('x-forwarded-for');
   if (forwardedFor) {
-    return forwardedFor.split(",")[0].trim();
+    return forwardedFor.split(',')[0].trim();
   }
 
-  const realIP = req.headers.get("x-real-ip");
+  const realIP = req.headers.get('x-real-ip');
   if (realIP) {
     return realIP;
   }
 
-  const cfConnectingIP = req.headers.get("cf-connecting-ip");
+  const cfConnectingIP = req.headers.get('cf-connecting-ip');
   if (cfConnectingIP) {
     return cfConnectingIP;
   }
 
-  return "unknown";
+  return 'unknown';
 }
 
 // Security headers to add to responses
 export const SECURITY_HEADERS = {
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
-  "X-XSS-Protection": "1; mode=block",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
 };

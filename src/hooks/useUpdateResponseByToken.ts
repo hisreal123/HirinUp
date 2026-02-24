@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ResponseService } from "@/services/responses.service";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ResponseService } from '@/services/responses.service';
 
 interface UpdateResponseParams {
   call_id?: string;
@@ -25,8 +25,7 @@ export const useUpdateResponseByToken = () => {
     },
     onSuccess: () => {
       // Invalidate responses queries to refetch updated data
-      queryClient.invalidateQueries({ queryKey: ["responses"] });
+      queryClient.invalidateQueries({ queryKey: ['responses'] });
     },
   });
 };
-

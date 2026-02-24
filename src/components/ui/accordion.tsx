@@ -14,8 +14,8 @@ export default function Accordion({ q, a, defaultOpen }: FaqItemProps) {
     <div className="rounded-xl border border-white/10 bg-[#6300FF0A]">
       {/* Header */}
       <button
-        onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between text-left px-5 pt-6 text-black"
+        onClick={() => setOpen(!open)}
       >
         <span className="text-base">{q}</span>
 

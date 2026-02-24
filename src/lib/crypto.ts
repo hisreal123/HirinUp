@@ -8,14 +8,15 @@
  * IV: 96-bit random, generated fresh per request (guarantees unique ciphertext every time)
  */
 
-const ALGO = { name: "ECDH", namedCurve: "P-256" } as const;
-const AES  = { name: "AES-GCM", length: 256 }      as const;
+const ALGO = { name: 'ECDH', namedCurve: 'P-256' } as const;
+const AES = { name: 'AES-GCM', length: 256 } as const;
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
 function getCrypto(): SubtleCrypto {
-  if (typeof window !== "undefined") return window.crypto.subtle;
-  return (globalThis as any).crypto.subtle;
+  if (typeof window !== 'undefined') {return window.crypto.subtle;}
+  
+return (globalThis as any).crypto.subtle;
 }
 
 async function deriveAesKey(
@@ -23,16 +24,18 @@ async function deriveAesKey(
   publicKey: CryptoKey
 ): Promise<CryptoKey> {
   return getCrypto().deriveKey(
-    { name: "ECDH", public: publicKey },
+    { name: 'ECDH', public: publicKey },
     privateKey,
     AES,
     false,
-    ["encrypt", "decrypt"]
+    ['encrypt', 'decrypt']
   );
 }
 
 function toBase64(buf: ArrayBuffer): string {
-  return btoa(Array.from(new Uint8Array(buf), (c) => String.fromCharCode(c)).join(""));
+  return btoa(
+    Array.from(new Uint8Array(buf), (c) => String.fromCharCode(c)).join('')
+  );
 }
 
 function fromBase64(str: string): Uint8Array {
@@ -50,11 +53,12 @@ export async function generateEphemeralKeypair(): Promise<{
   publicKeyJwk: JsonWebKey;
 }> {
   const keypair = await getCrypto().generateKey(ALGO, true, [
-    "deriveKey",
-    "deriveBits",
+    'deriveKey',
+    'deriveBits',
   ]);
-  const publicKeyJwk = await getCrypto().exportKey("jwk", keypair.publicKey);
-  return { privateKey: keypair.privateKey, publicKeyJwk };
+  const publicKeyJwk = await getCrypto().exportKey('jwk', keypair.publicKey);
+  
+return { privateKey: keypair.privateKey, publicKeyJwk };
 }
 
 /**
@@ -67,7 +71,7 @@ export async function encryptPayload(
   ephemeralPrivateKey: CryptoKey
 ): Promise<{ encrypted: string; iv: string }> {
   const serverPublicKey = await getCrypto().importKey(
-    "jwk",
+    'jwk',
     serverPublicKeyJwk,
     ALGO,
     false,
@@ -80,7 +84,7 @@ export async function encryptPayload(
   const encoded = new TextEncoder().encode(JSON.stringify(payload));
 
   const ciphertext = await getCrypto().encrypt(
-    { name: "AES-GCM", iv },
+    { name: 'AES-GCM', iv },
     aesKey,
     encoded
   );
@@ -102,7 +106,7 @@ export async function decryptResponse(
   ephemeralPrivateKey: CryptoKey
 ): Promise<any> {
   const serverPublicKey = await getCrypto().importKey(
-    "jwk",
+    'jwk',
     serverPublicKeyJwk,
     ALGO,
     false,
@@ -112,14 +116,13 @@ export async function decryptResponse(
   const aesKey = await deriveAesKey(ephemeralPrivateKey, serverPublicKey);
 
   const plaintext = await getCrypto().decrypt(
-    { name: "AES-GCM", iv: fromBase64(iv) },
+    { name: 'AES-GCM', iv: fromBase64(iv) },
     aesKey,
     fromBase64(encrypted)
   );
 
   return JSON.parse(new TextDecoder().decode(plaintext));
 }
-
 
 /**
  * Decrypt an incoming encrypted payload.
@@ -137,15 +140,15 @@ export async function serverDecryptPayload(
   ) as JsonWebKey;
 
   const serverPrivateKey = await subtle.importKey(
-    "jwk",
+    'jwk',
     serverPrivateKeyJwk,
     ALGO,
     false,
-    ["deriveKey", "deriveBits"]
+    ['deriveKey', 'deriveBits']
   );
 
   const clientPublicKey = await subtle.importKey(
-    "jwk",
+    'jwk',
     clientPublicKeyJwk,
     ALGO,
     false,
@@ -155,7 +158,7 @@ export async function serverDecryptPayload(
   const aesKey = await deriveAesKey(serverPrivateKey, clientPublicKey);
 
   const plaintext = await subtle.decrypt(
-    { name: "AES-GCM", iv: fromBase64(iv) },
+    { name: 'AES-GCM', iv: fromBase64(iv) },
     aesKey,
     fromBase64(encrypted)
   );
@@ -178,15 +181,15 @@ export async function serverEncryptResponse(
   ) as JsonWebKey;
 
   const serverPrivateKey = await subtle.importKey(
-    "jwk",
+    'jwk',
     serverPrivateKeyJwk,
     ALGO,
     false,
-    ["deriveKey", "deriveBits"]
+    ['deriveKey', 'deriveBits']
   );
 
   const clientPublicKey = await subtle.importKey(
-    "jwk",
+    'jwk',
     clientPublicKeyJwk,
     ALGO,
     false,
@@ -199,7 +202,7 @@ export async function serverEncryptResponse(
   const encoded = new TextEncoder().encode(JSON.stringify(data));
 
   const ciphertext = await subtle.encrypt(
-    { name: "AES-GCM", iv },
+    { name: 'AES-GCM', iv },
     aesKey,
     encoded
   );

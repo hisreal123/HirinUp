@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { ResponseService } from "@/services/responses.service";
-import React, { useContext } from "react";
+import { ResponseService } from '@/services/responses.service';
+import React, { useCallback, useContext, useMemo } from 'react';
 
 interface Response {
   createResponse: (payload: any) => void;
@@ -18,23 +18,23 @@ interface ResponseProviderProps {
 }
 
 export function ResponseProvider({ children }: ResponseProviderProps) {
-  const createResponse = async (payload: any) => {
+  const createResponse = useCallback(async (payload: any) => {
     const data = await ResponseService.createResponse({ ...payload });
+    
+return data;
+  }, []);
 
-    return data;
-  };
-
-  const saveResponse = async (payload: any, call_id: string) => {
+  const saveResponse = useCallback(async (payload: any, call_id: string) => {
     await ResponseService.saveResponse({ ...payload }, call_id);
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({ createResponse, saveResponse }),
+    [createResponse, saveResponse]
+  );
 
   return (
-    <ResponseContext.Provider
-      value={{
-        createResponse,
-        saveResponse,
-      }}
-    >
+    <ResponseContext.Provider value={contextValue}>
       {children}
     </ResponseContext.Provider>
   );

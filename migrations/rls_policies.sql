@@ -71,6 +71,12 @@ ON organization FOR INSERT
 TO authenticated
 WITH CHECK (true);
 
+-- Anon: allow when service_role not set (e.g. sync-organization from API)
+CREATE POLICY "org_insert_anon"
+ON organization FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "org_update_anon"
+ON organization FOR UPDATE TO anon USING (true) WITH CHECK (true);
+
 -- ===========================================
 -- 2. USER TABLE
 -- ===========================================
@@ -97,6 +103,12 @@ TO authenticated
 USING (id = auth.uid()::text)
 WITH CHECK (id = auth.uid()::text);
 
+-- Anon: allow when service_role not set (e.g. sync-user from API)
+CREATE POLICY "user_insert_anon"
+ON "user" FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "user_update_anon"
+ON "user" FOR UPDATE TO anon USING (true) WITH CHECK (true);
+
 -- ===========================================
 -- 3. INTERVIEWER TABLE (Public Catalog)
 -- ===========================================
@@ -107,7 +119,13 @@ ON interviewer FOR SELECT
 TO authenticated, anon
 USING (true);
 
--- INSERT/UPDATE/DELETE only via service_role (migrations/admin)
+-- Anon: allow when service_role not set (e.g. create-interviewer from API)
+CREATE POLICY "interviewer_insert_anon"
+ON interviewer FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "interviewer_update_anon"
+ON interviewer FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "interviewer_delete_anon"
+ON interviewer FOR DELETE TO anon USING (true);
 
 -- ===========================================
 -- 4. INTERVIEW TABLE
@@ -141,6 +159,14 @@ CREATE POLICY "interview_select_active_anon"
 ON interview FOR SELECT
 TO anon
 USING (is_active = true AND is_archived = false);
+
+-- Anon: allow when service_role not set (dashboard create/edit/delete interview)
+CREATE POLICY "interview_insert_anon"
+ON interview FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "interview_update_anon"
+ON interview FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "interview_delete_anon"
+ON interview FOR DELETE TO anon USING (true);
 
 -- ===========================================
 -- 5. CANDIDATE TABLE
@@ -194,6 +220,10 @@ ON response FOR SELECT
 TO authenticated
 USING (public.owns_interview(interview_id));
 
+-- Anon: allow delete (e.g. dashboard/callInfo delete response)
+CREATE POLICY "response_delete_anon"
+ON response FOR DELETE TO anon USING (true);
+
 -- ===========================================
 -- 7. FEEDBACK TABLE
 -- ===========================================
@@ -204,6 +234,11 @@ CREATE POLICY "feedback_insert_public"
 ON feedback FOR INSERT
 TO authenticated, anon
 WITH CHECK (true);
+
+-- Explicit anon INSERT so candidate feedback form always works (permanent fix)
+DROP POLICY IF EXISTS "feedback_insert_anon" ON feedback;
+CREATE POLICY "feedback_insert_anon"
+ON feedback FOR INSERT TO anon WITH CHECK (true);
 
 -- Only org members can view feedback
 CREATE POLICY "feedback_select_org"

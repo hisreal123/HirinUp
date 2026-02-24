@@ -1,5 +1,5 @@
 export const SYSTEM_PROMPT =
-  "You are an expert in coming up with follow up questions to uncover deeper insights.";
+  'You are an expert in coming up with follow up questions to uncover deeper insights.';
 
 export const generateQuestionsPrompt = (body: {
   name: string;

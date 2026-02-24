@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React from "react";
-import { PlayCircleIcon, SpeechIcon, Users, LucideIcon } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import { OrganizationSwitcher } from "@clerk/nextjs";
-import { useSidebar } from "@/contexts/sidebar.context";
+import React from 'react';
+import { PlayCircleIcon, SpeechIcon, Users, LucideIcon } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { OrganizationSwitcher } from '@clerk/nextjs';
+import { useSidebar } from '@/contexts/sidebar.context';
 
 interface MenuItem {
   label: string;
@@ -15,23 +15,23 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    label: "Interviews",
-    path: "/dashboard",
+    label: 'Interviews',
+    path: '/dashboard',
     icon: PlayCircleIcon,
     isActive: (pathname) =>
-      pathname.endsWith("/dashboard") || pathname.includes("/interviews"),
+      pathname.endsWith('/dashboard') || pathname.includes('/interviews'),
   },
   {
-    label: "Interviewers",
-    path: "/dashboard/interviewers",
+    label: 'Interviewers',
+    path: '/dashboard/interviewers',
     icon: SpeechIcon,
-    isActive: (pathname) => pathname.endsWith("/interviewers"),
+    isActive: (pathname) => pathname.endsWith('/interviewers'),
   },
   {
-    label: "Candidates",
-    path: "/dashboard/candidates",
+    label: 'Candidates',
+    path: '/dashboard/candidates',
     icon: Users,
-    isActive: (pathname) => pathname.endsWith("/candidates"),
+    isActive: (pathname) => pathname.endsWith('/candidates'),
   },
 ];
 
@@ -43,7 +43,7 @@ function SideMenu() {
   return (
     <div
       className={`z-[10] bg-slate-100 fixed top-[64px] left-0 h-full transition-all duration-300 ${
-        isCollapsed ? "w-[80px] p-2" : "w-[250px] p-6"
+        isCollapsed ? 'w-[80px] p-2' : 'w-[250px] p-6'
       }`}
     >
       <div className="flex flex-col space-y-5 gap-4">
@@ -56,7 +56,7 @@ function SideMenu() {
               afterLeaveOrganizationUrl="/dashboard"
               appearance={{
                 variables: {
-                  fontSize: "0.9rem",
+                  fontSize: '0.9rem',
                 },
               }}
             />
@@ -71,22 +71,22 @@ function SideMenu() {
               <div
                 key={item.path}
                 className={`items-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:text-accent-foreground h-9 py-2 flex cursor-pointer ${
-                  isActive
-                    ? "hover:bg-primary/20"
-                    : "hover:bg-secondary/20"
+                  isActive ? 'hover:bg-primary/20' : 'hover:bg-secondary/20'
                 } text-primary ${
                   isCollapsed
-                    ? "justify-center px-2"
-                    : "justify-start gap-2 px-4" 
-            }`}
-                onClick={() => router.push(item.path)}
+                    ? 'justify-center px-2'
+                    : 'justify-start gap-2 px-4'
+                }`}
                 title={isCollapsed ? item.label : undefined}
-          >
+                onClick={() => router.push(item.path)}
+              >
                 <Icon className="font-thin text-primary w-5 h-5" />
                 {!isCollapsed && (
-                  <span className="block font-bold gradient-text">{item.label}</span>
+                  <span className="block font-bold gradient-text">
+                    {item.label}
+                  </span>
                 )}
-          </div>
+              </div>
             );
           })}
         </div>

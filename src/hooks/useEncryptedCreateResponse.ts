@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEncryptedFetch } from "./useEncryptedFetch";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEncryptedFetch } from './useEncryptedFetch';
 
 interface CreateResponseParams {
   interview_id: string;
@@ -26,11 +26,13 @@ export const useEncryptedCreateResponse = () => {
   const { encryptedFetch, isReady } = useEncryptedFetch();
 
   const mutation = useMutation({
-    mutationFn: async (params: CreateResponseParams): Promise<CreateResponseResponse> => {
-      return encryptedFetch("/api/create-response", params);
+    mutationFn: async (
+      params: CreateResponseParams
+    ): Promise<CreateResponseResponse> => {
+      return encryptedFetch('/api/create-response', params);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["responses"] });
+      queryClient.invalidateQueries({ queryKey: ['responses'] });
     },
   });
 

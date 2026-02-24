@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
-import { X } from "lucide-react";
+import { ReactNode } from 'react';
+import { X } from 'lucide-react';
 
 interface ModalProps {
   open: boolean;
@@ -17,13 +17,13 @@ export default function Modal({
   return (
     <div
       className={`fixed z-50 inset-0 flex justify-center items-center transition-colors 
-      ${open ? "visible bg-black/30" : "invisible"}
+      ${open ? 'visible bg-black/30' : 'invisible'}
       `}
       onClick={closeOnOutsideClick ? onClose : () => {}}
     >
       <div
         className={`bg-white rounded-xl shadow p-6 transition-all
-        ${open ? "scale-100 opacity-100" : "scale-125 opacity-0"}
+        ${open ? 'scale-100 opacity-100' : 'scale-125 opacity-0'}
         `}
         onClick={(e) => e.stopPropagation()}
       >

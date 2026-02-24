@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from '@/components/ui/card';
 // import { InterviewerService } from "@/services/interviewers.service"; // replaced with encrypted API call
-import { encryptedApiCall } from "@/lib/encrypted-api";
-import axios from "axios";
-import { Plus, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { encryptedApiCall } from '@/lib/encrypted-api';
+import axios from 'axios';
+import { Plus, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 function CreateInterviewerButton() {
   const [isLoading, setIsLoading] = useState(false);
 
   const createInterviewers = async () => {
     setIsLoading(true);
-    const response = await axios.get("/api/create-interviewer", {});
+    const response = await axios.get('/api/create-interviewer', {});
     setIsLoading(false);
-    encryptedApiCall("/api/get-interviewers", {});
+    encryptedApiCall('/api/get-interviewers', {});
   };
 
   return (

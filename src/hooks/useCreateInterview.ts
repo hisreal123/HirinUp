@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 interface CreateInterviewParams {
   name: string;
@@ -20,21 +20,24 @@ export const useCreateInterview = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: CreateInterviewParams): Promise<CreateInterviewResponse> => {
-      const response = await axios.post("/api/create-interview", params);
-      return response.data;
+    mutationFn: async (
+      params: CreateInterviewParams
+    ): Promise<CreateInterviewResponse> => {
+      const response = await axios.post('/api/create-interview', params);
+      
+return response.data;
     },
     onSuccess: () => {
       // Invalidate interviews list to refetch
-      queryClient.invalidateQueries({ queryKey: ["interviews"] });
-      toast.success("Interview created successfully!");
+      queryClient.invalidateQueries({ queryKey: ['interviews'] });
+      toast.success('Interview created successfully!');
     },
     onError: (error: any) => {
-      console.error("Error creating interview:", error);
+      console.error('Error creating interview:', error);
       toast.error(
-        error.response?.data?.error || "Failed to create interview. Please try again.",
+        error.response?.data?.error ||
+          'Failed to create interview. Please try again.'
       );
     },
   });
 };
-

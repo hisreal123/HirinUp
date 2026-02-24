@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback } from "react";
-import { RetellWebClient } from "retell-client-js-sdk";
+import { useState, useRef, useCallback } from 'react';
+import { RetellWebClient } from 'retell-client-js-sdk';
 
 let webClientInstance: RetellWebClient | null = null;
 
@@ -12,20 +12,20 @@ export type AudioCheckStatus = {
   audioLevelDetected: boolean;
   deviceSelected: boolean;
   browserCompatible: boolean;
-  networkQuality: "good" | "poor" | "unknown";
+  networkQuality: 'good' | 'poor' | 'unknown';
 };
 
 export const useAudioDetection = (
   isStarted: boolean,
-  onAudioMessage?: (message: string) => void,
+  onAudioMessage?: (message: string) => void
 ) => {
   const [audioNotDetected, setAudioNotDetected] = useState(false);
   const [showAudioModal, setShowAudioModal] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
   const [availableDevices, setAvailableDevices] = useState<MediaDeviceInfo[]>(
-    [],
+    []
   );
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const [isTestingMic, setIsTestingMic] = useState(false);
   const audioMessage =
     "I can see you, but I'm not receiving any audio yet. Let's quickly check a few things together.";
@@ -34,7 +34,7 @@ export const useAudioDetection = (
     audioLevelDetected: false,
     deviceSelected: false,
     browserCompatible: true,
-    networkQuality: "unknown",
+    networkQuality: 'unknown',
   });
 
   const audioStreamRef = useRef<MediaStream | null>(null);
@@ -51,7 +51,7 @@ export const useAudioDetection = (
 
       return true;
     } catch (error) {
-      console.error("Microphone permission denied:", error);
+      console.error('Microphone permission denied:', error);
 
       return false;
     }
@@ -60,7 +60,7 @@ export const useAudioDetection = (
   const checkBrowserCompatibility = useCallback((): boolean => {
     const hasMediaDevices = !!navigator.mediaDevices;
     const hasGetUserMedia =
-      hasMediaDevices && "getUserMedia" in navigator.mediaDevices;
+      hasMediaDevices && 'getUserMedia' in navigator.mediaDevices;
     const hasAudioContext = !!(
       window.AudioContext || (window as any).webkitAudioContext
     );
@@ -74,7 +74,7 @@ export const useAudioDetection = (
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const audioDevices = devices.filter(
-        (device) => device.kind === "audioinput",
+        (device) => device.kind === 'audioinput'
       );
       setAvailableDevices(audioDevices);
       if (audioDevices.length > 0 && !selectedDeviceId) {
@@ -83,39 +83,41 @@ export const useAudioDetection = (
 
       return audioDevices;
     } catch (error) {
-      console.error("Error enumerating devices:", error);
+      console.error('Error enumerating devices:', error);
 
       return [];
     }
   }, [selectedDeviceId]);
 
   const checkNetworkQuality = useCallback(async (): Promise<
-    "good" | "poor" | "unknown"
+    'good' | 'poor' | 'unknown'
   > => {
     try {
-      if (!webClientInstance) { return "unknown"; }
+      if (!webClientInstance) {
+        return 'unknown';
+      }
       const connection = (webClientInstance as any).peerConnection;
       if (connection) {
         const stats = await connection.getStats();
         let hasAudioStats = false;
         stats.forEach((report: any) => {
-          if (report.type === "inbound-rtp" && report.mediaType === "audio") {
+          if (report.type === 'inbound-rtp' && report.mediaType === 'audio') {
             hasAudioStats = true;
             const packetLoss = report.packetsLost / report.packetsReceived;
             if (packetLoss > 0.1) {
-              return "poor";
+              return 'poor';
             }
           }
         });
 
-        return hasAudioStats ? "good" : "unknown";
+        return hasAudioStats ? 'good' : 'unknown';
       }
 
-      return "unknown";
+      return 'unknown';
     } catch (error) {
-      console.error("Error checking network quality:", error);
+      console.error('Error checking network quality:', error);
 
-      return "unknown";
+      return 'unknown';
     }
   }, []);
 
@@ -146,7 +148,9 @@ export const useAudioDetection = (
         const noAudioThresholdMs = 10000; // 10 seconds
 
         const checkAudioLevel = () => {
-          if (!analyserRef.current) { return; }
+          if (!analyserRef.current) {
+            return;
+          }
 
           analyserRef.current.getByteFrequencyData(dataArray);
           const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
@@ -212,14 +216,14 @@ export const useAudioDetection = (
 
         checkAudioLevel();
       } catch (error) {
-        console.error("Error starting audio detection:", error);
+        console.error('Error starting audio detection:', error);
         setAudioCheckStatus((prev) => ({
           ...prev,
           audioLevelDetected: false,
         }));
       }
     },
-    [onAudioMessage, audioMessage],
+    [onAudioMessage, audioMessage]
   );
 
   const stopAudioLevelDetection = useCallback(() => {
@@ -252,7 +256,7 @@ export const useAudioDetection = (
       modalShownRef.current = false;
       await startAudioLevelDetection(deviceId);
     },
-    [stopAudioLevelDetection, startAudioLevelDetection],
+    [stopAudioLevelDetection, startAudioLevelDetection]
   );
 
   const testMicrophone = useCallback(async () => {
@@ -295,7 +299,7 @@ export const useAudioDetection = (
 
       return maxLevel > 5;
     } catch (error) {
-      console.error("Error testing microphone:", error);
+      console.error('Error testing microphone:', error);
       setIsTestingMic(false);
 
       return false;
@@ -394,7 +398,7 @@ export const useAudioDetection = (
         setShowAudioModal(true);
       }
     },
-    [isStarted, onAudioMessage, audioMessage],
+    [isStarted, onAudioMessage, audioMessage]
   );
 
   return {

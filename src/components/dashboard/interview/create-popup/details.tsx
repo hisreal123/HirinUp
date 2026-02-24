@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { useInterviewers } from "@/contexts/interviewers.context";
-import { useGenerateInterviewQuestions } from "@/hooks/useGenerateInterviewQuestions";
-import { InterviewBase, Question } from "@/types/interview";
-import { ChevronRight, ChevronLeft, Info } from "lucide-react";
-import Image from "next/image";
-import { CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import FileUpload from "../fileUpload";
-import Modal from "@/components/dashboard/Modal";
-import InterviewerDetailsModal from "@/components/dashboard/interviewer/interviewerDetailsModal";
-import { Interviewer } from "@/types/interviewer";
-import { toast } from "sonner";
+import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { useInterviewers } from '@/contexts/interviewers.context';
+import { useGenerateInterviewQuestions } from '@/hooks/useGenerateInterviewQuestions';
+import { InterviewBase, Question } from '@/types/interview';
+import { ChevronRight, ChevronLeft, Info } from 'lucide-react';
+import Image from 'next/image';
+import { CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import FileUpload from '../fileUpload';
+import Modal from '@/components/dashboard/Modal';
+import InterviewerDetailsModal from '@/components/dashboard/interviewer/interviewerDetailsModal';
+import { Interviewer } from '@/types/interviewer';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -44,19 +44,19 @@ function DetailsPopup({
 
   const [name, setName] = useState(interviewData.name);
   const [selectedInterviewer, setSelectedInterviewer] = useState(
-    interviewData.interviewer_id,
+    interviewData.interviewer_id
   );
   const [objective, setObjective] = useState(interviewData.objective);
   const [isAnonymous, setIsAnonymous] = useState<boolean>(
-    interviewData.is_anonymous,
+    interviewData.is_anonymous
   );
   const [numQuestions, setNumQuestions] = useState(
     interviewData.question_count == 0
-      ? ""
-      : String(interviewData.question_count),
+      ? ''
+      : String(interviewData.question_count)
   );
   const [duration, setDuration] = useState(interviewData.time_duration);
-  const [uploadedDocumentContext, setUploadedDocumentContext] = useState("");
+  const [uploadedDocumentContext, setUploadedDocumentContext] = useState('');
 
   const slideLeft = (id: string, value: number) => {
     var slider = document.getElementById(`${id}`);
@@ -90,28 +90,31 @@ function DetailsPopup({
       if (response.error) {
         setLoading(false);
         setIsClicked(false);
-        return;
+        
+return;
       }
 
       // Check if response has the expected data
       if (!response.response) {
-        toast.error("Invalid response from server. Please try again.", {
+        toast.error('Invalid response from server. Please try again.', {
           duration: 5000,
         });
         setLoading(false);
         setIsClicked(false);
-        return;
+        
+return;
       }
 
       const generatedQuestionsResponse = JSON.parse(response.response);
 
       if (!generatedQuestionsResponse.questions) {
-        toast.error("No questions generated. Please try again.", {
+        toast.error('No questions generated. Please try again.', {
           duration: 5000,
         });
         setLoading(false);
         setIsClicked(false);
-        return;
+        
+return;
       }
 
       const questionsArray = generatedQuestionsResponse.questions;
@@ -137,13 +140,13 @@ function DetailsPopup({
         interviewer_id: selectedInterviewer,
         question_count: Number(numQuestions),
         time_duration: duration,
-        description: generatedQuestionsResponse.description || "",
+        description: generatedQuestionsResponse.description || '',
         is_anonymous: isAnonymous,
       };
 
       setInterviewData(updatedInterviewData);
     } catch (error: any) {
-      console.error("Error generating questions:", error);
+      console.error('Error generating questions:', error);
       setLoading(false);
       setIsClicked(false);
     } finally {
@@ -159,11 +162,11 @@ function DetailsPopup({
       ...interviewData,
       name: name.trim(),
       objective: objective.trim(),
-      questions: [{ id: uuidv4(), question: "", follow_up_count: 1 }],
+      questions: [{ id: uuidv4(), question: '', follow_up_count: 1 }],
       interviewer_id: selectedInterviewer,
       question_count: Number(numQuestions),
       time_duration: String(duration),
-      description: "",
+      description: '',
       is_anonymous: isAnonymous,
     };
     setInterviewData(updatedInterviewData);
@@ -171,12 +174,12 @@ function DetailsPopup({
 
   useEffect(() => {
     if (!open) {
-      setName("");
+      setName('');
       setSelectedInterviewer(BigInt(0));
-      setObjective("");
+      setObjective('');
       setIsAnonymous(false);
-      setNumQuestions("");
-      setDuration("");
+      setNumQuestions('');
+      setDuration('');
       setIsClicked(false);
     }
   }, [open]);
@@ -221,8 +224,8 @@ function DetailsPopup({
                   <div
                     className={`w-[96px] overflow-hidden rounded-full ${
                       selectedInterviewer === item.id
-                        ? "border-4 border-indigo-600"
-                        : ""
+                        ? 'border-4 border-indigo-600'
+                        : ''
                     }`}
                     onClick={() => setSelectedInterviewer(item.id)}
                   >
@@ -251,12 +254,12 @@ function DetailsPopup({
                 <ChevronRight
                   className="opacity-50 cursor-pointer hover:opacity-100"
                   size={27}
-                  onClick={() => slideRight("slider-3", 115)}
+                  onClick={() => slideRight('slider-3', 115)}
                 />
                 <ChevronLeft
                   className="opacity-50 cursor-pointer hover:opacity-100"
                   size={27}
-                  onClick={() => slideLeft("slider-3", 115)}
+                  onClick={() => slideLeft('slider-3', 115)}
                 />
               </div>
             ) : (
@@ -289,13 +292,13 @@ function DetailsPopup({
               <Switch
                 checked={isAnonymous}
                 className={`ml-4 mt-1 ${
-                  isAnonymous ? "bg-indigo-600" : "bg-[#E6E7EB]"
+                  isAnonymous ? 'bg-indigo-600' : 'bg-[#E6E7EB]'
                 }`}
                 onCheckedChange={(checked) => setIsAnonymous(checked)}
               />
             </div>
             <span
-              style={{ fontSize: "0.7rem", lineHeight: "0.66rem" }}
+              style={{ fontSize: '0.7rem', lineHeight: '0.66rem' }}
               className="font-light text-xs italic w-full text-left block"
             >
               Note: If not anonymous, the interviewee&apos;s email and name will
@@ -315,11 +318,11 @@ function DetailsPopup({
                 onChange={(e) => {
                   let value = e.target.value;
                   if (
-                    value === "" ||
+                    value === '' ||
                     (Number.isInteger(Number(value)) && Number(value) > 0)
                   ) {
                     if (Number(value) > 20) {
-                      value = "20";
+                      value = '20';
                     }
                     setNumQuestions(value);
                   }
@@ -338,11 +341,11 @@ function DetailsPopup({
                 onChange={(e) => {
                   let value = e.target.value;
                   if (
-                    value === "" ||
+                    value === '' ||
                     (Number.isInteger(Number(value)) && Number(value) > 0)
                   ) {
                     if (Number(value) > 10) {
-                      value = "10";
+                      value = '10';
                     }
                     setDuration(value);
                   }

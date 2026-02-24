@@ -27,8 +27,8 @@ export default function Slider({
         min={min}
         max={max}
         value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
         className="w-full accent-purple-500 cursor-pointer"
+        onChange={(e) => onChange(Number(e.target.value))}
       />
     </div>
   );

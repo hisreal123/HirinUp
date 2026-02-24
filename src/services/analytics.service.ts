@@ -1,14 +1,14 @@
-"use server";
+'use server';
 
-import { OpenAI } from "openai";
-import { ResponseService } from "@/services/responses.service";
-import { InterviewService } from "@/services/interviews.service";
-import { Question } from "@/types/interview";
-import { Analytics } from "@/types/response";
+import { OpenAI } from 'openai';
+import { ResponseService } from '@/services/responses.service';
+import { InterviewService } from '@/services/interviews.service';
+import { Question } from '@/types/interview';
+import { Analytics } from '@/types/response';
 import {
   getInterviewAnalyticsPrompt,
   SYSTEM_PROMPT,
-} from "@/lib/prompts/analytics";
+} from '@/lib/prompts/analytics';
 
 export const generateInterviewAnalytics = async (payload: {
   callId: string;
@@ -29,7 +29,7 @@ export const generateInterviewAnalytics = async (payload: {
     const questions = interview?.questions || [];
     const mainInterviewQuestions = questions
       .map((q: Question, index: number) => `${index + 1}. ${q.question}`)
-      .join("\n");
+      .join('\n');
 
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -39,36 +39,36 @@ export const generateInterviewAnalytics = async (payload: {
 
     const prompt = getInterviewAnalyticsPrompt(
       interviewTranscript,
-      mainInterviewQuestions,
+      mainInterviewQuestions
     );
 
     const baseCompletion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: 'gpt-4o',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: SYSTEM_PROMPT,
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
-      response_format: { type: "json_object" },
+      response_format: { type: 'json_object' },
     });
 
     const basePromptOutput = baseCompletion.choices[0] || {};
-    const content = basePromptOutput.message?.content || "";
+    const content = basePromptOutput.message?.content || '';
     const analyticsResponse = JSON.parse(content);
 
     analyticsResponse.mainInterviewQuestions = questions.map(
-      (q: Question) => q.question,
+      (q: Question) => q.question
     );
 
     return { analytics: analyticsResponse, status: 200 };
   } catch (error) {
-    console.error("Error in OpenAI request:", error);
+    console.error('Error in OpenAI request:', error);
 
-    return { error: "internal server error", status: 500 };
+    return { error: 'internal server error', status: 500 };
   }
 };

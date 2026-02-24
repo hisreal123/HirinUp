@@ -1,17 +1,17 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  (typeof window === "undefined"
+  (typeof window === 'undefined'
     ? process.env.SUPABASE_SERVICE_ROLE_KEY
     : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!
 );
 
 const updateOrganization = async (payload: any, id: string) => {
   const { error, data } = await supabase
-    .from("organization")
+    .from('organization')
     .update({ ...payload })
-    .eq("id", id);
+    .eq('id', id);
   if (error) {
     console.log(error);
 
@@ -24,20 +24,20 @@ const updateOrganization = async (payload: any, id: string) => {
 const getClientById = async (
   id: string,
   email?: string | null,
-  organization_id?: string | null,
+  organization_id?: string | null
 ) => {
   try {
     const { data, error } = await supabase
-      .from("user")
+      .from('user')
       .select(`*`)
-      .filter("id", "eq", id);
+      .filter('id', 'eq', id);
 
     if (!data || (data.length === 0 && email)) {
       const { error, data } = await supabase
-        .from("user")
+        .from('user')
         .upsert(
           { id: id, email: email, organization_id: organization_id },
-          { onConflict: "id", ignoreDuplicates: true }
+          { onConflict: 'id', ignoreDuplicates: true }
         )
         .select();
 
@@ -52,9 +52,9 @@ const getClientById = async (
 
     if (data[0].organization_id !== organization_id) {
       const { error, data } = await supabase
-        .from("user")
+        .from('user')
         .update({ organization_id: organization_id })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) {
         console.log(error);
@@ -75,20 +75,20 @@ const getClientById = async (
 
 const getOrganizationById = async (
   organization_id?: string,
-  organization_name?: string,
+  organization_name?: string
 ) => {
   try {
     const { data, error } = await supabase
-      .from("organization")
+      .from('organization')
       .select(`*`)
-      .filter("id", "eq", organization_id);
+      .filter('id', 'eq', organization_id);
 
     if (!data || data.length === 0) {
       const { error, data } = await supabase
-        .from("organization")
+        .from('organization')
         .upsert(
           { id: organization_id, name: organization_name },
-          { onConflict: "id", ignoreDuplicates: true }
+          { onConflict: 'id', ignoreDuplicates: true }
         )
         .select();
 
@@ -103,9 +103,9 @@ const getOrganizationById = async (
 
     if (organization_name && data[0].name !== organization_name) {
       const { error, data } = await supabase
-        .from("organization")
+        .from('organization')
         .update({ name: organization_name })
-        .eq("id", organization_id);
+        .eq('id', organization_id);
 
       if (error) {
         console.log(error);

@@ -10,7 +10,8 @@ import CallTOActionLayout from '@/app/(marketing)/layout/cta';
 export default function FaqSection() {
   const leftFaqs = faqList.slice(0, 4);
   const rightFaqs = faqList.slice(4, 8);
-  return (
+  
+return (
     <section className="w-full bg-[#FFFFFF] pb-20">
       {/* ================= FAQ ================= */}
       <div className="max-w-6xl mx-auto  pt-28">

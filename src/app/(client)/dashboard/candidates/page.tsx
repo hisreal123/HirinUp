@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 // import { CandidateService } from "@/services/candidates.service"; // replaced with encrypted API call
-import { encryptedApiCall } from "@/lib/encrypted-api";
-import CandidatesTable from "@/components/dashboard/candidate/candidatesTable";
-import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { encryptedApiCall } from '@/lib/encrypted-api';
+import CandidatesTable from '@/components/dashboard/candidate/candidatesTable';
+import LoaderWithText from '@/components/loaders/loader-with-text/loaderWithText';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 function Candidates() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchCandidates = async () => {
       setLoading(true);
       try {
-        const data = await encryptedApiCall<any[]>("/api/get-candidates", {});
+        const data = await encryptedApiCall<any[]>('/api/get-candidates', {});
         setCandidates(data);
       } catch (error) {
-        console.error("Error fetching candidates:", error);
+        console.error('Error fetching candidates:', error);
       } finally {
         setLoading(false);
       }
@@ -56,8 +56,8 @@ function Candidates() {
                   type="text"
                   placeholder="Search candidates by name, email, phone, country..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <CandidatesTable data={candidates} searchQuery={searchQuery} />
@@ -70,4 +70,3 @@ function Candidates() {
 }
 
 export default Candidates;
-

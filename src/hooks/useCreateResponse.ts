@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 
 interface CreateResponseParams {
   interview_id: string;
@@ -18,13 +18,15 @@ export const useCreateResponse = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: CreateResponseParams): Promise<CreateResponseResponse> => {
-      const response = await axios.post("/api/create-response", params);
+    mutationFn: async (
+      params: CreateResponseParams
+    ): Promise<CreateResponseResponse> => {
+      const response = await axios.post('/api/create-response', params);
 
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["responses"] });
+      queryClient.invalidateQueries({ queryKey: ['responses'] });
     },
   });
 };

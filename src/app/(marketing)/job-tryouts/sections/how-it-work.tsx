@@ -94,8 +94,8 @@ export default function HowJobTryoutsWork() {
                     <Image
                       src={step.image}
                       alt={step.title}
-                      fill
                       className="object-cover"
+                      fill
                     />
                   </motion.div>
 

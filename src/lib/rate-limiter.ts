@@ -36,7 +36,8 @@ export function checkRateLimit(
       count: 1,
       resetTime: now + config.windowMs,
     });
-    return {
+    
+return {
       allowed: true,
       remaining: config.maxRequests - 1,
       resetTime: now + config.windowMs,
@@ -52,7 +53,8 @@ export function checkRateLimit(
   }
 
   entry.count++;
-  return {
+  
+return {
     allowed: true,
     remaining: config.maxRequests - entry.count,
     resetTime: entry.resetTime,

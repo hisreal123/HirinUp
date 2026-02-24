@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 export function DevToolsBlocker() {
   return (
@@ -28,8 +28,8 @@ export function DevToolsBlocker() {
         </h1>
 
         <p className="text-gray-600 mb-4 leading-relaxed">
-          Opening developer tools during an interview is a violation of our{" "}
-          <span className="font-semibold text-gray-800">Terms of Service</span>{" "}
+          Opening developer tools during an interview is a violation of our{' '}
+          <span className="font-semibold text-gray-800">Terms of Service</span>{' '}
           and interview integrity policy.
         </p>
 

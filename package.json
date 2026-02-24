@@ -6,7 +6,10 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css}\""
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
@@ -94,6 +97,7 @@
     "eslint-config-next": "14.0.3",
     "eslint-config-prettier": "^10.0.1",
     "postcss": "^8",
+    "prettier": "^3.8.1",
     "prisma": "^5.15.0",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"

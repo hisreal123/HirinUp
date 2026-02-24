@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import LoaderWithLogo from "@/components/loaders/loader-with-logo/loaderWithLogo";
-import DetailsPopup from "@/components/dashboard/interview/create-popup/details";
-import QuestionsPopup from "@/components/dashboard/interview/create-popup/questions";
-import { InterviewBase } from "@/types/interview";
+import React, { useEffect, useState } from 'react';
+import LoaderWithLogo from '@/components/loaders/loader-with-logo/loaderWithLogo';
+import DetailsPopup from '@/components/dashboard/interview/create-popup/details';
+import QuestionsPopup from '@/components/dashboard/interview/create-popup/questions';
+import { InterviewBase } from '@/types/interview';
 
 interface Props {
   open: boolean;
@@ -10,16 +10,16 @@ interface Props {
 }
 
 const CreateEmptyInterviewData = (): InterviewBase => ({
-  user_id: "",
-  organization_id: "",
-  name: "",
+  user_id: '',
+  organization_id: '',
+  name: '',
   interviewer_id: BigInt(0),
-  objective: "",
+  objective: '',
   question_count: 0,
-  time_duration: "",
+  time_duration: '',
   is_anonymous: false,
   questions: [],
-  description: "",
+  description: '',
   response_count: BigInt(0),
 });
 
@@ -27,12 +27,12 @@ function CreateInterviewModal({ open, setOpen }: Props) {
   const [loading, setLoading] = useState(false);
   const [proceed, setProceed] = useState(false);
   const [interviewData, setInterviewData] = useState<InterviewBase>(
-    CreateEmptyInterviewData(),
+    CreateEmptyInterviewData()
   );
 
   // Below for File Upload
   const [isUploaded, setIsUploaded] = useState(false);
-  const [fileName, setFileName] = useState("");
+  const [fileName, setFileName] = useState('');
 
   useEffect(() => {
     if (loading == true) {
@@ -49,7 +49,7 @@ function CreateInterviewModal({ open, setOpen }: Props) {
       setInterviewData(CreateEmptyInterviewData());
       // Below for File Upload
       setIsUploaded(false);
-      setFileName("");
+      setFileName('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);

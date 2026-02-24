@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useRef, useCallback, useEffect, useState } from "react";
+import { useRef, useCallback, useEffect, useState } from 'react';
 import {
   generateEphemeralKeypair,
   encryptPayload,
   decryptResponse,
-} from "@/lib/crypto";
+} from '@/lib/crypto';
 
 /**
  * Hook that provides an encrypted fetch function for the interview flow.
@@ -44,7 +44,7 @@ export function useEncryptedFetch() {
   const encryptedFetch = useCallback(
     async (url: string, payload: object): Promise<any> => {
       if (!privateKeyRef.current || !publicKeyJwkRef.current) {
-        throw new Error("Encryption keys not ready");
+        throw new Error('Encryption keys not ready');
       }
 
       // Encrypt the payload
@@ -56,8 +56,8 @@ export function useEncryptedFetch() {
 
       // Send ciphertext + client public key (server needs it to derive shared secret)
       const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: encrypted,
           iv,

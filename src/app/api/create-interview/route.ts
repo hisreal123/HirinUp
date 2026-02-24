@@ -1,9 +1,15 @@
-import { nanoid } from "nanoid";
-import { NextResponse } from "next/server";
-import { InterviewService } from "@/services/interviews.service";
-import { logger } from "@/lib/logger";
+import { nanoid } from 'nanoid';
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { InterviewService } from '@/services/interviews.service';
+import { logger } from '@/lib/logger';
 
 const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(req: Request) {
   try {
@@ -11,41 +17,74 @@ export async function POST(req: Request) {
     const url = `${base_url}/join/${url_id}`;
     const body = await req.json();
 
-    logger.info("create-interview request received");
+    logger.info('create-interview request received');
 
     const payload = body.interviewData;
+    const organizationId: string | undefined = payload?.organization_id;
 
-    let readableSlug = null;
+    // Build readable_slug as "org-name-url_id" so it is always unique per
+    // interview (org name alone caused a UNIQUE violation on the second interview).
+    let readableSlug = url_id;
     if (body.organizationName) {
-      // Format: [organization_name] (just the org name, not combined with interview ID)
-      // The URL will be: /join/[organization_name]/[interview_id]/[response_id]
       const orgNameSlug = body.organizationName
         ?.toLowerCase()
         .trim()
-        .replace(/\s+/g, "-")  // Replace one or more spaces with single hyphen
-        .replace(/[^a-z0-9-]/g, ""); // Remove special characters, keep only alphanumeric and hyphens
-      readableSlug = orgNameSlug; // Just organization name for backward compatibility
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+      readableSlug = `${orgNameSlug}-${url_id}`;
     }
 
-    const newInterview = await InterviewService.createInterview({
+    // Guard against FK violation: if the org hasn't been synced yet (race
+    // between Clerk org creation and sync-organization completing), upsert it
+    // now so the interview insert doesn't fail with a foreign-key error.
+    if (organizationId) {
+      const { data: existingOrg } = await supabase
+        .from('organization')
+        .select('id')
+        .eq('id', organizationId)
+        .single();
+
+      if (!existingOrg) {
+        await supabase.from('organization').upsert(
+          {
+            id: organizationId,
+            name: body.organizationName || organizationId,
+            plan: 'free',
+            allowed_responses_count: 10,
+          },
+          { onConflict: 'id', ignoreDuplicates: true }
+        );
+      }
+    }
+
+    const error = await InterviewService.createInterview({
       ...payload,
       url: url,
       id: url_id,
       readable_slug: readableSlug,
     });
 
-    logger.info("Interview created successfully");
+    if (error) {
+      logger.error('Interview insert failed:', error);
+
+      return NextResponse.json(
+        { error: 'Failed to create interview' },
+        { status: 500 }
+      );
+    }
+
+    logger.info('Interview created successfully');
 
     return NextResponse.json(
-      { response: "Interview created successfully" },
-      { status: 200 },
+      { response: 'Interview created successfully' },
+      { status: 200 }
     );
   } catch (err) {
-    logger.error("Error creating interview");
+    logger.error('Error creating interview');
 
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: 'Internal server error' },
+      { status: 500 }
     );
   }
 }

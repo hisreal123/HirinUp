@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { toast } from "sonner";
-import { Inbox } from "lucide-react";
-import { useState } from "react";
-import { useDropzone } from "react-dropzone";
-import { parsePdf } from "@/actions/parse-pdf";
+import { toast } from 'sonner';
+import { Inbox } from 'lucide-react';
+import { useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { parsePdf } from '@/actions/parse-pdf';
 
 type Props = {
   isUploaded: boolean;
@@ -25,14 +25,14 @@ function FileUpload({
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { getRootProps, getInputProps } = useDropzone({
-    accept: { "application/pdf": [".pdf"] },
+    accept: { 'application/pdf': ['.pdf'] },
     maxFiles: 1,
     onDrop: async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
       setFileName(file.name);
       if (file.size > 10 * 1024 * 1024) {
-        toast.error("Please upload a file smaller than 10MB.", {
-          position: "bottom-right",
+        toast.error('Please upload a file smaller than 10MB.', {
+          position: 'bottom-right',
           duration: 3000,
         });
 
@@ -42,18 +42,18 @@ function FileUpload({
       try {
         setUploading(true);
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append('file', file);
 
         const result = await parsePdf(formData);
         if (!result.success) {
           throw new Error(result.error);
         }
-        const fullText = result.text || "";
+        const fullText = result.text || '';
         setUploadedDocumentContext(fullText);
         setIsUploaded(true);
       } catch (error) {
-        toast.error("Error reading PDF", {
-          description: "Please try again.",
+        toast.error('Error reading PDF', {
+          description: 'Please try again.',
           duration: 3000,
         });
       } finally {
@@ -68,7 +68,7 @@ function FileUpload({
         <div
           {...getRootProps({
             className:
-              "border-dashed border-2 rounded-xl cursor-pointer bg-gray-50 py-4 flex justify-center items-center flex-col",
+              'border-dashed border-2 rounded-xl cursor-pointer bg-gray-50 py-4 flex justify-center items-center flex-col',
           })}
         >
           <input {...getInputProps()} />
@@ -85,7 +85,7 @@ function FileUpload({
             File uploaded successfully. {fileName}
           </p>
           <p className="mt-2 text-xs text-slate-600">
-            Do you want to{" "}
+            Do you want to{' '}
             <span
               className="underline text-slate-950 cursor-pointer font-semibold"
               onClick={() => setIsUploaded(false)}

@@ -1,24 +1,19 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { ResponseService } from "@/services/responses.service";
-import { Response } from "@/types/response";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { ResponseService } from '@/services/responses.service';
+import { Response } from '@/types/response';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 // import { OrganizationService } from "@/services/organizations.service"; // replaced with encrypted API call
-import { encryptedApiCall } from "@/lib/encrypted-api";
-import { useInterviews } from "@/contexts/interviews.context";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
-import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
-import ResponsesTable from "@/components/dashboard/interview/responsesTable";
-import LinksTable from "@/components/dashboard/interview/linksTable";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { encryptedApiCall } from '@/lib/encrypted-api';
+import { useInterviews } from '@/contexts/interviews.context';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import LoaderWithText from '@/components/loaders/loader-with-text/loaderWithText';
+import ResponsesTable from '@/components/dashboard/interview/responsesTable';
+import LinksTable from '@/components/dashboard/interview/linksTable';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
 
@@ -28,17 +23,17 @@ function InterviewResponses() {
   const interviewId = params?.interviewId as string;
   const [responses, setResponses] = useState<Response[]>([]);
   const [loading, setLoading] = useState(true);
-  const [organizationNameSlug, setOrganizationNameSlug] = useState<string>("");
+  const [organizationNameSlug, setOrganizationNameSlug] = useState<string>('');
   const { getInterviewById } = useInterviews();
 
   const fetchResponses = useCallback(async () => {
-    if (!interviewId) return;
+    if (!interviewId) {return;}
     const responsesData = await ResponseService.getAllResponses(interviewId);
     setResponses(responsesData || []);
   }, [interviewId]);
 
   useEffect(() => {
-    if (!interviewId) return;
+    if (!interviewId) {return;}
 
     const fetchData = async () => {
       setLoading(true);
@@ -51,18 +46,20 @@ function InterviewResponses() {
 
         // Fetch organization slug
         if (interview?.organization_id) {
-          const orgData = await encryptedApiCall("/api/get-organization", { id: interview.organization_id });
+          const orgData = await encryptedApiCall('/api/get-organization', {
+            id: interview.organization_id,
+          });
           if (orgData?.name) {
             const slug = orgData.name
               .toLowerCase()
               .trim()
-              .replace(/\s+/g, "-")
-              .replace(/[^a-z0-9-]/g, "");
+              .replace(/\s+/g, '-')
+              .replace(/[^a-z0-9-]/g, '');
             setOrganizationNameSlug(slug);
           }
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
@@ -72,21 +69,15 @@ function InterviewResponses() {
   }, [interviewId, getInterviewById]);
 
   // Calculate statistics
-  const totalResponses = responses.filter(
-    (r) => r.call_id && r.details
-  ).length;
+  const totalResponses = responses.filter((r) => r.call_id && r.details).length;
   const totalLinks = responses.length;
   const totalAnsweredLinks = responses.filter(
     (r) => r.is_ended === true
   ).length;
-  const unusedLinks = responses.filter(
-    (r) => !r.call_id || !r.details
-  ).length;
+  const unusedLinks = responses.filter((r) => !r.call_id || !r.details).length;
 
   // Filter responses with details (for table)
-  const responsesWithDetails = responses.filter(
-    (r) => r.call_id && r.details
-  );
+  const responsesWithDetails = responses.filter((r) => r.call_id && r.details);
 
   // All links (for links tab)
   const allLinks = responses;
@@ -98,8 +89,8 @@ function InterviewResponses() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push(`/interviews/${interviewId}`)}
             className="flex items-center gap-2"
+            onClick={() => router.push(`/interviews/${interviewId}`)}
           >
             <ArrowLeft size={16} />
             Back to Interview
@@ -205,4 +196,3 @@ function InterviewResponses() {
 }
 
 export default InterviewResponses;
-

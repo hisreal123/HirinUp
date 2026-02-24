@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React, { useState, useContext, ReactNode, useEffect } from "react";
-import { User } from "@/types/user";
-import { useClerk, useOrganization } from "@clerk/nextjs";
+import React, { useState, useContext, ReactNode, useEffect } from 'react';
+import { User } from '@/types/user';
+import { useClerk, useOrganization } from '@clerk/nextjs';
 // import { ClientService } from "@/services/clients.service"; // replaced with encrypted API call
-import { encryptedApiCall } from "@/lib/encrypted-api";
+import { encryptedApiCall } from '@/lib/encrypted-api';
 
 interface ClientContextProps {
   client?: User;
@@ -28,7 +28,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
   const fetchClient = async () => {
     try {
       setClientLoading(true);
-      const response = await encryptedApiCall("/api/sync-user", {
+      const response = await encryptedApiCall('/api/sync-user', {
         id: user?.id,
         email: user?.emailAddresses[0]?.emailAddress,
         organization_id: organization?.id,
@@ -43,7 +43,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
   const fetchOrganization = async () => {
     try {
       setClientLoading(true);
-      await encryptedApiCall("/api/sync-organization", {
+      await encryptedApiCall('/api/sync-organization', {
         id: organization?.id,
         name: organization?.name,
         image_url: organization?.imageUrl,

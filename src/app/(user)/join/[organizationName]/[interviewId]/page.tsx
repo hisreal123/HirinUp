@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
 // import { useInterviews } from "@/contexts/interviews.context";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
-import { ArrowUpRightSquareIcon } from "lucide-react";
-import { Interview } from "@/types/interview";
-import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
-import axios from "axios";
-import { encryptedApiCall } from "@/lib/encrypted-api";
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { ArrowUpRightSquareIcon } from 'lucide-react';
+import { Interview } from '@/types/interview';
+import LoaderWithText from '@/components/loaders/loader-with-text/loaderWithText';
+import axios from 'axios';
+import { encryptedApiCall } from '@/lib/encrypted-api';
 
 type PopupProps = {
   title: string;
@@ -26,12 +26,12 @@ function PopupLoader() {
       </div>
       <a
         className="flex flex-row justify-center align-middle mt-3"
-          href="https://hirin-up.co/"
+        href="https://hirin-up.co/"
         target="_blank"
         rel="noopener noreferrer"
       >
         <div className="text-center text-md font-semibold mr-2">
-          Powered by{" "}
+          Powered by{' '}
           <span className="font-bold">
             Hirin<span className="text-indigo-600">Up</span>
           </span>
@@ -60,12 +60,12 @@ function PopUpMessage({ title, description, image }: PopupProps) {
       </div>
       <a
         className="flex flex-row justify-center align-middle mt-3"
-          href="https://hirin-up.co/"
+        href="https://hirin-up.co/"
         target="_blank"
         rel="noopener noreferrer"
       >
         <div className="text-center text-md font-semibold mr-2">
-          Powered by{" "}
+          Powered by{' '}
           <span className="font-bold">
             Hirin<span className="text-indigo-600">Up</span>
           </span>
@@ -102,15 +102,19 @@ function InterviewLanding() {
   useEffect(() => {
     if (!interviewId) {
       setInterviewNotFound(true);
-      return;
+      
+return;
     }
 
     const fetchinterview = async () => {
       try {
-        const response = await encryptedApiCall<Interview>("/api/get-interview", { id: interviewId });
+        const response = await encryptedApiCall<Interview>(
+          '/api/get-interview',
+          { id: interviewId }
+        );
         if (response) {
           setInterview(response);
-          document.title = "AI Recruiter for Voice Interviews";
+          document.title = 'AI Recruiter for Voice Interviews';
         } else {
           setInterviewNotFound(true);
         }
@@ -126,36 +130,45 @@ function InterviewLanding() {
 
   // Generate response_id and redirect when interview is loaded
   useEffect(() => {
-    if (!interview || !isActive || isGenerating) return;
+    if (!interview || !isActive || isGenerating) {return;}
 
     const generateResponseAndRedirect = async () => {
       setIsGenerating(true);
       try {
         // Create response record early (before call starts)
-        const response = await axios.post("/api/create-response", {
+        const response = await axios.post('/api/create-response', {
           interview_id: interview.id,
           // email and name can be added later when user provides them
         });
 
         if (response.data?.response_id) {
           // Redirect to call page with response_id
-          router.push(`/join/${organizationName}/${interviewId}/${response.data.response_id}`);
+          router.push(
+            `/join/${organizationName}/${interviewId}/${response.data.response_id}`
+          );
         } else {
-          setError("Failed to generate response link. Please try again.");
+          setError('Failed to generate response link. Please try again.');
           setIsGenerating(false);
         }
       } catch (err: any) {
-        console.error("Error generating response:", err);
+        console.error('Error generating response:', err);
         setError(
           err.response?.data?.error ||
-            "Failed to generate response link. Please try again.",
+            'Failed to generate response link. Please try again.'
         );
         setIsGenerating(false);
       }
     };
 
     generateResponseAndRedirect();
-  }, [interview, isActive, organizationName, interviewId, router, isGenerating]);
+  }, [
+    interview,
+    isActive,
+    organizationName,
+    interviewId,
+    router,
+    isGenerating,
+  ]);
 
   if (error) {
     return (
@@ -199,4 +212,3 @@ function InterviewLanding() {
 }
 
 export default InterviewLanding;
-

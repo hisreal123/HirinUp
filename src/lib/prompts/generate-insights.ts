@@ -1,11 +1,11 @@
 export const SYSTEM_PROMPT =
-  "You are an expert in uncovering deeper insights from interview question and answer sets.";
+  'You are an expert in uncovering deeper insights from interview question and answer sets.';
 
 export const createUserPrompt = (
   callSummaries: string,
   interviewName: string,
   interviewObjective: string,
-  interviewDescription: string,
+  interviewDescription: string
 ) => {
   return `Imagine you are an interviewer who is an expert in uncovering deeper insights from call summaries.
     Use the list of call summaries and the interview details below to generate insights.

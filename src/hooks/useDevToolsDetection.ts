@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 interface UseDevToolsDetectionOptions {
   enabled?: boolean;
@@ -15,23 +15,23 @@ export function useDevToolsDetection({
 
   // Step 2: Block right-click context menu
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
     };
 
-    window.addEventListener("contextmenu", handleContextMenu, true);
+    window.addEventListener('contextmenu', handleContextMenu, true);
 
     return () => {
-      window.removeEventListener("contextmenu", handleContextMenu, true);
+      window.removeEventListener('contextmenu', handleContextMenu, true);
     };
   }, [enabled]);
 
   // Step 3: Detect DevTools via window size difference (docked DevTools shrinks viewport)
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     const THRESHOLD = 160; // px — DevTools panel is always wider/taller than this
 

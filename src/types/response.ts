@@ -64,7 +64,7 @@ export interface CallData {
   end_timestamp: number;
   transcript: string;
   transcript_object: {
-    role: "agent" | "user";
+    role: 'agent' | 'user';
     content: string;
     words: {
       word: string;
@@ -73,7 +73,7 @@ export interface CallData {
     }[];
   }[];
   transcript_with_tool_calls: {
-    role: "agent" | "user";
+    role: 'agent' | 'user';
     content: string;
     words: {
       word: string;

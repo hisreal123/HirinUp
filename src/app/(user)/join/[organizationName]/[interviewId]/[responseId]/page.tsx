@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
 // import { useInterviews } from "@/contexts/interviews.context";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useDevToolsDetection } from "@/hooks/useDevToolsDetection";
-import { DevToolsBlocker } from "@/components/call/DevToolsBlocker";
-import Call from "@/components/call";
-import Image from "next/image";
-import { ArrowUpRightSquareIcon } from "lucide-react";
-import { Interview } from "@/types/interview";
-import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
-import { ResponseService } from "@/services/responses.service";
-import { encryptedApiCall } from "@/lib/encrypted-api";
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useDevToolsDetection } from '@/hooks/useDevToolsDetection';
+import { DevToolsBlocker } from '@/components/call/DevToolsBlocker';
+import Call from '@/components/call';
+import Image from 'next/image';
+import { ArrowUpRightSquareIcon } from 'lucide-react';
+import { Interview } from '@/types/interview';
+import LoaderWithText from '@/components/loaders/loader-with-text/loaderWithText';
+import { ResponseService } from '@/services/responses.service';
+import { encryptedApiCall } from '@/lib/encrypted-api';
 
 type PopupProps = {
   title: string;
@@ -29,12 +29,12 @@ function PopupLoader() {
       </div>
       <a
         className="flex flex-row justify-center align-middle mt-3"
-          href="https://hirin-up.co/"
+        href="https://hirin-up.co/"
         target="_blank"
         rel="noopener noreferrer"
       >
         <div className="text-center text-md font-semibold mr-2">
-          Powered by{" "}
+          Powered by{' '}
           <span className="font-bold">
             Hirin<span className="text-indigo-600">Up</span>
           </span>
@@ -63,12 +63,12 @@ function PopUpMessage({ title, description, image }: PopupProps) {
       </div>
       <a
         className="flex flex-row justify-center align-middle mt-3"
-          href="https://hirin-up.co/"
+        href="https://hirin-up.co/"
         target="_blank"
         rel="noopener noreferrer"
       >
         <div className="text-center text-md font-semibold mr-2">
-          Powered by{" "}
+          Powered by{' '}
           <span className="font-bold">
             Hirin<span className="text-indigo-600">Up</span>
           </span>
@@ -99,7 +99,9 @@ function InterviewInterface() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isExpired, setIsExpired] = useState(false);
   const [expirationChecked, setExpirationChecked] = useState(false);
-  const [initialCallPhase, setInitialCallPhase] = useState<'first_call' | 'verification_modal' | 'second_call'>('first_call');
+  const [initialCallPhase, setInitialCallPhase] = useState<
+    'first_call' | 'verification_modal' | 'second_call'
+  >('first_call');
 
   useEffect(() => {
     if (interview) {
@@ -119,7 +121,9 @@ function InterviewInterface() {
       setIsValidating(true);
 
       try {
-        const response = await encryptedApiCall("/api/get-response", { token: responseId });
+        const response = await encryptedApiCall('/api/get-response', {
+          token: responseId,
+        });
         if (response && response.is_ended === true) {
           setIsExpired(true);
           setExpirationChecked(true);
@@ -129,12 +133,16 @@ function InterviewInterface() {
         }
 
         // DB is source of truth - localStorage is just a cache
-        const dbFlowState = (response?.call_flow_state as Record<string, string>) || {};
-        
+        const dbFlowState =
+          (response?.call_flow_state as Record<string, string>) || {};
+
         // Always sync localStorage from DB (clear if DB is empty, update if DB has data)
         try {
           if (Object.keys(dbFlowState).length > 0) {
-            localStorage.setItem(`call_flow_state_${responseId}`, JSON.stringify(dbFlowState));
+            localStorage.setItem(
+              `call_flow_state_${responseId}`,
+              JSON.stringify(dbFlowState)
+            );
           } else {
             // DB is empty (new response) - clear ALL stale localStorage for this response
             localStorage.removeItem(`call_flow_state_${responseId}`);
@@ -169,16 +177,19 @@ function InterviewInterface() {
         if (!flowState.is_loaded) {
           const isLoadedTs = new Date().toISOString();
           const updatedState = { ...dbFlowState, is_loaded: isLoadedTs };
-          
+
           // Write to DB first
           await ResponseService.updateResponseByToken(
             { call_flow_state: updatedState },
-            responseId,
+            responseId
           );
-          
+
           // Then sync localStorage from updated DB state
           try {
-            localStorage.setItem(`call_flow_state_${responseId}`, JSON.stringify(updatedState));
+            localStorage.setItem(
+              `call_flow_state_${responseId}`,
+              JSON.stringify(updatedState)
+            );
           } catch (e) {
             // ignore localStorage errors
           }
@@ -187,7 +198,7 @@ function InterviewInterface() {
         setExpirationChecked(true);
         setIsValidating(false);
       } catch (error) {
-        console.error("Error checking expiration:", error);
+        console.error('Error checking expiration:', error);
         setExpirationChecked(true);
         setIsValidating(false);
       }
@@ -209,98 +220,154 @@ function InterviewInterface() {
       return;
     }
 
+    let cancelled = false;
+
     const validateAll = async () => {
+      if (cancelled) {return;}
       setIsValidating(true);
       setValidationError(null);
 
       try {
-
         // Step 1: Validate Response exists and belongs to interview
-        const response = await encryptedApiCall("/api/get-response", { token: responseId });
-        
+        const response = await encryptedApiCall('/api/get-response', {
+          token: responseId,
+        });
+
+        if (cancelled) {return;}
+
         if (!response) {
-          console.error("Response not found for token:", responseId);
-          setValidationError("Response not found");
+          console.error('Response not found for token:', responseId);
+          setValidationError('Response not found');
           setResponseNotFound(true);
           setIsValidating(false);
-          return;
+
+return;
         }
-        
+
         // Compare with actual interview.id (not the interviewId from URL)
         if (response.interview_id !== interview.id) {
-          console.error("Response interview_id mismatch:", {
+          console.error('Response interview_id mismatch:', {
             responseInterviewId: response.interview_id,
             expectedInterviewId: interview.id,
-            urlInterviewId: interviewId
+            urlInterviewId: interviewId,
           });
-          setValidationError("Response does not belong to this interview");
+          setValidationError('Response does not belong to this interview');
           setResponseNotFound(true);
           setIsValidating(false);
-          return;
+
+return;
         }
-        
+
         // Double-check expiration (in case early check didn't catch it)
         if (response.is_ended === true) {
           setIsExpired(true);
           setIsValidating(false);
-          return;
+
+return;
         }
-        
 
         // Step 2: Validate Organization exists and matches URL
         if (!interview.organization_id) {
-          console.error("Interview has no organization_id");
-          setValidationError("Interview organization not found");
+          console.error('Interview has no organization_id');
+          setValidationError('Interview organization not found');
           setOrganizationNotFound(true);
           setIsValidating(false);
-          return;
+
+return;
         }
 
-        const organization = await encryptedApiCall("/api/get-organization", {
-          id: interview.organization_id,
-        }).catch(() => null);
+        // Retry up to 2 times for transient network/server errors.
+        // Only treat a genuine 404 "Organization not found" as unregistered —
+        // a network blip or 500 should not permanently block the candidate.
+        let organization = null;
+        let orgFetchError: Error | null = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            organization = await encryptedApiCall('/api/get-organization', {
+              id: interview.organization_id,
+            });
+            orgFetchError = null;
+            break;
+          } catch (err: any) {
+            orgFetchError = err;
+            const isNotFound =
+              err?.message === 'Organization not found' ||
+              err?.message?.includes('404');
+            if (isNotFound) {
+              break; // Genuine 404 — no point retrying
+            }
+            if (attempt < 2) {
+              await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+            }
+          }
+        }
+
+        if (cancelled) {return;}
 
         if (!organization) {
-          console.error("Organization not found:", interview.organization_id);
-          setValidationError("Organization not registered");
+          const isNotFound =
+            orgFetchError?.message === 'Organization not found' ||
+            orgFetchError?.message?.includes('404');
+          console.error('Organization fetch failed:', orgFetchError?.message);
+          setValidationError(
+            isNotFound
+              ? 'Organization not registered'
+              : 'Could not verify organization. Please refresh and try again.'
+          );
           setOrganizationNotFound(true);
           setIsValidating(false);
-          return;
+
+return;
         }
 
         // Validate organization name matches URL (normalize for comparison)
         const orgNameSlug = organization.name
           ?.toLowerCase()
           .trim()
-          .replace(/\s+/g, "-")
-          .replace(/[^a-z0-9-]/g, "");
-        
-        if (orgNameSlug !== organizationName && !organizationName?.startsWith(orgNameSlug)) {
-          console.error("Organization name mismatch:", {
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, '');
+
+        if (
+          orgNameSlug !== organizationName &&
+          !organizationName?.startsWith(orgNameSlug)
+        ) {
+          console.error('Organization name mismatch:', {
             urlOrgName: organizationName,
             dbOrgName: orgNameSlug,
-            actualOrgName: organization.name
+            actualOrgName: organization.name,
           });
-          setValidationError("Organization name does not match");
+          setValidationError('Organization name does not match');
           setOrganizationNotFound(true);
           setIsValidating(false);
-          return;
+
+return;
         }
 
-
-   
-        setIsValidating(false);
+        if (!cancelled) {
+          setIsValidating(false);
+        }
       } catch (error) {
-        console.error("Error during validation:", error);
-        setValidationError("Validation error occurred");
+        if (cancelled) {return;}
+        console.error('Error during validation:', error);
+        setValidationError('Validation error occurred');
         setIsValidating(false);
-        // Set appropriate error state
         setResponseNotFound(true);
       }
     };
 
     validateAll();
-  }, [responseId, interview, organizationName, interviewId, expirationChecked, isExpired]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    responseId,
+    interview,
+    organizationName,
+    interviewId,
+    expirationChecked,
+    isExpired,
+  ]);
 
   // Only fetch interview AFTER expiration check passes
   useEffect(() => {
@@ -310,10 +377,13 @@ function InterviewInterface() {
 
     const fetchinterview = async () => {
       try {
-        const response = await encryptedApiCall<Interview>("/api/get-interview", { id: interviewId });
+        const response = await encryptedApiCall<Interview>(
+          '/api/get-interview',
+          { id: interviewId }
+        );
         if (response) {
           setInterview(response);
-          document.title = `AI Recruiter for Voice Interviews - ${response.name ? response.name.charAt(0).toUpperCase() + response.name.slice(1) : ""}`;
+          document.title = `AI Recruiter for Voice Interviews - ${response.name ? response.name.charAt(0).toUpperCase() + response.name.slice(1) : ''}`;
         } else {
           setInterviewNotFound(true);
         }
@@ -343,7 +413,12 @@ function InterviewInterface() {
   }
 
   // Show 404/error page if validation fails
-  if (responseNotFound || organizationNotFound || interviewNotFound || validationError) {
+  if (
+    responseNotFound ||
+    organizationNotFound ||
+    interviewNotFound ||
+    validationError
+  ) {
     return (
       <div>
         <div className="hidden md:block p-8 mx-auto form-container">
@@ -392,7 +467,11 @@ function InterviewInterface() {
             image="/closed.png"
           />
         ) : (
-          <Call interview={interview} responseToken={responseId} initialCallPhase={initialCallPhase} />
+          <Call
+            interview={interview}
+            responseToken={responseId}
+            initialCallPhase={initialCallPhase}
+          />
         )}
       </div>
     </div>
@@ -400,4 +479,3 @@ function InterviewInterface() {
 }
 
 export default InterviewInterface;
-

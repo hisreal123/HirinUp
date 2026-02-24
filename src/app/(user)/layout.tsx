@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import "../globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
-import Providers from "@/components/providers";
-import { Toaster } from "sonner";
-import MobileRestriction from "@/components/mobile-restriction";
+import '../globals.css';
+import { ClerkProvider } from '@clerk/nextjs';
+import Providers from '@/components/providers';
+import { Toaster } from 'sonner';
+import MobileRestriction from '@/components/mobile-restriction';
 
 // Note: Call pages are public and don't require authentication
 // ClerkProvider is included for compatibility but won't be used for auth on these pages
@@ -26,14 +26,14 @@ export default function RootLayout({
             <Providers>
               {children}
               <Toaster
-                richColors
                 toastOptions={{
                   classNames: {
-                    actionButton: "bg-primary",
-                    cancelButton: "bg-orange-400",
-                    closeButton: "bg-lime-400",
+                    actionButton: 'bg-primary',
+                    cancelButton: 'bg-orange-400',
+                    closeButton: 'bg-lime-400',
                   },
                 }}
+                richColors
               />
             </Providers>
           </ClerkProvider>

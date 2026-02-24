@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { serverDecryptPayload, serverEncryptResponse } from "@/lib/crypto";
-import { logger } from "@/lib/logger";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { serverDecryptPayload, serverEncryptResponse } from '@/lib/crypto';
+import { logger } from '@/lib/logger';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,34 +22,46 @@ export async function POST(req: Request) {
     const { userId, organizationId } = body;
 
     if (!userId && !organizationId) {
-      return NextResponse.json({ error: "userId or organizationId is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: 'userId or organizationId is required' },
+        { status: 400 }
+      );
     }
 
     // When in an org, show only that org's interviews. When personal, show only by user_id.
     const query = supabase
-      .from("interview")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .from('interview')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     const { data, error } = organizationId
-      ? await query.eq("organization_id", organizationId)
-      : await query.eq("user_id", userId);
+      ? await query.eq('organization_id', organizationId)
+      : await query.eq('user_id', userId);
 
     if (error) {
-      logger.warn("[get-interviews] Query error:", { error });
-      return NextResponse.json({ error: "Failed to fetch interviews" }, { status: 500 });
+      logger.warn('[get-interviews] Query error:', { error });
+      
+return NextResponse.json(
+        { error: 'Failed to fetch interviews' },
+        { status: 500 }
+      );
     }
 
     const result = data || [];
 
     if (raw.cpk) {
       const encrypted = await serverEncryptResponse(result, raw.cpk);
-      return NextResponse.json(encrypted, { status: 200 });
+      
+return NextResponse.json(encrypted, { status: 200 });
     }
 
     return NextResponse.json(result, { status: 200 });
   } catch (err: any) {
-    logger.error("[get-interviews] Error:", err.message);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    logger.error('[get-interviews] Error:', err.message);
+    
+return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

@@ -11,7 +11,8 @@ import CallTOActionLayout from '@/app/(marketing)/layout/cta';
 export default function TalvinSection() {
   const leftFaqs = faqList.slice(0, 5);
   const rightFaqs = faqList.slice(5, 10);
-  return (
+  
+return (
     <section className="w-full bg-[#F8F8F8] pb-20">
       {/* ================= FAQ ================= */}
       <div className="max-w-7xl mx-auto px-6 pt-28">

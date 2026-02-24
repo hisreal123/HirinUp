@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { Interview } from "@/types/interview";
-import { Interviewer } from "@/types/interviewer";
-import { Response } from "@/types/response";
-import React, { useEffect, useState } from "react";
-import { UserCircleIcon, SmileIcon, Info } from "lucide-react";
-import { useInterviewers } from "@/contexts/interviewers.context";
-import { PieChart } from "@mui/x-charts/PieChart";
-import { CandidateStatus } from "@/lib/enum";
-import { convertSecondstoMMSS } from "@/lib/utils";
-import Image from "next/image";
+import { Interview } from '@/types/interview';
+import { Interviewer } from '@/types/interviewer';
+import { Response } from '@/types/response';
+import React, { useEffect, useState } from 'react';
+import { UserCircleIcon, SmileIcon, Info } from 'lucide-react';
+import { useInterviewers } from '@/contexts/interviewers.context';
+import { PieChart } from '@mui/x-charts/PieChart';
+import { CandidateStatus } from '@/lib/enum';
+import { convertSecondstoMMSS } from '@/lib/utils';
+import Image from 'next/image';
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 import DataTable, {
   TableData,
-} from "@/components/dashboard/interview/dataTable";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/dashboard/interview/dataTable';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type SummaryProps = {
   responses: Response[];
@@ -74,13 +74,13 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
   const prepareTableData = (responses: Response[]): TableData[] => {
     return responses.map((response) => ({
       call_id: response.call_id,
-      name: response.name || "Anonymous",
+      name: response.name || 'Anonymous',
       overallScore: response.analytics?.overallScore || 0,
       communicationScore: response.analytics?.communication?.score || 0,
       callSummary:
         response.analytics?.softSkillSummary ||
         response.details?.call_analysis?.call_summary ||
-        "No summary available",
+        'No summary available',
     }));
   };
 
@@ -89,7 +89,7 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
       return;
     }
     const interviewer = interviewers.find(
-      (interviewer) => interviewer.id === interview.interviewer_id,
+      (interviewer) => interviewer.id === interview.interviewer_id
     );
     setInterviewer(interviewer);
   }, [interviewers, interview]);
@@ -123,29 +123,29 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
 
     responses.forEach((response) => {
       const sentiment = response.details?.call_analysis?.user_sentiment;
-      if (sentiment === "Positive") {
+      if (sentiment === 'Positive') {
         sentimentCounter.positive += 1;
-      } else if (sentiment === "Negative") {
+      } else if (sentiment === 'Negative') {
         sentimentCounter.negative += 1;
-      } else if (sentiment === "Neutral") {
+      } else if (sentiment === 'Neutral') {
         sentimentCounter.neutral += 1;
       }
 
       const callCompletion =
         response.details?.call_analysis?.call_completion_rating;
-      if (callCompletion === "Complete") {
+      if (callCompletion === 'Complete') {
         callCompletionCounter.complete += 1;
-      } else if (callCompletion === "Incomplete") {
+      } else if (callCompletion === 'Incomplete') {
         callCompletionCounter.incomplete += 1;
-      } else if (callCompletion === "Partial") {
+      } else if (callCompletion === 'Partial') {
         callCompletionCounter.partial += 1;
       }
 
       const agentTaskCompletion =
         response.details?.call_analysis?.agent_task_completion_rating;
       if (
-        agentTaskCompletion === "Complete" ||
-        agentTaskCompletion === "Partial"
+        agentTaskCompletion === 'Complete' ||
+        agentTaskCompletion === 'Partial'
       ) {
         completedCount += 1;
       }
@@ -153,7 +153,7 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
       totalDuration += response.duration;
       if (
         Object.values(CandidateStatus).includes(
-          response.candidate_status as CandidateStatus,
+          response.candidate_status as CandidateStatus
         )
       ) {
         statusCounter[response.candidate_status as CandidateStatus]++;
@@ -179,17 +179,17 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
               <p className="font-semibold my-2">Overall Analysis</p>
             </div>
             <p className="text-sm">
-              Interviewer used:{" "}
+              Interviewer used:{' '}
               <span className="font-medium">{interviewer?.name}</span>
             </p>
           </div>
           <p className="my-3 ml-2 text-sm">
-            Interview Description:{" "}
+            Interview Description:{' '}
             <span className="font-medium">{interview?.description}</span>
           </p>
           <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-4 rounded-2xl bg-slate-50 shadow-md">
             <ScrollArea className="h-[250px]">
-              <DataTable data={tableData} interviewId={interview?.id || ""} />
+              <DataTable data={tableData} interviewId={interview?.id || ''} />
             </ScrollArea>
           </div>
           <div className="flex flex-row gap-1 my-2 justify-center">
@@ -212,7 +212,7 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                 </div>
                 <p className="w-fit text-2xl font-semibold text-indigo-600  p-1 px-2 bg-indigo-100 rounded-md">
                   {Math.round(
-                    (completedInterviews / responses.length) * 10000,
+                    (completedInterviews / responses.length) * 10000
                   ) / 100}
                   %
                 </p>
@@ -226,8 +226,8 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
               </div>
               <PieChart
                 sx={{
-                  "& .MuiChartsLegend-series text": {
-                    fontSize: "0.8rem !important",
+                  '& .MuiChartsLegend-series text': {
+                    fontSize: '0.8rem !important',
                   },
                 }}
                 series={[
@@ -237,26 +237,26 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                         id: 0,
                         value: sentimentCount.positive,
                         label: `Positive (${sentimentCount.positive})`,
-                        color: "#22c55e",
+                        color: '#22c55e',
                       },
                       {
                         id: 1,
                         value: sentimentCount.neutral,
                         label: `Neutral (${sentimentCount.neutral})`,
-                        color: "#eab308",
+                        color: '#eab308',
                       },
                       {
                         id: 2,
                         value: sentimentCount.negative,
                         label: `Negative (${sentimentCount.negative})`,
-                        color: "#eb4444",
+                        color: '#eb4444',
                       },
                     ],
-                    highlightScope: { faded: "global", highlighted: "item" },
+                    highlightScope: { faded: 'global', highlighted: 'item' },
                     faded: {
                       innerRadius: 10,
                       additionalRadius: -10,
-                      color: "gray",
+                      color: 'gray',
                     },
                   },
                 ]}
@@ -275,8 +275,8 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
               </div>
               <PieChart
                 sx={{
-                  "& .MuiChartsLegend-series text": {
-                    fontSize: "0.8rem !important",
+                  '& .MuiChartsLegend-series text': {
+                    fontSize: '0.8rem !important',
                   },
                 }}
                 series={[
@@ -286,33 +286,33 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                         id: 0,
                         value: candidateStatusCount[CandidateStatus.SELECTED],
                         label: `Selected (${candidateStatusCount[CandidateStatus.SELECTED]})`,
-                        color: "#22c55e",
+                        color: '#22c55e',
                       },
                       {
                         id: 1,
                         value: candidateStatusCount[CandidateStatus.POTENTIAL],
                         label: `Potential (${candidateStatusCount[CandidateStatus.POTENTIAL]})`,
-                        color: "#eab308",
+                        color: '#eab308',
                       },
                       {
                         id: 2,
                         value:
                           candidateStatusCount[CandidateStatus.NOT_SELECTED],
                         label: `Not Selected (${candidateStatusCount[CandidateStatus.NOT_SELECTED]})`,
-                        color: "#eb4444",
+                        color: '#eb4444',
                       },
                       {
                         id: 3,
                         value: candidateStatusCount[CandidateStatus.NO_STATUS],
                         label: `No Status (${candidateStatusCount[CandidateStatus.NO_STATUS]})`,
-                        color: "#9ca3af",
+                        color: '#9ca3af',
                       },
                     ],
-                    highlightScope: { faded: "global", highlighted: "item" },
+                    highlightScope: { faded: 'global', highlighted: 'item' },
                     faded: {
                       innerRadius: 10,
                       additionalRadius: -10,
-                      color: "gray",
+                      color: 'gray',
                     },
                   },
                 ]}
@@ -320,8 +320,8 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                 height={120}
                 slotProps={{
                   legend: {
-                    direction: "column",
-                    position: { vertical: "middle", horizontal: "right" },
+                    direction: 'column',
+                    position: { vertical: 'middle', horizontal: 'right' },
                     padding: 0,
                     itemMarkWidth: 10,
                     itemMarkHeight: 10,

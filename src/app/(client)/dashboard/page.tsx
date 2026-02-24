@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useOrganization } from "@clerk/nextjs";
-import InterviewCard from "@/components/dashboard/interview/interviewCard";
-import InterviewListItem from "@/components/dashboard/interview/interviewListItem";
-import CreateInterviewCard from "@/components/dashboard/interview/createInterviewCard";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { InterviewService } from "@/services/interviews.service";
-import { ClientService } from "@/services/clients.service";
-import { encryptedApiCall } from "@/lib/encrypted-api";
-import { ResponseService } from "@/services/responses.service";
-import { useInterviews } from "@/contexts/interviews.context";
-import Modal from "@/components/dashboard/Modal";
-import { Gem, Plus, Grid3x3, List } from "lucide-react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
+import { useOrganization } from '@clerk/nextjs';
+import InterviewCard from '@/components/dashboard/interview/interviewCard';
+import InterviewListItem from '@/components/dashboard/interview/interviewListItem';
+import CreateInterviewCard from '@/components/dashboard/interview/createInterviewCard';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { InterviewService } from '@/services/interviews.service';
+import { ClientService } from '@/services/clients.service';
+import { encryptedApiCall } from '@/lib/encrypted-api';
+import { ResponseService } from '@/services/responses.service';
+import { useInterviews } from '@/contexts/interviews.context';
+import Modal from '@/components/dashboard/Modal';
+import { Gem, Plus, Grid3x3, List } from 'lucide-react';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
 
 function Interviews() {
   const { interviews, interviewsLoading } = useInterviews();
   const { organization } = useOrganization();
   const [loading, setLoading] = useState<boolean>(false);
-  const [currentPlan, setCurrentPlan] = useState<string>("");
+  const [currentPlan, setCurrentPlan] = useState<string>('');
   const [allowedResponsesCount, setAllowedResponsesCount] =
     useState<number>(10);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   function InterviewsLoader() {
     return (
@@ -41,10 +41,12 @@ function Interviews() {
     const fetchOrganizationData = async () => {
       try {
         if (organization?.id) {
-          const data = await encryptedApiCall("/api/get-organization", { id: organization.id });
+          const data = await encryptedApiCall('/api/get-organization', {
+            id: organization.id,
+          });
           if (data?.plan) {
             setCurrentPlan(data.plan);
-            if (data.plan === "free_trial_over") {
+            if (data.plan === 'free_trial_over') {
               setIsModalOpen(true);
             }
           }
@@ -53,7 +55,7 @@ function Interviews() {
           }
         }
       } catch (error) {
-        console.error("Error fetching organization data:", error);
+        console.error('Error fetching organization data:', error);
       }
     };
 
@@ -62,7 +64,7 @@ function Interviews() {
 
   useEffect(() => {
     const fetchResponsesCount = async () => {
-      if (!organization || currentPlan !== "free") {
+      if (!organization || currentPlan !== 'free') {
         return;
       }
 
@@ -70,19 +72,19 @@ function Interviews() {
       try {
         const totalResponses =
           await ResponseService.getResponseCountByOrganizationId(
-            organization.id,
+            organization.id
           );
         const hasExceededLimit = totalResponses >= allowedResponsesCount;
         if (hasExceededLimit) {
-          setCurrentPlan("free_trial_over");
+          setCurrentPlan('free_trial_over');
           await InterviewService.deactivateInterviewsByOrgId(organization.id);
           await ClientService.updateOrganization(
-            { plan: "free_trial_over" },
-            organization.id,
+            { plan: 'free_trial_over' },
+            organization.id
           );
         }
       } catch (error) {
-        console.error("Error fetching responses:", error);
+        console.error('Error fetching responses:', error);
       } finally {
         setLoading(false);
       }
@@ -97,39 +99,47 @@ function Interviews() {
         <div className="flex flex-row items-center justify-between mt-8">
           <div>
             <h2 className="mr-2 text-2xl font-semibold tracking-tight">
-          My Interviews
-        </h2>
+              My Interviews
+            </h2>
             <h3 className="text-gray-500 text-sm tracking-tight ">
               {interviews?.length} Interviews created
-        </h3>
+            </h3>
           </div>
           <div className="flex gap-2">
             <Button
-              variant={viewMode === "grid" ? "default" : "outline"}
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setViewMode("grid")}
               className="flex items-center gap-2"
+              onClick={() => setViewMode('grid')}
             >
               <Grid3x3 size={16} />
               Grid
             </Button>
             <Button
-              variant={viewMode === "list" ? "default" : "outline"}
+              variant={viewMode === 'list' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setViewMode("list")}
               className="flex items-center gap-2"
+              onClick={() => setViewMode('list')}
             >
               <List size={16} />
               List
             </Button>
           </div>
         </div>
-        <div className={`relative mt-1 ${viewMode === "grid" ? "grid grid-cols-4 gap-4" : "flex flex-col gap-4"}`}>
-          {currentPlan == "free_trial_over" ? (
-            <Card className={`w-full flex flex-col gap-4 border border-dashed border-primary-500 bg-lightCard-100 hover:bg-secondary-100/30 transition-colors rounded-xl justify-center items-center p-4 cursor-pointer ${viewMode === "grid" ? "h-full min-h-40" : "min-h-24"}`}>
+        <div
+          className={`relative mt-1 ${viewMode === 'grid' ? 'grid grid-cols-4 gap-4' : 'flex flex-col gap-4'}`}
+        >
+          {currentPlan == 'free_trial_over' ? (
+            <Card
+              className={`w-full flex flex-col gap-4 border border-dashed border-primary-500 bg-lightCard-100 hover:bg-secondary-100/30 transition-colors rounded-xl justify-center items-center p-4 cursor-pointer ${viewMode === 'grid' ? 'h-full min-h-40' : 'min-h-24'}`}
+            >
               <CardContent className="flex items-center flex-col mx-auto">
                 <div className="flex flex-col justify-center items-center w-full overflow-hidden">
-                  <Plus size={viewMode === "grid" ? 90 : 50} strokeWidth={0.5} className="text-gray-700" />
+                  <Plus
+                    size={viewMode === 'grid' ? 90 : 50}
+                    strokeWidth={0.5}
+                    className="text-gray-700"
+                  />
                 </div>
                 <CardTitle className="p-0 text-md text-center">
                   You cannot create any more interviews unless you upgrade
@@ -159,7 +169,7 @@ function Interviews() {
                     <div className="grid grid-cols-2 gap-2">
                       <div className="flex justify-center items-center">
                         <Image
-                          src={"/premium-plan-icon.png"}
+                          src={'/premium-plan-icon.png'}
                           alt="Graphic"
                           width={299}
                           height={300}
@@ -186,36 +196,36 @@ function Interviews() {
                       </div>
                     </div>
                     <p className="text-l text-center">
-                      Contact{" "}
-                      <span className="font-semibold">founders@hirin-up.co</span>{" "}
+                      Contact{' '}
+                      <span className="font-semibold">
+                        founders@hirin-up.co
+                      </span>{' '}
                       to upgrade your plan.
                     </p>
                   </div>
                 </Modal>
               )}
-              {viewMode === "grid" ? (
-                interviews.map((item) => (
-                <InterviewCard
-                  id={item.id}
-                  interviewerId={item.interviewer_id}
-                  key={item.id}
-                  name={item.name}
-                  url={item.url ?? ""}
-                  readableSlug={item.readable_slug}
-                />
-                ))
-              ) : (
-                interviews.map((item) => (
-                  <InterviewListItem
-                    id={item.id}
-                    interviewerId={item.interviewer_id}
-                    key={item.id}
-                    name={item.name}
-                    url={item.url ?? ""}
-                    readableSlug={item.readable_slug}
-                  />
-                ))
-              )}
+              {viewMode === 'grid'
+                ? interviews.map((item) => (
+                    <InterviewCard
+                      id={item.id}
+                      interviewerId={item.interviewer_id}
+                      key={item.id}
+                      name={item.name}
+                      url={item.url ?? ''}
+                      readableSlug={item.readable_slug}
+                    />
+                  ))
+                : interviews.map((item) => (
+                    <InterviewListItem
+                      id={item.id}
+                      interviewerId={item.interviewer_id}
+                      key={item.id}
+                      name={item.name}
+                      url={item.url ?? ''}
+                      readableSlug={item.readable_slug}
+                    />
+                  ))}
             </>
           )}
         </div>

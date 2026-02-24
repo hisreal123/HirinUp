@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { serverDecryptPayload, serverEncryptResponse } from "@/lib/crypto";
-import { logger } from "@/lib/logger";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { serverDecryptPayload, serverEncryptResponse } from '@/lib/crypto';
+import { logger } from '@/lib/logger';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,28 +22,37 @@ export async function POST(req: Request) {
     const { id } = body;
 
     if (!id) {
-      return NextResponse.json({ error: "id is required" }, { status: 400 });
+      return NextResponse.json({ error: 'id is required' }, { status: 400 });
     }
 
     const { data, error } = await supabase
-      .from("interviewer")
-      .select("*")
-      .eq("id", id)
+      .from('interviewer')
+      .select('*')
+      .eq('id', id)
       .single();
 
     if (error || !data) {
-      logger.warn("[get-interviewer] Not found:", { id });
-      return NextResponse.json({ error: "Interviewer not found" }, { status: 404 });
+      logger.warn('[get-interviewer] Not found:', { id });
+      
+return NextResponse.json(
+        { error: 'Interviewer not found' },
+        { status: 404 }
+      );
     }
 
     if (raw.cpk) {
       const encrypted = await serverEncryptResponse(data, raw.cpk);
-      return NextResponse.json(encrypted, { status: 200 });
+      
+return NextResponse.json(encrypted, { status: 200 });
     }
 
     return NextResponse.json(data, { status: 200 });
   } catch (err: any) {
-    logger.error("[get-interviewer] Error:", err.message);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    logger.error('[get-interviewer] Error:', err.message);
+    
+return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

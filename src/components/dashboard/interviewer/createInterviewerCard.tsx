@@ -1,39 +1,39 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React from "react";
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { Image as LucideImage } from "lucide-react";
-import { Plus } from "lucide-react";
-import { CardTitle } from "@/components/ui/card";
-import Modal from "@/components/dashboard/Modal";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
-import { avatars } from "@/components/dashboard/interviewer/avatars";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useInterviewers } from "@/contexts/interviewers.context";
-import { useClerk } from "@clerk/nextjs";
+import React from 'react';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { Image as LucideImage } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { CardTitle } from '@/components/ui/card';
+import Modal from '@/components/dashboard/Modal';
+import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { avatars } from '@/components/dashboard/interviewer/avatars';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useInterviewers } from '@/contexts/interviewers.context';
+import { useClerk } from '@clerk/nextjs';
 
 const createInterviewerCard = () => {
   const [open, setOpen] = useState(false);
   const [gallery, setGallery] = useState(false);
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
   const [empathy, setEmpathy] = useState(0.4);
   const [rapport, setRapport] = useState(0.7);
   const [exploration, setExploration] = useState(0.2);
   const [speed, setSpeed] = useState(0.9);
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState('');
   const { createInterviewer } = useInterviewers();
   const { user } = useClerk();
   const [isClicked, setIsClicked] = useState(false);
 
   useEffect(() => {
     if (!open) {
-      setName("");
+      setName('');
       setEmpathy(0.4);
       setRapport(0.7);
       setExploration(0.2);
       setSpeed(0.9);
-      setImage("");
+      setImage('');
     }
   }, [open]);
 

@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
-import Image from "next/image";
+import React, { memo } from 'react';
+import Image from 'next/image';
 
 interface InterviewViewProps {
   lastInterviewerResponse: string;
@@ -10,7 +11,7 @@ interface InterviewViewProps {
   lastUserResponseRef: React.RefObject<HTMLDivElement>;
 }
 
-export function InterviewView({
+export const InterviewView = memo(function InterviewView({
   lastInterviewerResponse,
   lastUserResponse,
   activeTurn,
@@ -36,15 +37,15 @@ export function InterviewView({
                     width={120}
                     height={120}
                     className={`object-cover object-center mx-auto my-auto ${
-                      activeTurn === "agent"
-                        ? "border-4 border-primary rounded-full"
-                        : ""
+                      activeTurn === 'agent'
+                        ? 'border-4 border-primary rounded-full'
+                        : ''
                     }`}
                   />
                 ) : (
                   <div
                     className={`w-[120px] h-[120px] rounded-full bg-gray-200 flex items-center justify-center mx-auto my-auto ${
-                      activeTurn === "agent" ? "border-4 border-primary" : ""
+                      activeTurn === 'agent' ? 'border-4 border-primary' : ''
                     }`}
                   >
                     <span className="text-gray-500 text-sm">No Image</span>
@@ -69,9 +70,9 @@ export function InterviewView({
                 width={120}
                 height={120}
                 className={`object-cover object-center mx-auto my-auto ${
-                  activeTurn === "user"
-                    ? "border-4 border-primary rounded-full"
-                    : ""
+                  activeTurn === 'user'
+                    ? 'border-4 border-primary rounded-full'
+                    : ''
                 }`}
               />
               <div className="font-semibold">You</div>
@@ -81,4 +82,4 @@ export function InterviewView({
       </div>
     </>
   );
-}
+});

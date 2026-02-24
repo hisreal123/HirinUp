@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { Analytics, CallData } from "@/types/response";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useGetCall } from "@/hooks/useGetCall";
-import ReactAudioPlayer from "react-audio-player";
-import { DownloadIcon, TrashIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { ResponseService } from "@/services/responses.service";
-import { encryptedApiCall } from "@/lib/encrypted-api";
-import { useRouter } from "next/navigation";
-import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CircularProgress } from "@nextui-org/react";
-import QuestionAnswerCard from "@/components/dashboard/interview/questionAnswerCard";
-import { marked } from "marked";
+import React, { useEffect, useState } from 'react';
+import { Analytics, CallData } from '@/types/response';
+import { ScrollArea } from '@radix-ui/react-scroll-area';
+import { useGetCall } from '@/hooks/useGetCall';
+import ReactAudioPlayer from 'react-audio-player';
+import { DownloadIcon, TrashIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { ResponseService } from '@/services/responses.service';
+import { encryptedApiCall } from '@/lib/encrypted-api';
+import { useRouter } from 'next/navigation';
+import LoaderWithText from '@/components/loaders/loader-with-text/loaderWithText';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { CircularProgress } from '@nextui-org/react';
+import QuestionAnswerCard from '@/components/dashboard/interview/questionAnswerCard';
+import { marked } from 'marked';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,16 +27,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { CandidateStatus } from "@/lib/enum";
-import { ArrowLeft } from "lucide-react";
+} from '@/components/ui/select';
+import { CandidateStatus } from '@/lib/enum';
+import { ArrowLeft } from 'lucide-react';
 
 type CallProps = {
   call_id: string;
@@ -51,17 +51,24 @@ function CallInfo({
 }: CallProps) {
   const [call, setCall] = useState<CallData>();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
-  const [email, setEmail] = useState<string>("");
-  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
+  const [name, setName] = useState<string>('');
   const [isClicked, setIsClicked] = useState(false);
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [transcript, setTranscript] = useState("");
-  const [candidateStatus, setCandidateStatus] = useState<string>("");
-  const [interviewId, setInterviewId] = useState<string>("");
+  const [emailLoading, setEmailLoading] = useState(true);
+  const [transcript, setTranscript] = useState('');
+  const [candidateStatus, setCandidateStatus] = useState<string>('');
+  const [interviewId, setInterviewId] = useState<string>('');
   const [tabSwitchCount, setTabSwitchCount] = useState<number>();
 
-  const { data: callData, isLoading: callLoading, refetch: refetchCall } = useGetCall(call_id, !!call_id);
+  const {
+    data: callData,
+    isLoading: callLoading,
+    refetch: refetchCall,
+  } = useGetCall(call_id, !!call_id);
+
+  // Derived: spinner shows while either the call data OR the response metadata is loading
+  const isLoading = callLoading || emailLoading;
 
   // Update state when call data changes
   useEffect(() => {
@@ -71,16 +78,13 @@ function CallInfo({
     }
   }, [callData]);
 
-  // Update loading state
-  useEffect(() => {
-    setIsLoading(callLoading);
-  }, [callLoading]);
-
   useEffect(() => {
     const fetchEmail = async () => {
-      setIsLoading(true);
+      setEmailLoading(true);
       try {
-        const response = await encryptedApiCall("/api/get-response-by-call", { call_id });
+        const response = await encryptedApiCall('/api/get-response-by-call', {
+          call_id,
+        });
         setEmail(response.email);
         setName(response.name);
         setCandidateStatus(response.candidate_status);
@@ -89,7 +93,7 @@ function CallInfo({
       } catch (error) {
         console.error(error);
       } finally {
-        setIsLoading(false);
+        setEmailLoading(false);
       }
     };
 
@@ -99,7 +103,7 @@ function CallInfo({
 
   useEffect(() => {
     const replaceAgentAndUser = (transcript: string, name: string): string => {
-      const agentReplacement = "**AI interviewer:**";
+      const agentReplacement = '**AI interviewer:**';
       const userReplacement = `**${name}:**`;
 
       // Replace "Agent:" with "AI interviewer:" and "User:" with the variable `${name}:`
@@ -108,7 +112,7 @@ function CallInfo({
         .replace(/User:/g, userReplacement);
 
       // Add space between the dialogues
-      updatedTranscript = updatedTranscript.replace(/(?:\r\n|\r|\n)/g, "\n\n");
+      updatedTranscript = updatedTranscript.replace(/(?:\r\n|\r|\n)/g, '\n\n');
 
       return updatedTranscript;
     };
@@ -120,7 +124,9 @@ function CallInfo({
 
   const onDeleteResponseClick = async () => {
     try {
-      const response = await encryptedApiCall("/api/get-response-by-call", { call_id });
+      const response = await encryptedApiCall('/api/get-response-by-call', {
+        call_id,
+      });
 
       if (response) {
         const interview_id = response.interview_id;
@@ -132,16 +138,16 @@ function CallInfo({
         onDeleteResponse(call_id);
       }
 
-      toast.success("Response deleted successfully.", {
-        position: "bottom-right",
+      toast.success('Response deleted successfully.', {
+        position: 'bottom-right',
 
         duration: 3000,
       });
     } catch (error) {
-      console.error("Error deleting response:", error);
+      console.error('Error deleting response:', error);
 
-      toast.error("Failed to delete the response.", {
-        position: "bottom-right",
+      toast.error('Failed to delete the response.', {
+        position: 'bottom-right',
 
         duration: 3000,
       });
@@ -183,7 +189,7 @@ function CallInfo({
                 <div className="flex flex-row justify-between">
                   <div className="flex flex-row gap-3">
                     <Avatar>
-                      <AvatarFallback>{name ? name[0] : "A"}</AvatarFallback>
+                      <AvatarFallback>{name ? name[0] : 'A'}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
                       {name && (
@@ -199,7 +205,7 @@ function CallInfo({
                         setCandidateStatus(newValue);
                         await ResponseService.updateResponse(
                           { candidate_status: newValue },
-                          call_id,
+                          call_id
                         );
                         onCandidateStatusChange(call_id, newValue);
                       }}
@@ -299,15 +305,15 @@ function CallInfo({
                   <div className="flex flex-row gap-2 align-middle">
                     <CircularProgress
                       classNames={{
-                        svg: "w-28 h-28 drop-shadow-md",
-                        indicator: "stroke-secondary",
-                        track: "stroke-secondary/10",
-                        value: "text-3xl font-semibold text-secondary",
+                        svg: 'w-28 h-28 drop-shadow-md',
+                        indicator: 'stroke-secondary',
+                        track: 'stroke-secondary/10',
+                        value: 'text-3xl font-semibold text-secondary',
                       }}
                       value={analytics?.overallScore}
                       strokeWidth={4}
                       showValueLabel={true}
-                      formatOptions={{ signDisplay: "never" }}
+                      formatOptions={{ signDisplay: 'never' }}
                     />
                     <p className="font-medium my-auto text-xl">
                       Overall Hiring Score
@@ -330,10 +336,10 @@ function CallInfo({
                   <div className="flex flex-row gap-2 align-middle">
                     <CircularProgress
                       classNames={{
-                        svg: "w-28 h-28 drop-shadow-md",
-                        indicator: "stroke-secondary",
-                        track: "stroke-secondary/10",
-                        value: "text-3xl font-semibold text-secondary",
+                        svg: 'w-28 h-28 drop-shadow-md',
+                        indicator: 'stroke-secondary',
+                        track: 'stroke-secondary/10',
+                        value: 'text-3xl font-semibold text-secondary',
                       }}
                       value={analytics?.communication.score}
                       maxValue={10}
@@ -346,7 +352,7 @@ function CallInfo({
                           <span className="text-xl ml-0.5">/10</span>
                         </div>
                       }
-                      formatOptions={{ signDisplay: "never" }}
+                      formatOptions={{ signDisplay: 'never' }}
                     />
                     <p className="font-medium my-auto text-xl">Communication</p>
                   </div>
@@ -375,13 +381,13 @@ function CallInfo({
 
                   <div
                     className={`${
-                      call?.call_analysis?.user_sentiment == "Neutral"
-                        ? "text-yellow-500"
-                        : call?.call_analysis?.user_sentiment == "Negative"
-                          ? "text-red-500"
-                          : call?.call_analysis?.user_sentiment == "Positive"
-                            ? "text-green-500"
-                            : "text-transparent"
+                      call?.call_analysis?.user_sentiment == 'Neutral'
+                        ? 'text-yellow-500'
+                        : call?.call_analysis?.user_sentiment == 'Negative'
+                          ? 'text-red-500'
+                          : call?.call_analysis?.user_sentiment == 'Positive'
+                            ? 'text-green-500'
+                            : 'text-transparent'
                     } text-xl`}
                   >
                     ●

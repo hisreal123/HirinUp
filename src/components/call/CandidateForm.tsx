@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { memo, useEffect, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { memo, useEffect, useRef, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,12 +19,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import PhoneInput from "react-phone-number-input";
-import { CountrySelect } from "@/components/ui/phone-country-select";
-import { countries } from "@/lib/countries";
-import MiniLoader from "../loaders/mini-loader/miniLoader";
-import { Interview } from "@/types/interview";
+} from '@/components/ui/alert-dialog';
+import PhoneInput from 'react-phone-number-input';
+import { CountrySelect } from '@/components/ui/phone-country-select';
+import { countries } from '@/lib/countries';
+import MiniLoader from '../loaders/mini-loader/miniLoader';
+import { Interview } from '@/types/interview';
 
 declare global {
   interface Window {
@@ -34,10 +34,10 @@ declare global {
         options: {
           sitekey: string;
           callback?: (token: string) => void;
-          "expired-callback"?: () => void;
-          "error-callback"?: () => void;
-          theme?: "light" | "dark" | "auto";
-          size?: "normal" | "compact";
+          'expired-callback'?: () => void;
+          'error-callback'?: () => void;
+          theme?: 'light' | 'dark' | 'auto';
+          size?: 'normal' | 'compact';
         }
       ) => string;
       reset: (widgetId: string) => void;
@@ -108,52 +108,65 @@ export const CandidateForm = memo(function CandidateForm({
   const turnstileRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
 
-  const handleTurnstileCallback = useCallback((token: string) => {
-    setTurnstileToken(token);
-  }, [setTurnstileToken]);
+  const handleTurnstileCallback = useCallback(
+    (token: string) => {
+      setTurnstileToken(token);
+    },
+    [setTurnstileToken]
+  );
 
   const handleTurnstileExpired = useCallback(() => {
-    setTurnstileToken("");
+    setTurnstileToken('');
   }, [setTurnstileToken]);
 
   useEffect(() => {
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-    if (!siteKey || !turnstileRef.current || widgetIdRef.current) {
+    if (!siteKey || !turnstileRef.current) {
       return;
     }
 
-    // Wait for turnstile script to load
+    let checkInterval: ReturnType<typeof setInterval> | null = null;
+    let killTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const renderWidget = () => {
       if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
           sitekey: siteKey,
           callback: handleTurnstileCallback,
-          "expired-callback": handleTurnstileExpired,
-          "error-callback": handleTurnstileExpired,
-          theme: "light",
-          size: "normal",
+          'expired-callback': handleTurnstileExpired,
+          'error-callback': handleTurnstileExpired,
+          theme: 'light',
+          size: 'normal',
         });
       }
     };
 
-    // Check if turnstile is already loaded
     if (window.turnstile) {
       renderWidget();
     } else {
-      // Wait for script to load
-      const checkInterval = setInterval(() => {
+      // Poll until the Cloudflare script (loaded in layout.tsx) is ready
+      checkInterval = setInterval(() => {
         if (window.turnstile) {
-          clearInterval(checkInterval);
+          clearInterval(checkInterval!);
+          checkInterval = null;
           renderWidget();
         }
       }, 100);
 
-      // Cleanup interval after 10 seconds
-      setTimeout(() => clearInterval(checkInterval), 10000);
+      // Give up after 10 seconds to avoid a zombie interval
+      killTimeout = setTimeout(() => {
+        if (checkInterval) {
+          clearInterval(checkInterval);
+          checkInterval = null;
+        }
+      }, 10000);
     }
 
     return () => {
+      // Always cancel pending timers so they don't fire on a detached DOM node
+      if (checkInterval) {clearInterval(checkInterval);}
+      if (killTimeout) {clearTimeout(killTimeout);}
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
@@ -177,16 +190,20 @@ export const CandidateForm = memo(function CandidateForm({
   return (
     <div className="relative w-[80%] mx-auto mt-2 shadow-lg rounded-md p-2 m-2 bg-slate-50 max-h-[calc(88vh-200px)] overflow-y-auto">
       <div className="p-2">
-        <h2 className="text-lg font-semibold mb-4 text-center">Candidate Information</h2>
+        <h2 className="text-lg font-semibold mb-4 text-center">
+          Candidate Information
+        </h2>
         <div className="grid grid-cols-2 gap-3 px-4">
           {!interview?.is_anonymous && (
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address <span className="text-red-500">*</span></Label>
+              <Label htmlFor="email">
+                Email Address <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
-                className={email && !isValidEmail ? "border-red-500" : ""}
+                className={email && !isValidEmail ? 'border-red-500' : ''}
                 placeholder="Enter your email address"
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -198,7 +215,9 @@ export const CandidateForm = memo(function CandidateForm({
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name <span className="text-red-500">*</span></Label>
+            <Label htmlFor="fullName">
+              Full Name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="fullName"
               type="text"
@@ -208,18 +227,20 @@ export const CandidateForm = memo(function CandidateForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number <span className="text-red-500">*</span></Label>
+            <Label htmlFor="phone">
+              Phone Number <span className="text-red-500">*</span>
+            </Label>
             <PhoneInput
-              international
               defaultCountry="US"
               value={phone}
-              onChange={(value) => setPhone(value || "")}
               placeholder="Enter phone number"
-              className={!isValidPhone && phone ? "phone-input-error" : ""}
+              className={!isValidPhone && phone ? 'phone-input-error' : ''}
               countrySelectComponent={CountrySelect}
               numberInputProps={{
-                className: !isValidPhone && phone ? "error" : "",
+                className: !isValidPhone && phone ? 'error' : '',
               }}
+              international
+              onChange={(value) => setPhone(value || '')}
             />
             {!isValidPhone && phone && (
               <p className="text-xs text-red-500">
@@ -228,14 +249,19 @@ export const CandidateForm = memo(function CandidateForm({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="country">Country <span className="text-red-500">*</span></Label>
+            <Label htmlFor="country">
+              Country <span className="text-red-500">*</span>
+            </Label>
             <Select value={country} onValueChange={setCountry}>
               <SelectTrigger id="country">
                 <SelectValue placeholder="Select your country" />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
                 {countries.map((countryOption) => (
-                  <SelectItem key={countryOption.value} value={countryOption.value}>
+                  <SelectItem
+                    key={countryOption.value}
+                    value={countryOption.value}
+                  >
                     {countryOption.label}
                   </SelectItem>
                 ))}
@@ -243,7 +269,9 @@ export const CandidateForm = memo(function CandidateForm({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="gender">Gender <span className="text-red-500">*</span></Label>
+            <Label htmlFor="gender">
+              Gender <span className="text-red-500">*</span>
+            </Label>
             <Select value={gender} onValueChange={setGender}>
               <SelectTrigger id="gender">
                 <SelectValue placeholder="Select gender" />
@@ -260,7 +288,7 @@ export const CandidateForm = memo(function CandidateForm({
               id="twitter"
               type="url"
               value={twitter}
-              className={!isValidTwitter ? "border-red-500" : ""}
+              className={!isValidTwitter ? 'border-red-500' : ''}
               placeholder="https://twitter.com/yourhandle"
               onChange={(e) => setTwitter(e.target.value)}
             />
@@ -271,12 +299,14 @@ export const CandidateForm = memo(function CandidateForm({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="linkedin">LinkedIn <span className="text-red-500">*</span></Label>
+            <Label htmlFor="linkedin">
+              LinkedIn <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="linkedin"
               type="url"
               value={linkedin}
-              className={!isValidLinkedin ? "border-red-500" : ""}
+              className={!isValidLinkedin ? 'border-red-500' : ''}
               placeholder="https://linkedin.com/in/yourprofile"
               onChange={(e) => setLinkedin(e.target.value)}
             />
@@ -287,7 +317,9 @@ export const CandidateForm = memo(function CandidateForm({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="experience">Years of Experience <span className="text-red-500">*</span></Label>
+            <Label htmlFor="experience">
+              Years of Experience <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="experience"
               type="number"
@@ -315,7 +347,7 @@ export const CandidateForm = memo(function CandidateForm({
           disabled={loading || !isFormValid}
           onClick={onStartInterview}
         >
-          {!loading ? "Start Interview" : <MiniLoader />}
+          {!loading ? 'Start Interview' : <MiniLoader />}
         </Button>
         <AlertDialog>
           <AlertDialogContent>
@@ -337,4 +369,3 @@ export const CandidateForm = memo(function CandidateForm({
     </div>
   );
 });
-

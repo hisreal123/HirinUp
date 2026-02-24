@@ -1,29 +1,30 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { FeedbackData } from "@/types/response";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { FeedbackData } from '@/types/response';
 
 enum SatisfactionLevel {
-  Positive = "😀",
-  Moderate = "😐",
-  Negative = "😔",
+  Positive = '😀',
+  Moderate = '😐',
+  Negative = '😔',
 }
 
 interface FeedbackFormProps {
-  onSubmit: (data: Omit<FeedbackData, "interview_id">) => void;
+  onSubmit: (data: Omit<FeedbackData, 'interview_id'>) => void;
   email: string;
 }
 
 export function FeedbackForm({ onSubmit, email }: FeedbackFormProps) {
   const [satisfaction, setSatisfaction] = useState<SatisfactionLevel>(
-    SatisfactionLevel.Moderate,
+    SatisfactionLevel.Moderate
   );
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState('');
 
   const handleSubmit = () => {
-    if (satisfaction !== null || feedback.trim() !== "") {
+    if (satisfaction !== null || feedback.trim() !== '') {
       onSubmit({
-        satisfaction: Object.values(SatisfactionLevel).indexOf(satisfaction),
+        // DB CHECK: satisfaction >= 1. indexOf returns 0-based, so +1 gives 1–3.
+        satisfaction: Object.values(SatisfactionLevel).indexOf(satisfaction) + 1,
         feedback,
         email,
       });
@@ -39,7 +40,7 @@ export function FeedbackForm({ onSubmit, email }: FeedbackFormProps) {
         {Object.values(SatisfactionLevel).map((emoji) => (
           <button
             key={emoji}
-            className={`text-3xl ${satisfaction === emoji ? "border-2 border-indigo-600" : ""}`}
+            className={`text-3xl ${satisfaction === emoji ? 'border-2 border-indigo-600' : ''}`}
             onClick={() => setSatisfaction(emoji)}
           >
             {emoji}
@@ -53,7 +54,7 @@ export function FeedbackForm({ onSubmit, email }: FeedbackFormProps) {
         onChange={(e) => setFeedback(e.target.value)}
       />
       <Button
-        disabled={satisfaction === null && feedback.trim() === ""}
+        disabled={satisfaction === null && feedback.trim() === ''}
         className="w-full bg-secondary hover:bg-secondary/90 text-white"
         onClick={handleSubmit}
       >
