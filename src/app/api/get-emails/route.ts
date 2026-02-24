@@ -29,7 +29,8 @@ export async function POST(req: Request) {
     const { data, error } = await supabase
       .from("response")
       .select("email")
-      .eq("interview_id", interview_id);
+      .eq("interview_id", interview_id)
+      .eq("is_ended", false);
 
     if (error) {
       logger.error("[get-emails] Error:", error);
