@@ -332,18 +332,14 @@ function Call({
     formData: Omit<FeedbackData, 'interview_id'>
   ) => {
     try {
-      const result = await FeedbackService.submitFeedback({
+      await FeedbackService.submitFeedback({
         ...formData,
         interview_id: interview.id,
       });
 
-      if (result) {
-        toast.success('Thank you for your feedback!');
-        setIsFeedbackSubmitted(true);
-        setIsDialogOpen(false);
-      } else {
-        toast.error('Failed to submit feedback. Please try again.');
-      }
+      toast.success('Thank you for your feedback!');
+      setIsFeedbackSubmitted(true);
+      setIsDialogOpen(false);
     } catch (error) {
       console.error('Error submitting feedback:', error);
       toast.error('An error occurred. Please try again later.');
