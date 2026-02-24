@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import MiniLoader from "@/components/loaders/mini-loader/miniLoader";
+import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import MiniLoader from '@/components/loaders/mini-loader/miniLoader';
 // import { InterviewerService } from "@/services/interviewers.service"; // replaced with encrypted API call
-import { encryptedApiCall } from "@/lib/encrypted-api";
-import { useGetAllResponses } from "@/hooks/useGetAllResponses";
-import { useAnalyzeCall } from "@/hooks/useAnalyzeCall";
+import { encryptedApiCall } from '@/lib/encrypted-api';
+import { useGetAllResponses } from '@/hooks/useGetAllResponses';
+import { useAnalyzeCall } from '@/hooks/useAnalyzeCall';
 
 interface Props {
   name: string | null;
@@ -20,12 +20,13 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
     useGetAllResponses(id);
   const analyzeCallMutation = useAnalyzeCall();
   const [isFetching, setIsFetching] = useState(false);
-  const [img, setImg] = useState("");
+  const [img, setImg] = useState('');
 
   useEffect(() => {
     const fetchInterviewer = async () => {
-      const interviewer =
-        await encryptedApiCall("/api/get-interviewer", { id: interviewerId });
+      const interviewer = await encryptedApiCall('/api/get-interviewer', {
+        id: interviewerId,
+      });
       setImg(interviewer.image);
     };
     fetchInterviewer();
@@ -37,13 +38,13 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
 
   // Analyze unanalyzed responses
   useEffect(() => {
-    if (!responses || responses.length === 0) return;
+    if (!responses || responses.length === 0) {return;}
 
     const unanalyzedResponses = responses.filter(
       (response) =>
         !response.is_analysed &&
         response.call_id &&
-        !analyzedCallsRef.current.has(response.call_id),
+        !analyzedCallsRef.current.has(response.call_id)
     );
 
     if (unanalyzedResponses.length > 0) {
@@ -64,14 +65,14 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
             .catch((error) => {
               console.error(
                 `Failed to analyze call for response id ${response.call_id}:`,
-                error,
+                error
               );
               // Remove from set on error so it can be retried
               if (response.call_id) {
                 analyzedCallsRef.current.delete(response.call_id);
               }
-            }),
-        ),
+            })
+        )
       ).finally(() => {
         setIsFetching(false);
       });
@@ -84,12 +85,12 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
     <a
       href={`/interviews/${id}`}
       style={{
-        pointerEvents: isFetching ? "none" : "auto",
-        cursor: isFetching ? "default" : "pointer",
+        pointerEvents: isFetching ? 'none' : 'auto',
+        cursor: isFetching ? 'default' : 'pointer',
       }}
     >
       <Card className="relative p-0 mt-4 cursor-pointer h-48 w-full rounded-xl overflow-hidden shadow-md">
-        <CardContent className={`p-0 ${isFetching ? "opacity-60" : ""}`}>
+        <CardContent className={`p-0 ${isFetching ? 'opacity-60' : ''}`}>
           <div className="w-full h-32 overflow-hidden bg-secondary flex items-center text-center">
             <CardTitle className="w-full mt-3 mx-2 text-white text-lg">
               {name}
@@ -117,7 +118,7 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
               )}
             </div>
             <div className="text-black text-sm font-semibold mt-2 mr-2 whitespace-nowrap">
-              Responses:{" "}
+              Responses:{' '}
               <span className="font-normal">
                 {responseCount?.toString() || 0}
               </span>

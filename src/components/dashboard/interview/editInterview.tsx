@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { Interview, Question } from "@/types/interview";
-import React, { useEffect, useRef, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { Plus, SaveIcon, TrashIcon } from "lucide-react";
-import { useInterviewers } from "@/contexts/interviewers.context";
-import QuestionCard from "@/components/dashboard/interview/create-popup/questionCard";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { useInterviews } from "@/contexts/interviews.context";
-import { InterviewService } from "@/services/interviews.service";
-import { CardTitle } from "../../ui/card";
-import Image from "next/image";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { Interview, Question } from '@/types/interview';
+import React, { useEffect, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { Plus, SaveIcon, TrashIcon } from 'lucide-react';
+import { useInterviewers } from '@/contexts/interviewers.context';
+import QuestionCard from '@/components/dashboard/interview/create-popup/questionCard';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { useInterviews } from '@/contexts/interviews.context';
+import { InterviewService } from '@/services/interviews.service';
+import { CardTitle } from '../../ui/card';
+import Image from 'next/image';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 type EditInterviewProps = {
   interview: Interview | undefined;
@@ -37,25 +37,25 @@ function EditInterview({ interview }: EditInterviewProps) {
   const { fetchInterviews } = useInterviews();
 
   const [description, setDescription] = useState<string>(
-    interview?.description || "",
+    interview?.description || ''
   );
   const [objective, setObjective] = useState<string>(
-    interview?.objective || "",
+    interview?.objective || ''
   );
   const [numQuestions, setNumQuestions] = useState<number>(
-    interview?.question_count || 1,
+    interview?.question_count || 1
   );
   const [duration, setDuration] = useState<Number>(
-    Number(interview?.time_duration),
+    Number(interview?.time_duration)
   );
   const [questions, setQuestions] = useState<Question[]>(
-    interview?.questions || [],
+    interview?.questions || []
   );
   const [selectedInterviewer, setSelectedInterviewer] = useState(
-    interview?.interviewer_id,
+    interview?.interviewer_id
   );
   const [isAnonymous, setIsAnonymous] = useState<boolean>(
-    interview?.is_anonymous || false,
+    interview?.is_anonymous || false
   );
 
   const [isClicked, setIsClicked] = useState(false);
@@ -67,8 +67,8 @@ function EditInterview({ interview }: EditInterviewProps) {
   const handleInputChange = (id: string, newQuestion: Question) => {
     setQuestions(
       questions.map((question) =>
-        question.id === id ? { ...question, ...newQuestion } : question,
-      ),
+        question.id === id ? { ...question, ...newQuestion } : question
+      )
     );
   };
 
@@ -77,9 +77,9 @@ function EditInterview({ interview }: EditInterviewProps) {
       setQuestions(
         questions.map((question) => ({
           ...question,
-          question: "",
+          question: '',
           follow_up_count: 1,
-        })),
+        }))
       );
 
       return;
@@ -92,7 +92,7 @@ function EditInterview({ interview }: EditInterviewProps) {
     if (questions.length < numQuestions) {
       setQuestions([
         ...questions,
-        { id: uuidv4(), question: "", follow_up_count: 1 },
+        { id: uuidv4(), question: '', follow_up_count: 1 },
       ]);
     }
   };
@@ -117,17 +117,17 @@ function EditInterview({ interview }: EditInterviewProps) {
       }
       const response = await InterviewService.updateInterview(
         interviewData,
-        interview?.id,
+        interview?.id
       );
       setIsClicked(false);
       fetchInterviews();
-      toast.success("Interview updated successfully.", {
-        position: "bottom-right",
+      toast.success('Interview updated successfully.', {
+        position: 'bottom-right',
         duration: 3000,
       });
       router.push(`/interviews/${interview?.id}`);
     } catch (error) {
-      console.error("Error creating interview:", error);
+      console.error('Error creating interview:', error);
     }
   };
 
@@ -138,11 +138,11 @@ function EditInterview({ interview }: EditInterviewProps) {
 
     try {
       await InterviewService.deleteInterview(interview.id);
-      router.push("/dashboard");
+      router.push('/dashboard');
     } catch (error) {
-      console.error("Error deleting interview:", error);
-      toast.error("Failed to delete the interview.", {
-        position: "bottom-right",
+      console.error('Error deleting interview:', error);
+      toast.error('Failed to delete the interview.', {
+        position: 'bottom-right',
         duration: 3000,
       });
     }
@@ -150,7 +150,7 @@ function EditInterview({ interview }: EditInterviewProps) {
 
   useEffect(() => {
     if (questions.length > prevQuestionLengthRef.current) {
-      endOfListRef.current?.scrollIntoView({ behavior: "smooth" });
+      endOfListRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
     prevQuestionLengthRef.current = questions.length;
   }, [questions.length]);
@@ -171,7 +171,7 @@ function EditInterview({ interview }: EditInterviewProps) {
         </div>
         <div className="flex flex-row justify-between">
           <p className="mt-3 mb-1 ml-2 font-medium">
-            Interview Description{" "}
+            Interview Description{' '}
             <span className="text-xs ml-2 font-normal">
               (Your respondents will see this.)
             </span>
@@ -256,8 +256,8 @@ function EditInterview({ interview }: EditInterviewProps) {
                     <div
                       className={`w-[96px] overflow-hidden rounded-full ${
                         selectedInterviewer === item.id
-                          ? "border-4 border-indigo-600"
-                          : ""
+                          ? 'border-4 border-indigo-600'
+                          : ''
                       }`}
                       onClick={() => {
                         setSelectedInterviewer(item.id);
@@ -296,13 +296,13 @@ function EditInterview({ interview }: EditInterviewProps) {
             <Switch
               checked={isAnonymous}
               className={`ml-4 mt-1 border-2 border-gray-300 ${
-                isAnonymous ? "bg-indigo-600" : "bg-white"
+                isAnonymous ? 'bg-indigo-600' : 'bg-white'
               }`}
               onCheckedChange={(checked) => setIsAnonymous(checked)}
             />
           </div>
           <span
-            style={{ fontSize: "0.7rem", lineHeight: "0.66rem" }}
+            style={{ fontSize: '0.7rem', lineHeight: '0.66rem' }}
             className="font-light text-xs italic w-full text-left block"
           >
             Note: If not anonymous, the interviewee&apos;s email and name will
@@ -322,11 +322,11 @@ function EditInterview({ interview }: EditInterviewProps) {
               onChange={(e) => {
                 let value = e.target.value;
                 if (
-                  value === "" ||
+                  value === '' ||
                   (Number.isInteger(Number(value)) && Number(value) > 0)
                 ) {
                   if (Number(value) > 20) {
-                    value = "20";
+                    value = '20';
                   }
                   setNumQuestions(Number(value));
                 }
@@ -345,11 +345,11 @@ function EditInterview({ interview }: EditInterviewProps) {
               onChange={(e) => {
                 let value = e.target.value;
                 if (
-                  value === "" ||
+                  value === '' ||
                   (Number.isInteger(Number(value)) && Number(value) > 0)
                 ) {
                   if (Number(value) > 10) {
-                    value = "10";
+                    value = '10';
                   }
                   setDuration(Number(value));
                 }

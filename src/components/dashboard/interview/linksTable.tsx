@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -8,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   flexRender,
   getCoreRowModel,
@@ -17,22 +17,22 @@ import {
   getPaginationRowModel,
   SortingState,
   useReactTable,
-} from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
-import { Response } from "@/types/response";
-import { toast } from "sonner";
+} from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
+import { Response } from '@/types/response';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { getLinksColumns } from "./linksColumns";
-import { ExpireLinkDialog } from "./expireLinkDialog";
+} from '@/components/ui/select';
+import { getLinksColumns } from './linksColumns';
+import { ExpireLinkDialog } from './expireLinkDialog';
 
 interface LinksTableProps {
   data: Response[];
@@ -41,17 +41,22 @@ interface LinksTableProps {
   onDelete?: () => void | Promise<void>;
 }
 
-function LinksTable({ data, interviewId, organizationNameSlug, onDelete }: LinksTableProps) {
+function LinksTable({
+  data,
+  interviewId,
+  organizationNameSlug,
+  onDelete,
+}: LinksTableProps) {
   const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [globalFilter, setGlobalFilter] = useState('');
   const [deleteToken, setDeleteToken] = useState<string | null>(null);
 
   const copyToClipboard = (link: string) => {
     navigator.clipboard.writeText(link);
     setCopiedLink(link);
-    toast.success("Link copied to clipboard");
+    toast.success('Link copied to clipboard');
     setTimeout(() => setCopiedLink(null), 2000);
   };
 
@@ -61,7 +66,8 @@ function LinksTable({ data, interviewId, organizationNameSlug, onDelete }: Links
     copiedLink,
     copyToClipboard,
     setDeleteToken,
-    onView: (callId) => router.push(`/interviews/${interviewId}?call=${callId}`),
+    onView: (callId) =>
+      router.push(`/interviews/${interviewId}?call=${callId}`),
   });
 
   const table = useReactTable({
@@ -76,12 +82,17 @@ function LinksTable({ data, interviewId, organizationNameSlug, onDelete }: Links
     globalFilterFn: (row, _columnId, filterValue) => {
       const search = filterValue.toLowerCase();
       const response = row.original;
-      const token = (response as any).token || "";
-      const name = (response.name || "").toLowerCase();
-      const email = (response.email || "").toLowerCase();
+      const token = (response as any).token || '';
+      const name = (response.name || '').toLowerCase();
+      const email = (response.email || '').toLowerCase();
       const isUnused = !response.call_id;
-      const status = isUnused ? "unused" : response.is_ended ? "completed" : "in progress";
-      return (
+      const status = isUnused
+        ? 'unused'
+        : response.is_ended
+          ? 'completed'
+          : 'in progress';
+      
+return (
         token.toLowerCase().includes(search) ||
         name.includes(search) ||
         email.includes(search) ||
@@ -93,8 +104,9 @@ function LinksTable({ data, interviewId, organizationNameSlug, onDelete }: Links
   });
 
   if (data.length === 0) {
-
-    return <div className="text-center py-8 text-gray-500">No links to display</div>;
+    return (
+      <div className="text-center py-8 text-gray-500">No links to display</div>
+    );
   }
 
   return (
@@ -112,8 +124,8 @@ function LinksTable({ data, interviewId, organizationNameSlug, onDelete }: Links
           type="text"
           placeholder="Search by response ID, name, email, status..."
           value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
           className="pl-10"
+          onChange={(e) => setGlobalFilter(e.target.value)}
         />
       </div>
 
@@ -126,7 +138,10 @@ function LinksTable({ data, interviewId, organizationNameSlug, onDelete }: Links
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -138,14 +153,20 @@ function LinksTable({ data, interviewId, organizationNameSlug, onDelete }: Links
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -177,12 +198,16 @@ function LinksTable({ data, interviewId, organizationNameSlug, onDelete }: Links
             <span className="text-sm text-gray-700">per page</span>
           </div>
           <div className="text-sm text-gray-700">
-            Showing{" "}
-            {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
+            Showing{' '}
+            {table.getState().pagination.pageIndex *
+              table.getState().pagination.pageSize +
+              1}{' '}
+            to{' '}
             {Math.min(
-              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+              (table.getState().pagination.pageIndex + 1) *
+                table.getState().pagination.pageSize,
               table.getFilteredRowModel().rows.length
-            )}{" "}
+            )}{' '}
             of {table.getFilteredRowModel().rows.length} links
           </div>
         </div>
@@ -190,19 +215,20 @@ function LinksTable({ data, interviewId, organizationNameSlug, onDelete }: Links
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            onClick={() => table.previousPage()}
           >
             Previous
           </Button>
           <span className="text-sm text-gray-700">
-            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+            Page {table.getState().pagination.pageIndex + 1} of{' '}
+            {table.getPageCount()}
           </span>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            onClick={() => table.nextPage()}
           >
             Next
           </Button>

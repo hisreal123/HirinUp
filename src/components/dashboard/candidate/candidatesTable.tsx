@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   ColumnDef,
   flexRender,
@@ -16,22 +16,22 @@ import {
   getPaginationRowModel,
   SortingState,
   useReactTable,
-} from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { ArrowUpDown, ExternalLink } from "lucide-react";
+} from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
+import { ArrowUpDown, ExternalLink } from 'lucide-react';
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 export type CandidateData = {
   id: number;
@@ -52,7 +52,7 @@ interface CandidatesTableProps {
   searchQuery?: string;
 }
 
-function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
+function CandidatesTable({ data, searchQuery = '' }: CandidatesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState(searchQuery);
 
@@ -63,50 +63,54 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+    
+return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   };
 
   const formatWorkExperience = (workExp: Record<string, any> | null) => {
-    if (!workExp) return "N/A";
-    const years = workExp.years || "N/A";
-    const company = workExp.company || "N/A";
-    return `${years} years${company !== "N/A" ? ` at ${company}` : ""}`;
+    if (!workExp) {return 'N/A';}
+    const years = workExp.years || 'N/A';
+    const company = workExp.company || 'N/A';
+    
+return `${years} years${company !== 'N/A' ? ` at ${company}` : ''}`;
   };
 
   const formatSocialMedia = (socialMedia: Record<string, any> | null) => {
-    if (!socialMedia) return null;
+    if (!socialMedia) {return null;}
     const links = [];
-    if (socialMedia.linkedin) links.push(socialMedia.linkedin);
-    if (socialMedia.twitter) links.push(socialMedia.twitter);
-    return links.length > 0 ? links.join(", ") : null;
+    if (socialMedia.linkedin) {links.push(socialMedia.linkedin);}
+    if (socialMedia.twitter) {links.push(socialMedia.twitter);}
+    
+return links.length > 0 ? links.join(', ') : null;
   };
 
   const extractCountryCode = (phone: string | null) => {
-    if (!phone) return "N/A";
+    if (!phone) {return 'N/A';}
     // Phone numbers are stored with country code (e.g., +1234567890)
     // Extract the country code (everything before the first space or after +)
     const match = phone.match(/^\+?(\d{1,4})/);
     if (match) {
       return `+${match[1]}`;
     }
-    return "N/A";
+    
+return 'N/A';
   };
 
   const columns: ColumnDef<CandidateData>[] = [
     {
-      accessorKey: "full_name",
+      accessorKey: 'full_name',
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             className={`w-full justify-start font-semibold text-[15px] ${
-              column.getIsSorted() ? "text-primary" : "text-black"
+              column.getIsSorted() ? 'text-primary' : 'text-black'
             }`}
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             Full Name
             <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -114,27 +118,27 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
         );
       },
       cell: ({ row }) => {
-        const name = row.getValue("full_name") as string;
-        return (
-          <span className="font-medium">{name || "N/A"}</span>
-        );
+        const name = row.getValue('full_name') as string;
+        
+return <span className="font-medium">{name || 'N/A'}</span>;
       },
       sortingFn: (rowA, rowB, columnId) => {
-        const a = (rowA.getValue(columnId) as string) || "";
-        const b = (rowB.getValue(columnId) as string) || "";
-        return a.toLowerCase().localeCompare(b.toLowerCase());
+        const a = (rowA.getValue(columnId) as string) || '';
+        const b = (rowB.getValue(columnId) as string) || '';
+        
+return a.toLowerCase().localeCompare(b.toLowerCase());
       },
     },
     {
-      accessorKey: "email",
+      accessorKey: 'email',
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             className={`w-full justify-start font-semibold text-[15px] ${
-              column.getIsSorted() ? "text-primary" : "text-black"
+              column.getIsSorted() ? 'text-primary' : 'text-black'
             }`}
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             Email
             <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -142,29 +146,30 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
         );
       },
       cell: ({ row }) => {
-        const email = row.getValue("email") as string;
-        return <span>{email || "N/A"}</span>;
+        const email = row.getValue('email') as string;
+        
+return <span>{email || 'N/A'}</span>;
       },
     },
     {
-      accessorKey: "phone",
-      header: "Phone",
+      accessorKey: 'phone',
+      header: 'Phone',
       cell: ({ row }) => {
-        const phone = row.getValue("phone") as string;
+        const phone = row.getValue('phone') as string;
         // Display the full phone number with country code as stored
-        return <span>{phone || "N/A"}</span>;
+        return <span>{phone || 'N/A'}</span>;
       },
     },
     {
-      accessorKey: "country",
+      accessorKey: 'country',
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             className={`w-full justify-start font-semibold text-[15px] ${
-              column.getIsSorted() ? "text-primary" : "text-black"
+              column.getIsSorted() ? 'text-primary' : 'text-black'
             }`}
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             Country
             <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -172,26 +177,27 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
         );
       },
       cell: ({ row }) => {
-        const country = row.getValue("country") as string;
-        return <span>{country || "N/A"}</span>;
+        const country = row.getValue('country') as string;
+        
+return <span>{country || 'N/A'}</span>;
       },
     },
     {
-      accessorKey: "gender",
-      header: "Gender",
+      accessorKey: 'gender',
+      header: 'Gender',
       cell: ({ row }) => {
-        const gender = row.getValue("gender") as string;
-        return (
-          <span className="capitalize">{gender || "N/A"}</span>
-        );
+        const gender = row.getValue('gender') as string;
+        
+return <span className="capitalize">{gender || 'N/A'}</span>;
       },
     },
     {
-      accessorKey: "work_experience",
-      header: "Experience",
+      accessorKey: 'work_experience',
+      header: 'Experience',
       cell: ({ row }) => {
         const workExp = row.original.work_experience;
-        return <span>{formatWorkExperience(workExp)}</span>;
+        
+return <span>{formatWorkExperience(workExp)}</span>;
       },
     },
     // {
@@ -226,18 +232,20 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
     //   },
     // },
     {
-      accessorKey: "social_media_links",
-      header: "Social Media",
+      accessorKey: 'social_media_links',
+      header: 'Social Media',
       cell: ({ row }) => {
         const socialMedia = row.original.social_media_links;
-        if (!socialMedia) return <span>N/A</span>;
-        
+        if (!socialMedia) {return <span>N/A</span>;}
+
         const links = [];
-        if (socialMedia.linkedin) links.push({ url: socialMedia.linkedin, label: "LinkedIn" });
-        if (socialMedia.twitter) links.push({ url: socialMedia.twitter, label: "Twitter" });
-        
-        if (links.length === 0) return <span>N/A</span>;
-        
+        if (socialMedia.linkedin)
+          {links.push({ url: socialMedia.linkedin, label: 'LinkedIn' });}
+        if (socialMedia.twitter)
+          {links.push({ url: socialMedia.twitter, label: 'Twitter' });}
+
+        if (links.length === 0) {return <span>N/A</span>;}
+
         return (
           <div className="max-w-md flex flex-col gap-1">
             {links.map((link, index) => (
@@ -257,15 +265,15 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
       },
     },
     {
-      accessorKey: "created_at",
+      accessorKey: 'created_at',
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             className={`w-full justify-start font-semibold text-[15px] ${
-              column.getIsSorted() ? "text-primary" : "text-black"
+              column.getIsSorted() ? 'text-primary' : 'text-black'
             }`}
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             Created At
             <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -273,8 +281,9 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
         );
       },
       cell: ({ row }) => {
-        const date = row.getValue("created_at") as string;
-        return <span>{formatDate(date)}</span>;
+        const date = row.getValue('created_at') as string;
+        
+return <span>{formatDate(date)}</span>;
       },
     },
   ];
@@ -290,12 +299,13 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnId, filterValue) => {
       const search = filterValue.toLowerCase();
-      const fullName = (row.getValue("full_name") as string)?.toLowerCase() || "";
-      const email = (row.getValue("email") as string)?.toLowerCase() || "";
-      const phone = (row.getValue("phone") as string)?.toLowerCase() || "";
-      const country = (row.getValue("country") as string)?.toLowerCase() || "";
-      const gender = (row.getValue("gender") as string)?.toLowerCase() || "";
-      
+      const fullName =
+        (row.getValue('full_name') as string)?.toLowerCase() || '';
+      const email = (row.getValue('email') as string)?.toLowerCase() || '';
+      const phone = (row.getValue('phone') as string)?.toLowerCase() || '';
+      const country = (row.getValue('country') as string)?.toLowerCase() || '';
+      const gender = (row.getValue('gender') as string)?.toLowerCase() || '';
+
       return (
         fullName.includes(search) ||
         email.includes(search) ||
@@ -336,7 +346,7 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableHead>
                 ))}
@@ -352,14 +362,20 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
                       key={cell.id}
                       className="text-left align-middle py-2"
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -367,7 +383,7 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
           </TableBody>
         </Table>
       </div>
-      
+
       {/* Pagination */}
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-4">
@@ -394,11 +410,16 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
             <span className="text-sm text-gray-700">per page</span>
           </div>
           <div className="text-sm text-gray-700">
-            Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
+            Showing{' '}
+            {table.getState().pagination.pageIndex *
+              table.getState().pagination.pageSize +
+              1}{' '}
+            to{' '}
             {Math.min(
-              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+              (table.getState().pagination.pageIndex + 1) *
+                table.getState().pagination.pageSize,
               table.getFilteredRowModel().rows.length
-            )}{" "}
+            )}{' '}
             of {table.getFilteredRowModel().rows.length} candidates
           </div>
         </div>
@@ -406,21 +427,22 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            onClick={() => table.previousPage()}
           >
             Previous
           </Button>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-700">
-              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+              Page {table.getState().pagination.pageIndex + 1} of{' '}
+              {table.getPageCount()}
             </span>
           </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            onClick={() => table.nextPage()}
           >
             Next
           </Button>
@@ -431,4 +453,3 @@ function CandidatesTable({ data, searchQuery = "" }: CandidatesTableProps) {
 }
 
 export default CandidatesTable;
-

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Copy } from "lucide-react";
-import { toast } from "sonner";
-import Modal from "@/components/dashboard/Modal";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Copy } from 'lucide-react';
+import { toast } from 'sonner';
+import Modal from '@/components/dashboard/Modal';
 
 interface SharePopupProps {
   open: boolean;
@@ -14,9 +14,9 @@ interface SharePopupProps {
 function SharePopup({ open, onClose, shareContent }: SharePopupProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedEmbed, setCopiedEmbed] = useState(false);
-  const [url, setUrl] = useState<string>("Loading...");
-  const [embedCode, setEmbedCode] = useState<string>("Loading...");
-  const [activeTab, setActiveTab] = useState("copy");
+  const [url, setUrl] = useState<string>('Loading...');
+  const [embedCode, setEmbedCode] = useState<string>('Loading...');
+  const [activeTab, setActiveTab] = useState('copy');
 
   const [embedWidth, setEmbedWidth] = useState(1350);
   const [embedHeight, setEmbedHeight] = useState(735);
@@ -26,7 +26,7 @@ function SharePopup({ open, onClose, shareContent }: SharePopupProps) {
     if (interviewURL) {
       setUrl(interviewURL);
       setEmbedCode(
-        `<iframe src="${interviewURL}" width="${embedWidth}" height="${embedHeight}"></iframe>`,
+        `<iframe src="${interviewURL}" width="${embedWidth}" height="${embedHeight}"></iframe>`
       );
     }
   }, [shareContent, embedWidth, embedHeight]);
@@ -36,18 +36,18 @@ function SharePopup({ open, onClose, shareContent }: SharePopupProps) {
       () => {
         setCopiedLink(true);
         toast.success(
-          "The link to your interview has been copied to your clipboard.",
+          'The link to your interview has been copied to your clipboard.',
           {
-            position: "bottom-right",
+            position: 'bottom-right',
             duration: 3000,
-          },
+          }
         );
 
         setTimeout(() => setCopiedLink(false), 2000);
         setTimeout(() => onClose(), 1000);
       },
 
-      (err) => console.error("Failed to copy", err.message),
+      (err) => console.error('Failed to copy', err.message)
     );
   };
 
@@ -56,17 +56,17 @@ function SharePopup({ open, onClose, shareContent }: SharePopupProps) {
       () => {
         setCopiedEmbed(true);
         toast.success(
-          "The embed HTML code for your interview has been copied to your clipboard.",
+          'The embed HTML code for your interview has been copied to your clipboard.',
           {
-            position: "bottom-right",
+            position: 'bottom-right',
             duration: 3000,
-          },
+          }
         );
 
         setTimeout(() => setCopiedEmbed(false), 2000);
         setTimeout(() => onClose(), 1000);
       },
-      (err) => console.error("Failed to copy", err.message),
+      (err) => console.error('Failed to copy', err.message)
     );
   };
 
@@ -107,7 +107,7 @@ function SharePopup({ open, onClose, shareContent }: SharePopupProps) {
                   onClick={copyLinkToClipboard}
                 >
                   <Copy size={16} className="mr-2" />
-                  {copiedLink ? "Copied" : "Copy URL"}
+                  {copiedLink ? 'Copied' : 'Copy URL'}
                 </Button>
               </TabsContent>
               <TabsContent value="embed" className="w-full">
@@ -162,7 +162,7 @@ function SharePopup({ open, onClose, shareContent }: SharePopupProps) {
                   onClick={copyEmbedToClipboard}
                 >
                   <Copy size={16} className="mr-2" />
-                  {copiedEmbed ? "Copied" : "Copy Embed Code"}
+                  {copiedEmbed ? 'Copied' : 'Copy Embed Code'}
                 </Button>
               </TabsContent>
             </div>

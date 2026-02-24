@@ -1,8 +1,8 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  (typeof window === "undefined"
+  (typeof window === 'undefined'
     ? process.env.SUPABASE_SERVICE_ROLE_KEY
     : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!
 );
@@ -21,33 +21,33 @@ interface CandidateData {
 
 const createOrUpdateCandidate = async (
   candidateData: CandidateData,
-  email?: string | null,
+  email?: string | null
 ): Promise<number | null> => {
   try {
     // If email is provided, check if candidate already exists
     if (email) {
       const { data: existingCandidate, error: checkError } = await supabase
-        .from("candidate")
-        .select("id")
-        .eq("email", email)
+        .from('candidate')
+        .select('id')
+        .eq('email', email)
         .maybeSingle();
 
-      if (checkError && checkError.code !== "PGRST116") {
-        console.error("Error checking existing candidate:", checkError);
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking existing candidate:', checkError);
         throw new Error(`Database check error: ${checkError.message}`);
       }
 
       if (existingCandidate) {
         // Update existing candidate
         const { error: updateError, data: updatedData } = await supabase
-          .from("candidate")
+          .from('candidate')
           .update(candidateData)
-          .eq("id", existingCandidate.id)
-          .select("id")
+          .eq('id', existingCandidate.id)
+          .select('id')
           .single();
 
         if (updateError) {
-          console.error("Error updating candidate:", updateError);
+          console.error('Error updating candidate:', updateError);
           throw new Error(`Database update error: ${updateError.message}`);
         }
 
@@ -57,23 +57,23 @@ const createOrUpdateCandidate = async (
 
     // Create new candidate
     const { error: insertError, data: newCandidate } = await supabase
-      .from("candidate")
+      .from('candidate')
       .insert(candidateData)
-      .select("id")
+      .select('id')
       .single();
 
     if (insertError) {
-      console.error("Error creating candidate:", insertError);
+      console.error('Error creating candidate:', insertError);
       throw new Error(`Database insert error: ${insertError.message}`);
     }
 
     if (!newCandidate) {
-      throw new Error("No data returned from insert");
+      throw new Error('No data returned from insert');
     }
 
     return newCandidate.id;
   } catch (error: any) {
-    console.error("Error in createOrUpdateCandidate:", error);
+    console.error('Error in createOrUpdateCandidate:', error);
     throw error;
   }
 };
@@ -81,59 +81,65 @@ const createOrUpdateCandidate = async (
 const getCandidateById = async (id: number) => {
   try {
     const { data, error } = await supabase
-      .from("candidate")
-      .select("*")
-      .eq("id", id)
+      .from('candidate')
+      .select('*')
+      .eq('id', id)
       .single();
 
     if (error) {
-      console.error("Error fetching candidate by id:", error);
-      return null;
+      console.error('Error fetching candidate by id:', error);
+      
+return null;
     }
 
     return data;
   } catch (error) {
-    console.error("Error in getCandidateById:", error);
-    return null;
+    console.error('Error in getCandidateById:', error);
+    
+return null;
   }
 };
 
 const getCandidateByEmail = async (email: string) => {
   try {
     const { data, error } = await supabase
-      .from("candidate")
-      .select("*")
-      .eq("email", email)
+      .from('candidate')
+      .select('*')
+      .eq('email', email)
       .maybeSingle();
 
-    if (error && error.code !== "PGRST116") {
-      console.error("Error fetching candidate by email:", error);
-      return null;
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching candidate by email:', error);
+      
+return null;
     }
 
     return data;
   } catch (error) {
-    console.error("Error in getCandidateByEmail:", error);
-    return null;
+    console.error('Error in getCandidateByEmail:', error);
+    
+return null;
   }
 };
 
 const getAllCandidates = async () => {
   try {
     const { data, error } = await supabase
-      .from("candidate")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .from('candidate')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Error fetching candidates:", error);
-      return [];
+      console.error('Error fetching candidates:', error);
+      
+return [];
     }
 
     return data || [];
   } catch (error) {
-    console.error("Error in getAllCandidates:", error);
-    return [];
+    console.error('Error in getAllCandidates:', error);
+    
+return [];
   }
 };
 
@@ -143,4 +149,3 @@ export const CandidateService = {
   getCandidateByEmail,
   getAllCandidates,
 };
-

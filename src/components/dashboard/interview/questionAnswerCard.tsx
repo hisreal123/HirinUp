@@ -1,4 +1,4 @@
-import { CardTitle } from "@/components/ui/card";
+import { CardTitle } from '@/components/ui/card';
 
 interface QuestionCardProps {
   questionNumber: number;

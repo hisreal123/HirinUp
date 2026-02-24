@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { CheckCircleIcon } from "lucide-react";
-import { FeedbackForm } from "./feedbackForm";
+} from '@/components/ui/alert-dialog';
+import { CheckCircleIcon } from 'lucide-react';
+import { FeedbackForm } from './feedbackForm';
 
 interface EndScreenProps {
   isStarted: boolean;
@@ -34,10 +34,10 @@ export function EndScreen({
           <p className="text-lg font-semibold text-center">
             {isStarted
               ? `Thank you for taking the time to participate in this interview`
-              : "Thank you very much for considering."}
+              : 'Thank you very much for considering.'}
           </p>
           <p className="text-center">
-            {"\n"}
+            {'\n'}
             You can close this tab now.
           </p>
         </div>
@@ -61,4 +61,3 @@ export function EndScreen({
     </div>
   );
 }
-

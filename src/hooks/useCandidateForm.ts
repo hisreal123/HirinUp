@@ -1,18 +1,18 @@
-import { useState, useEffect, useRef } from "react";
-import { testEmail } from "@/lib/utils";
-import { isValidPhoneNumber } from "react-phone-number-input";
+import { useState, useEffect, useRef } from 'react';
+import { testEmail } from '@/lib/utils';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 export const useCandidateForm = () => {
-  const [email, setEmail] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [fullName, setFullName] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
-  const [gender, setGender] = useState<string>("");
-  const [country, setCountry] = useState<string>("");
-  const [twitter, setTwitter] = useState<string>("");
-  const [linkedin, setLinkedin] = useState<string>("");
-  const [workExperienceYears, setWorkExperienceYears] = useState<string>("");
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [fullName, setFullName] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  const [gender, setGender] = useState<string>('');
+  const [country, setCountry] = useState<string>('');
+  const [twitter, setTwitter] = useState<string>('');
+  const [linkedin, setLinkedin] = useState<string>('');
+  const [workExperienceYears, setWorkExperienceYears] = useState<string>('');
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   const [isValidEmail, setIsValidEmail] = useState<boolean>(false);
   const [isValidPhone, setIsValidPhone] = useState<boolean>(true);
@@ -32,7 +32,8 @@ export const useCandidateForm = () => {
     emailTimerRef.current = setTimeout(() => {
       setIsValidEmail(testEmail(email));
     }, 300);
-    return () => {
+    
+return () => {
       if (emailTimerRef.current) {
         clearTimeout(emailTimerRef.current);
       }
@@ -51,7 +52,8 @@ export const useCandidateForm = () => {
         setIsValidPhone(true);
       }
     }, 300);
-    return () => {
+    
+return () => {
       if (phoneTimerRef.current) {
         clearTimeout(phoneTimerRef.current);
       }
@@ -65,12 +67,13 @@ export const useCandidateForm = () => {
     twitterTimerRef.current = setTimeout(() => {
       if (twitter && twitter.trim()) {
         const url = twitter.trim();
-        setIsValidTwitter(url.startsWith("https://") || url === "");
+        setIsValidTwitter(url.startsWith('https://') || url === '');
       } else {
         setIsValidTwitter(true);
       }
     }, 300);
-    return () => {
+    
+return () => {
       if (twitterTimerRef.current) {
         clearTimeout(twitterTimerRef.current);
       }
@@ -84,12 +87,13 @@ export const useCandidateForm = () => {
     linkedinTimerRef.current = setTimeout(() => {
       if (linkedin && linkedin.trim()) {
         const url = linkedin.trim();
-        setIsValidLinkedin(url.startsWith("https://") || url === "");
+        setIsValidLinkedin(url.startsWith('https://') || url === '');
       } else {
         setIsValidLinkedin(true);
       }
     }, 300);
-    return () => {
+    
+return () => {
       if (linkedinTimerRef.current) {
         clearTimeout(linkedinTimerRef.current);
       }
@@ -149,4 +153,3 @@ export const useCandidateForm = () => {
     isFormValid,
   };
 };
-

@@ -1,44 +1,44 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse, NextRequest } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse, NextRequest } from 'next/server';
 
 // ============ BOT DETECTION ============
 const BLOCKED_BOTS = [
-  "ahrefsbot",
-  "semrushbot",
-  "mj12bot",
-  "dotbot",
-  "blexbot",
-  "searchmetricsbot",
-  "sogou",
-  "exabot",
-  "python-requests",
-  "python-urllib",
-  "curl/",
-  "wget/",
-  "scrapy",
-  "phantomjs",
-  "headlesschrome",
-  "selenium",
-  "puppeteer",
-  "playwright",
+  'ahrefsbot',
+  'semrushbot',
+  'mj12bot',
+  'dotbot',
+  'blexbot',
+  'searchmetricsbot',
+  'sogou',
+  'exabot',
+  'python-requests',
+  'python-urllib',
+  'curl/',
+  'wget/',
+  'scrapy',
+  'phantomjs',
+  'headlesschrome',
+  'selenium',
+  'puppeteer',
+  'playwright',
 ];
 
-const ALLOWED_BOTS = ["googlebot", "bingbot", "slurp", "duckduckbot"];
+const ALLOWED_BOTS = ['googlebot', 'bingbot', 'slurp', 'duckduckbot'];
 
 function isMaliciousBot(userAgent: string): boolean {
-  if (!userAgent) return true;
+  if (!userAgent) {return true;}
   const ua = userAgent.toLowerCase();
 
   // Allow good bots
   for (const bot of ALLOWED_BOTS) {
     if (ua.includes(bot)) {
       return false;
-    } 
+    }
   }
 
   // Block bad bots
   for (const bot of BLOCKED_BOTS) {
-    if (ua.includes(bot)) { 
+    if (ua.includes(bot)) {
       return true;
     }
   }
@@ -59,7 +59,7 @@ function checkRateLimit(
 
   if (!entry || entry.resetTime < now) {
     rateLimitStore.set(ip, { count: 1, resetTime: now + windowMs });
-    
+
     return true;
   }
 
@@ -74,22 +74,22 @@ function checkRateLimit(
 
 function getClientIP(req: NextRequest): string {
   return (
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-    req.headers.get("x-real-ip") ||
-    req.headers.get("cf-connecting-ip") ||
-    "unknown"
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    req.headers.get('x-real-ip') ||
+    req.headers.get('cf-connecting-ip') ||
+    'unknown'
   );
 }
 
 // ============ SECURITY HEADERS ============
 const SECURITY_HEADERS = {
-  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
-  "X-XSS-Protection": "1; mode=block",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-  "Content-Security-Policy": [
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Content-Security-Policy': [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.clerk.accounts.dev https://clerk.hirinup.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
@@ -101,51 +101,50 @@ const SECURITY_HEADERS = {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
-  ].join("; "),
+    'upgrade-insecure-requests',
+  ].join('; '),
 };
 
 // ============ ROUTE MATCHERS ============
 const isPublicRoute = createRouteMatcher([
-  "/",
-  "/home(.*)",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/signin(.*)",
-  "/signup(.*)",
-  "/login(.*)",
-  "/register(.*)",
-  "/forgot-password(.*)",
-  "/verification-page(.*)",
-  "/admin/signin(.*)",
-  "/admin/signup(.*)",
-  "/interview(.*)",
-  "/join(.*)",
-  "/pricing(.*)",
-  "/book-a-demo(.*)",
-  "/job-tryouts(.*)",
-  "/ai-candidate-screening(.*)",
-  "/ethical-ai(.*)",
-  "/terms-condition(.*)",
-  "/privacy-policy(.*)",
-  "/api/register-call(.*)",
-  "/api/get-call(.*)",
-  "/api/generate-interview-questions(.*)",
-  "/api/create-interviewer(.*)",
-  "/api/create-response(.*)",
-  "/api/analyze-communication(.*)",
-  "/api/response-webhook(.*)",
-  "/api/check-allowlist(.*)",
-  "/not-allowed(.*)",
+  '/',
+  '/home(.*)',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/signin(.*)',
+  '/signup(.*)',
+  '/login(.*)',
+  '/register(.*)',
+  '/forgot-password(.*)',
+  '/verification-page(.*)',
+  '/admin/signin(.*)',
+  '/admin/signup(.*)',
+  '/interview(.*)',
+  '/join(.*)',
+  '/pricing(.*)',
+  '/book-a-demo(.*)',
+  '/job-tryouts(.*)',
+  '/ai-candidate-screening(.*)',
+  '/ethical-ai(.*)',
+  '/terms-condition(.*)',
+  '/privacy-policy(.*)',
+  '/api/register-call(.*)',
+  '/api/get-call(.*)',
+  '/api/generate-interview-questions(.*)',
+  '/api/create-interviewer(.*)',
+  '/api/create-response(.*)',
+  '/api/analyze-communication(.*)',
+  '/api/response-webhook(.*)',
+  '/api/check-allowlist(.*)',
+  '/not-allowed(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
-  "/dashboard(.*)",
-  "/interviews(.*)",
+  '/dashboard(.*)',
+  '/interviews(.*)',
 ]);
 
-const isApiRoute = createRouteMatcher(["/api/(.*)"]);
-
+const isApiRoute = createRouteMatcher(['/api/(.*)']);
 
 // ============ CLERK HANDLER ============
 const clerkHandler = clerkMiddleware(async (auth, req) => {
@@ -164,37 +163,34 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
 // ============ MAIN MIDDLEWARE ============
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const userAgent = req.headers.get("user-agent") || "";
+  const userAgent = req.headers.get('user-agent') || '';
   const clientIP = getClientIP(req);
 
   // 1. Block malicious bots
   if (isMaliciousBot(userAgent)) {
-    return new NextResponse("Access Denied", { status: 403 });
+    return new NextResponse('Access Denied', { status: 403 });
   }
 
   // 2. Rate limiting for API routes (stricter)
   if (isApiRoute(req)) {
     const allowed = checkRateLimit(clientIP, 180, 60000); // 180 req/min for API
     if (!allowed) {
-      return new NextResponse(
-        JSON.stringify({ error: "Too many requests" }),
-        {
-          status: 429,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      return new NextResponse(JSON.stringify({ error: 'Too many requests' }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
   }
 
   // 3. General rate limiting
   const allowed = checkRateLimit(`general:${clientIP}`, 200, 60000); // 200 req/min general
   if (!allowed) {
-    return new NextResponse("Too Many Requests", { status: 429 });
+    return new NextResponse('Too Many Requests', { status: 429 });
   }
 
   // 4. Redirect root to /home
-  if (pathname === "/") {
-    const response = NextResponse.redirect(new URL("/home", req.url));
+  if (pathname === '/') {
+    const response = NextResponse.redirect(new URL('/home', req.url));
     // Add security headers
     Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
       response.headers.set(key, value);
@@ -218,6 +214,6 @@ export default function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|txt)$|join/).*)",
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|txt)$|join/).*)',
   ],
 };

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { serverDecryptPayload, serverEncryptResponse } from "@/lib/crypto";
-import { logger } from "@/lib/logger";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { serverDecryptPayload, serverEncryptResponse } from '@/lib/crypto';
+import { logger } from '@/lib/logger';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,20 +22,22 @@ export async function POST(req: Request) {
     const { token } = body;
 
     if (!token) {
-
-      return NextResponse.json({ error: "token is required" }, { status: 400 });
+      return NextResponse.json({ error: 'token is required' }, { status: 400 });
     }
 
     const { data, error } = await supabase
-      .from("response")
-      .select("*")
-      .eq("token", token)
+      .from('response')
+      .select('*')
+      .eq('token', token)
       .single();
 
     if (error || !data) {
-      logger.warn("[get-response] Not found:", { token });
+      logger.warn('[get-response] Not found:', { token });
 
-      return NextResponse.json({ error: "Response not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Response not found' },
+        { status: 404 }
+      );
     }
 
     if (raw.cpk) {
@@ -46,8 +48,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json(data, { status: 200 });
   } catch (err: any) {
-    logger.error("[get-response] Error:", err.message);
+    logger.error('[get-response] Error:', err.message);
 
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useMutation } from "@tanstack/react-query";
-import { useEncryptedFetch } from "./useEncryptedFetch";
+import { useMutation } from '@tanstack/react-query';
+import { useEncryptedFetch } from './useEncryptedFetch';
 
 interface RegisterCallParams {
   dynamic_data: {
@@ -32,8 +32,10 @@ export const useEncryptedRegisterCall = () => {
   const { encryptedFetch, isReady } = useEncryptedFetch();
 
   const mutation = useMutation({
-    mutationFn: async (params: RegisterCallParams): Promise<RegisterCallResponse> => {
-      return encryptedFetch("/api/register-call", params);
+    mutationFn: async (
+      params: RegisterCallParams
+    ): Promise<RegisterCallResponse> => {
+      return encryptedFetch('/api/register-call', params);
     },
   });
 

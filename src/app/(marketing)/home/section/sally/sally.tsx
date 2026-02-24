@@ -14,7 +14,7 @@ export default function SallySection() {
   }, []);
 
   const toggleAudio = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current) {return;}
 
     if (playing) {
       audioRef.current.pause();
@@ -80,8 +80,8 @@ export default function SallySection() {
 
           {/* Play / Pause Button */}
           <button
-            onClick={toggleAudio}
             className="absolute bottom-6 left-6 z-10 transition hover:scale-105"
+            onClick={toggleAudio}
           >
             <img
               src={playing ? '/pause.svg' : '/play.svg'}

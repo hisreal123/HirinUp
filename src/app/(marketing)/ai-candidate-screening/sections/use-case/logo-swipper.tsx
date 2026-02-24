@@ -22,13 +22,13 @@ export default function IntegrationsCarousel() {
         modules={[Autoplay]}
         slidesPerView={4.5}
         spaceBetween={16}
-        loop
         speed={2000}
         autoplay={{
           delay: 0,
           disableOnInteraction: false,
         }}
         className="mb-4"
+        loop
       >
         {[...logos, ...logos].map((logo, i) => (
           <SwiperSlide key={`top-${i}`}>
@@ -42,13 +42,13 @@ export default function IntegrationsCarousel() {
         modules={[Autoplay]}
         slidesPerView={4.5}
         spaceBetween={16}
-        loop
         speed={2000}
         autoplay={{
           delay: 0,
           reverseDirection: true,
           disableOnInteraction: false,
         }}
+        loop
       >
         {[...logos, ...logos].map((logo, i) => (
           <SwiperSlide key={`bottom-${i}`}>

@@ -1,4 +1,4 @@
-import styles from "./mini-loader.module.css";
+import styles from './mini-loader.module.css';
 
 function MiniLoader() {
   return (

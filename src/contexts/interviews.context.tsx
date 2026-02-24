@@ -1,10 +1,17 @@
-"use client";
+'use client';
 
-import React, { useState, useContext, ReactNode, useEffect } from "react";
-import { Interview } from "@/types/interview";
-import { InterviewService } from "@/services/interviews.service";
-import { useClerk, useOrganization } from "@clerk/nextjs";
-import { encryptedApiCall } from "@/lib/encrypted-api";
+import React, {
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
+import { Interview } from '@/types/interview';
+import { InterviewService } from '@/services/interviews.service';
+import { useClerk, useOrganization } from '@clerk/nextjs';
+import { encryptedApiCall } from '@/lib/encrypted-api';
 
 interface InterviewContextProps {
   interviews: Interview[];
@@ -34,44 +41,49 @@ export function InterviewProvider({ children }: InterviewProviderProps) {
   const { organization } = useOrganization();
   const [interviewsLoading, setInterviewsLoading] = useState(false);
 
-  const fetchInterviews = async () => {
+  const fetchInterviews = useCallback(async () => {
     try {
       setInterviewsLoading(true);
-      const response = await encryptedApiCall<Interview[]>("/api/get-interviews", {
-        userId: user?.id,
-        organizationId: organization?.id,
-      });
+      const response = await encryptedApiCall<Interview[]>(
+        '/api/get-interviews',
+        {
+          userId: user?.id,
+          organizationId: organization?.id,
+        }
+      );
       setInterviews(response || []);
     } catch (error) {
       console.error(error);
     }
     setInterviewsLoading(false);
-  };
+  }, [user?.id, organization?.id]);
 
-  const getInterviewById = async (interviewId: string) => {
+  const getInterviewById = useCallback(async (interviewId: string) => {
     const response = await InterviewService.getInterviewById(interviewId);
-
-    return response;
-  };
+    
+return response;
+  }, []);
 
   useEffect(() => {
     if (organization?.id || user?.id) {
       fetchInterviews();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organization?.id, user?.id]);
+  }, [organization?.id, user?.id, fetchInterviews]);
+
+  const contextValue = useMemo(
+    () => ({
+      interviews,
+      setInterviews,
+      getInterviewById,
+      interviewsLoading,
+      setInterviewsLoading,
+      fetchInterviews,
+    }),
+    [interviews, interviewsLoading, fetchInterviews, getInterviewById]
+  );
 
   return (
-    <InterviewContext.Provider
-      value={{
-        interviews,
-        setInterviews,
-        getInterviewById,
-        interviewsLoading,
-        setInterviewsLoading,
-        fetchInterviews,
-      }}
-    >
+    <InterviewContext.Provider value={contextValue}>
       {children}
     </InterviewContext.Provider>
   );

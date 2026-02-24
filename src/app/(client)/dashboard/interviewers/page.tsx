@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { useInterviewers } from "@/contexts/interviewers.context";
-import React from "react";
-import { ChevronLeft } from "lucide-react";
-import { ChevronRight } from "lucide-react";
-import InterviewerCard from "@/components/dashboard/interviewer/interviewerCard";
-import CreateInterviewerButton from "@/components/dashboard/interviewer/createInterviewerButton";
+import { useInterviewers } from '@/contexts/interviewers.context';
+import React from 'react';
+import { ChevronLeft } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import InterviewerCard from '@/components/dashboard/interviewer/interviewerCard';
+import CreateInterviewerButton from '@/components/dashboard/interviewer/createInterviewerButton';
 
 function Interviewers() {
   const { interviewers, interviewersLoading } = useInterviewers();
 
   const slideLeft = () => {
-    var slider = document.getElementById("slider");
+    var slider = document.getElementById('slider');
     if (slider) {
       slider.scrollLeft = slider.scrollLeft - 190;
     }
   };
 
   const slideRight = () => {
-    var slider = document.getElementById("slider");
+    var slider = document.getElementById('slider');
     if (slider) {
       slider.scrollLeft = slider.scrollLeft + 190;
     }

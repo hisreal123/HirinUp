@@ -1,5 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
 
 interface RegisterCallParams {
   dynamic_data: {
@@ -23,10 +23,12 @@ interface RegisterCallResponse {
 
 export const useRegisterCall = () => {
   return useMutation({
-    mutationFn: async (params: RegisterCallParams): Promise<RegisterCallResponse> => {
-      const response = await axios.post("/api/register-call", params);
-      return response.data;
+    mutationFn: async (
+      params: RegisterCallParams
+    ): Promise<RegisterCallResponse> => {
+      const response = await axios.post('/api/register-call', params);
+      
+return response.data;
     },
   });
 };
-

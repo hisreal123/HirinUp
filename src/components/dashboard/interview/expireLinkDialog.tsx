@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { ResponseService } from "@/services/responses.service";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { ResponseService } from '@/services/responses.service';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -12,7 +12,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 interface ExpireLinkDialogProps {
   token: string | null;
@@ -20,20 +20,24 @@ interface ExpireLinkDialogProps {
   onSuccess: () => void | Promise<void>;
 }
 
-export function ExpireLinkDialog({ token, onClose, onSuccess }: ExpireLinkDialogProps) {
+export function ExpireLinkDialog({
+  token,
+  onClose,
+  onSuccess,
+}: ExpireLinkDialogProps) {
   const [deleting, setDeleting] = useState(false);
 
   const handleConfirm = async () => {
-    if (!token) return;
+    if (!token) {return;}
     setDeleting(true);
     try {
       await ResponseService.updateResponseByToken({ is_ended: true }, token);
-      toast.success("Link expired successfully");
+      toast.success('Link expired successfully');
       await onSuccess();
       onClose();
     } catch (err) {
-      console.error("Failed to expire link:", err);
-      toast.error("Failed to expire link");
+      console.error('Failed to expire link:', err);
+      toast.error('Failed to expire link');
     } finally {
       setDeleting(false);
     }
@@ -43,25 +47,25 @@ export function ExpireLinkDialog({ token, onClose, onSuccess }: ExpireLinkDialog
     <AlertDialog
       open={!!token}
       onOpenChange={(open) => {
-        if (!open && !deleting) onClose();
+        if (!open && !deleting) {onClose();}
       }}
     >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Expire this link?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will immediately expire the link. The candidate will no longer be able to use it.
-            This action cannot be undone.
+            This will immediately expire the link. The candidate will no longer
+            be able to use it. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
           <Button
-            onClick={handleConfirm}
             disabled={deleting}
             className="bg-red-600 hover:bg-red-700 text-white"
+            onClick={handleConfirm}
           >
-            {deleting ? "Expiring..." : "Expire Link"}
+            {deleting ? 'Expiring...' : 'Expire Link'}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

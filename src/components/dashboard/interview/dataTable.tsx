@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   ColumnDef,
   flexRender,
@@ -14,15 +14,15 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
-} from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { ArrowUpDown, ExternalLink } from "lucide-react";
+} from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
+import { ArrowUpDown, ExternalLink } from 'lucide-react';
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 
 export type TableData = {
   call_id: string;
@@ -37,9 +37,17 @@ interface DataTableProps {
   interviewId: string;
 }
 
+// Pure comparison helper — defined outside component to avoid recreation on every render
+function customSortingFn(a: any, b: any): number {
+  if (a === null || a === undefined) {return -1;}
+  if (b === null || b === undefined) {return 1;}
+  
+return a - b;
+}
+
 function DataTable({ data, interviewId }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "overallScore", desc: true },
+    { id: 'overallScore', desc: true },
   ]);
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,150 +68,148 @@ function DataTable({ data, interviewId }: DataTableProps) {
     setHoveredRowId(null);
   }, []);
 
-  const customSortingFn = (a: any, b: any) => {
-    if (a === null || a === undefined) {
-      return -1;
-    }
-    if (b === null || b === undefined) {
-      return 1;
-    }
+  const columns = useMemo<ColumnDef<TableData>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              className={`w-full justify-start font-semibold text-[15px] mb-1 ${column.getIsSorted() ? 'text-indigo-600' : 'text-black'}`}
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              Name
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="flex items-center justify-left min-h-[2.6em]">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-pointer mr-2 flex-shrink-0">
+                    <ExternalLink
+                      size={16}
+                      className="text-current hover:text-indigo-600"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(
+                          `/interviews/${interviewId}?call=${row.original.call_id}`,
+                          '_blank'
+                        );
+                      }}
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-gray-500 text-white font-normal"
+                >
+                  View Response
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <span className="truncate">{row.getValue('name')}</span>
+          </div>
+        ),
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue(columnId) as string;
+          const b = rowB.getValue(columnId) as string;
 
-    return a - b;
-  };
+          return a.toLowerCase().localeCompare(b.toLowerCase());
+        },
+      },
+      {
+        accessorKey: 'overallScore',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              className={`w-full justify-start font-semibold text-[15px] mb-1 ${column.getIsSorted() ? 'text-indigo-600' : 'text-black'}`}
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              Overall Score
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="min-h-[2.6em] flex items-center justify-center">
+            {row.getValue('overallScore') ?? '-'}
+          </div>
+        ),
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue(columnId) as number | null;
+          const b = rowB.getValue(columnId) as number | null;
 
-  const columns: ColumnDef<TableData>[] = [
-    {
-      accessorKey: "name",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className={`w-full justify-start font-semibold text-[15px] mb-1 ${column.getIsSorted() ? "text-indigo-600" : "text-black"}`}
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
+          return customSortingFn(a, b);
+        },
       },
-      cell: ({ row }) => (
-        <div className="flex items-center justify-left min-h-[2.6em]">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="cursor-pointer mr-2 flex-shrink-0">
-                  <ExternalLink
-                    size={16}
-                    className="text-current hover:text-indigo-600"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(
-                        `/interviews/${interviewId}?call=${row.original.call_id}`,
-                        "_blank",
-                      );
-                    }}
-                  />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-gray-500 text-white font-normal"
-              >
-                View Response
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <span className="truncate">{row.getValue("name")}</span>
-        </div>
-      ),
-      sortingFn: (rowA, rowB, columnId) => {
-        const a = rowA.getValue(columnId) as string;
-        const b = rowB.getValue(columnId) as string;
+      {
+        accessorKey: 'communicationScore',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              className={`w-full justify-start font-semibold text-[15px] mb-1 ${column.getIsSorted() ? 'text-indigo-600' : 'text-black'}`}
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              Communication Score
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="min-h-[2.6em] flex items-center justify-center">
+            {row.getValue('communicationScore') ?? '-'}
+          </div>
+        ),
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue(columnId) as number | null;
+          const b = rowB.getValue(columnId) as number | null;
 
-        return a.toLowerCase().localeCompare(b.toLowerCase());
+          return customSortingFn(a, b);
+        },
       },
-    },
-    {
-      accessorKey: "overallScore",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className={`w-full justify-start font-semibold text-[15px] mb-1 ${column.getIsSorted() ? "text-indigo-600" : "text-black"}`}
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Overall Score
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="min-h-[2.6em] flex items-center justify-center">
-          {row.getValue("overallScore") ?? "-"}
-        </div>
-      ),
-      sortingFn: (rowA, rowB, columnId) => {
-        const a = rowA.getValue(columnId) as number | null;
-        const b = rowB.getValue(columnId) as number | null;
+      {
+        accessorKey: 'callSummary',
+        header: () => (
+          <div className="w-full justify-start font-semibold text-[15px] mb-1 text-black">
+            Summary
+          </div>
+        ),
+        cell: ({ row }) => {
+          const summary = row.getValue('callSummary') as string;
 
-        return customSortingFn(a, b);
-      },
-    },
-    {
-      accessorKey: "communicationScore",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className={`w-full justify-start font-semibold text-[15px] mb-1 ${column.getIsSorted() ? "text-indigo-600" : "text-black"}`}
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Communication Score
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="min-h-[2.6em] flex items-center justify-center">
-          {row.getValue("communicationScore") ?? "-"}
-        </div>
-      ),
-      sortingFn: (rowA, rowB, columnId) => {
-        const a = rowA.getValue(columnId) as number | null;
-        const b = rowB.getValue(columnId) as number | null;
-
-        return customSortingFn(a, b);
-      },
-    },
-    {
-      accessorKey: "callSummary",
-      header: () => (
-        <div className="w-full justify-start font-semibold text-[15px] mb-1 text-black">
-          Summary
-        </div>
-      ),
-      cell: ({ row }) => {
-        const summary = row.getValue("callSummary") as string;
-
-        return (
-          <div className="text-xs text-justify pr-4">
-            <div
-              className={`
+          return (
+            <div className="text-xs text-justify pr-4">
+              <div
+                className={`
                 overflow-hidden transition-all duration-300 ease-in-out
                 ${
                   hoveredRowId === row.id
-                    ? "max-h-[1000px] opacity-100"
-                    : "max-h-[2.6em] line-clamp-2 opacity-90"
+                    ? 'max-h-[1000px] opacity-100'
+                    : 'max-h-[2.6em] line-clamp-2 opacity-90'
                 }
               `}
-            >
-              {summary}
+              >
+                {summary}
+              </div>
             </div>
-          </div>
-        );
+          );
+        },
       },
-    },
-  ];
+    ],
+    [interviewId, hoveredRowId]
+  );
 
   const table = useReactTable({
     data,
@@ -228,7 +234,7 @@ function DataTable({ data, interviewId }: DataTableProps) {
                     ? null
                     : flexRender(
                         header.column.columnDef.header,
-                        header.getContext(),
+                        header.getContext()
                       )}
                 </TableHead>
               ))}

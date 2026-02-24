@@ -21,7 +21,8 @@ function VerificationSuccessPage() {
     if (!token) {
       console.error('No token provided');
       setIsValid(false);
-      return;
+      
+return;
     }
 
     try {
@@ -29,14 +30,16 @@ function VerificationSuccessPage() {
       const urlDecoded = decodeURIComponent(token);
       const decoded = atob(urlDecoded);
       const data = JSON.parse(decoded) as DecodedData;
-      
-      
+
       // Validate that we have the required fields
       if (data.name && data.email && data.name.trim() && data.email.trim()) {
         setDecodedData(data);
         setIsValid(true);
       } else {
-        console.error('Missing required fields:', { name: data.name, email: data.email });
+        console.error('Missing required fields:', {
+          name: data.name,
+          email: data.email,
+        });
         setIsValid(false);
       }
     } catch (error) {
@@ -64,7 +67,7 @@ function VerificationSuccessPage() {
           <div className="w-[60%] bg-white rounded-2xl shadow-xl p-8 space-y-6 animate-in fade-in zoom-in-95 duration-500 my-8">
             <div className="flex flex-col items-center justify-center text-center space-y-6">
               <h1 className="text-6xl font-bold text-gray-900">404</h1>
-              
+
               <div className="space-y-3">
                 <h2 className="text-2xl font-semibold text-gray-800">
                   Page Not Found
@@ -79,22 +82,18 @@ function VerificationSuccessPage() {
 
               <div className="flex flex-col gap-4 w-full max-w-md pt-4">
                 <Button
-                  asChild
                   className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5"
+                  asChild
                 >
-                  <Link href="/verification-page">
-                    Go to Verification Page
-                  </Link>
+                  <Link href="/verification-page">Go to Verification Page</Link>
                 </Button>
 
                 <Button
-                  asChild
                   variant="outline"
                   className="w-full border-gray-300 hover:bg-gray-50"
+                  asChild
                 >
-                  <Link href="/">
-                    Return to Home
-                  </Link>
+                  <Link href="/">Return to Home</Link>
                 </Button>
               </div>
             </div>
@@ -137,16 +136,17 @@ function VerificationSuccessPage() {
             <div className="relative">
               <Clock className="h-20 w-20 text-indigo-600 animate-in zoom-in-95 duration-500" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-16 w-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                <div className="h-16 w-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
               </div>
             </div>
-            
+
             <div className="space-y-3">
               <h1 className="text-3xl font-bold text-gray-900">
                 Verification Request Submitted
               </h1>
               <p className="text-lg text-gray-600">
-                Hi {decodedData.name}, please wait while we verify your information
+                Hi {decodedData.name}, please wait while we verify your
+                information
               </p>
               <p className="text-sm text-gray-500">
                 We've received your verification request for {decodedData.email}
@@ -159,7 +159,9 @@ function VerificationSuccessPage() {
                       What happens next?
                     </p>
                     <p className="text-sm text-gray-600">
-                      Our team will review your verification request. You will receive an email notification once your verification has been processed. This typically takes 24-48 hours.
+                      Our team will review your verification request. You will
+                      receive an email notification once your verification has
+                      been processed. This typically takes 24-48 hours.
                     </p>
                   </div>
                 </div>
@@ -168,22 +170,18 @@ function VerificationSuccessPage() {
 
             <div className="flex flex-col gap-4 w-full max-w-md pt-4">
               <Button
-                asChild
                 className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5"
+                asChild
               >
-                <Link href="/signin">
-                  Sign In
-                </Link>
+                <Link href="/signin">Sign In</Link>
               </Button>
 
               <Button
-                asChild
                 variant="outline"
                 className="w-full border-gray-300 hover:bg-gray-50"
+                asChild
               >
-                <Link href="/">
-                  Return to Home
-                </Link>
+                <Link href="/">Return to Home</Link>
               </Button>
             </div>
 
@@ -204,4 +202,3 @@ function VerificationSuccessPage() {
 }
 
 export default VerificationSuccessPage;
-

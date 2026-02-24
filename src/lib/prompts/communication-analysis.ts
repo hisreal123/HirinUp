@@ -4,7 +4,7 @@ export const SYSTEM_PROMPT = `You are an expert in analyzing communication skill
 3. Provide a detailed breakdown of strengths and areas for improvement`;
 
 export const getCommunicationAnalysisPrompt = (
-  transcript: string,
+  transcript: string
 ) => `Analyze the communication skills demonstrated in the following interview transcript:
 
 Transcript: ${transcript}

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { nanoid } from "nanoid";
-import { createClient, RealtimeChannel } from "@supabase/supabase-js";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { nanoid } from 'nanoid';
+import { createClient, RealtimeChannel } from '@supabase/supabase-js';
 
-type SessionStatus = "active" | "blocked" | "expired" | "checking";
+type SessionStatus = 'active' | 'blocked' | 'expired' | 'checking';
 
 interface SessionSecurityState {
   sessionId: string;
@@ -39,12 +39,12 @@ export function useSessionSecurity({
   onSessionBlocked,
 }: UseSessionSecurityOptions) {
   const [state, setState] = useState<SessionSecurityState>({
-    sessionId: "",
-    status: "checking",
+    sessionId: '',
+    status: 'checking',
   });
 
-  const sessionIdRef = useRef<string>("");
-  const statusRef = useRef<SessionStatus>("checking"); // Ref so callbacks don't recreate on status change
+  const sessionIdRef = useRef<string>('');
+  const statusRef = useRef<SessionStatus>('checking'); // Ref so callbacks don't recreate on status change
   const channelRef = useRef<BroadcastChannel | null>(null);
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,21 +56,24 @@ export function useSessionSecurity({
     onSessionBlockedRef.current = onSessionBlocked;
   }, [onSessionBlocked]);
 
-  const setStatus = useCallback((status: SessionStatus, blockedReason?: string) => {
-    statusRef.current = status;
-    setState((prev) => ({ ...prev, status, blockedReason }));
-  }, []);
+  const setStatus = useCallback(
+    (status: SessionStatus, blockedReason?: string) => {
+      statusRef.current = status;
+      setState((prev) => ({ ...prev, status, blockedReason }));
+    },
+    []
+  );
 
   // Generate unique session ID on mount
   useEffect(() => {
-    if (!enabled || !responseToken) return;
+    if (!enabled || !responseToken) {return;}
 
     const newSessionId = nanoid();
     sessionIdRef.current = newSessionId;
     setState((prev) => ({ ...prev, sessionId: newSessionId }));
 
     return () => {
-      sessionIdRef.current = "";
+      sessionIdRef.current = '';
     };
   }, [enabled, responseToken]);
 
@@ -79,7 +82,7 @@ export function useSessionSecurity({
   // Runs once — uses statusRef instead of state.status
   // ==========================================
   useEffect(() => {
-    if (!enabled || !responseToken || !sessionIdRef.current) return;
+    if (!enabled || !responseToken || !sessionIdRef.current) {return;}
 
     const channelName = `foloup_session_${responseToken}`;
 
@@ -90,53 +93,67 @@ export function useSessionSecurity({
       channel.onmessage = (event) => {
         const { type, sessionId: incomingSessionId, timestamp } = event.data;
 
-        if (type === "SESSION_CLAIM" && incomingSessionId !== sessionIdRef.current) {
+        if (
+          type === 'SESSION_CLAIM' &&
+          incomingSessionId !== sessionIdRef.current
+        ) {
           channel.postMessage({
-            type: "SESSION_CONFLICT",
+            type: 'SESSION_CONFLICT',
             sessionId: sessionIdRef.current,
             timestamp: Date.now(),
           });
         }
 
-        if (type === "SESSION_CONFLICT" && incomingSessionId !== sessionIdRef.current) {
+        if (
+          type === 'SESSION_CONFLICT' &&
+          incomingSessionId !== sessionIdRef.current
+        ) {
           const ourTimestamp = parseInt(
-            localStorage.getItem(`session_ts_${responseToken}`) || "0"
+            localStorage.getItem(`session_ts_${responseToken}`) || '0'
           );
 
           if (timestamp < ourTimestamp) {
-            setStatus("blocked", "Interview is open in another tab");
-            onSessionBlockedRef.current?.("Interview is open in another tab");
+            setStatus('blocked', 'Interview is open in another tab');
+            onSessionBlockedRef.current?.('Interview is open in another tab');
           }
         }
 
-        if (type === "SESSION_PING") {
+        if (type === 'SESSION_PING') {
           // Only pong if this tab actually owns the session (not blocked)
-          if (statusRef.current === "active") {
+          if (statusRef.current === 'active') {
             channel.postMessage({
-              type: "SESSION_PONG",
+              type: 'SESSION_PONG',
               sessionId: sessionIdRef.current,
               timestamp: Date.now(),
             });
           }
         }
 
-        if (type === "SESSION_PONG" && incomingSessionId !== sessionIdRef.current) {
-          setStatus("blocked", "Interview is already open in another tab");
-          onSessionBlockedRef.current?.("Interview is already open in another tab");
+        if (
+          type === 'SESSION_PONG' &&
+          incomingSessionId !== sessionIdRef.current
+        ) {
+          setStatus('blocked', 'Interview is already open in another tab');
+          onSessionBlockedRef.current?.(
+            'Interview is already open in another tab'
+          );
         }
       };
 
       channel.postMessage({
-        type: "SESSION_PING",
+        type: 'SESSION_PING',
         sessionId: sessionIdRef.current,
         timestamp: Date.now(),
       });
 
       const claimTimeout = setTimeout(() => {
-        if (statusRef.current !== "blocked") {
-          localStorage.setItem(`session_ts_${responseToken}`, Date.now().toString());
+        if (statusRef.current !== 'blocked') {
+          localStorage.setItem(
+            `session_ts_${responseToken}`,
+            Date.now().toString()
+          );
           channel.postMessage({
-            type: "SESSION_CLAIM",
+            type: 'SESSION_CLAIM',
             sessionId: sessionIdRef.current,
             timestamp: Date.now(),
           });
@@ -149,7 +166,10 @@ export function useSessionSecurity({
         channelRef.current = null;
       };
     } catch (error) {
-      console.warn("[SessionSecurity L1] BroadcastChannel not supported:", error);
+      console.warn(
+        '[SessionSecurity L1] BroadcastChannel not supported:',
+        error
+      );
     }
   }, [enabled, responseToken, setStatus]); // No state.status — uses statusRef
 
@@ -157,8 +177,12 @@ export function useSessionSecurity({
   // LAYER 2 & 3: API Session Claim & Heartbeat
   // ==========================================
   const claimSession = useCallback(async () => {
-    if (!enabled || !responseToken || !sessionIdRef.current || isClaimingRef.current) {
-
+    if (
+      !enabled ||
+      !responseToken ||
+      !sessionIdRef.current ||
+      isClaimingRef.current
+    ) {
       return false;
     }
 
@@ -166,9 +190,9 @@ export function useSessionSecurity({
 
     // Single fetch attempt — extracted so we can retry on 409
     const attemptClaim = async () =>
-      fetch("/api/session/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      fetch('/api/session/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token: responseToken,
           session_id: sessionIdRef.current,
@@ -192,27 +216,32 @@ export function useSessionSecurity({
 
       if (!response.ok) {
         if (response.status === 409) {
-          setStatus("blocked", data.message || "Session active on another device/browser");
-          onSessionBlockedRef.current?.(data.message || "Session active on another device/browser");
+          setStatus(
+            'blocked',
+            data.message || 'Session active on another device/browser'
+          );
+          onSessionBlockedRef.current?.(
+            data.message || 'Session active on another device/browser'
+          );
 
           return false;
         }
         if (response.status === 410) {
-          setStatus("expired", data.message || "Interview has ended");
-          onSessionBlockedRef.current?.(data.message || "Interview has ended");
+          setStatus('expired', data.message || 'Interview has ended');
+          onSessionBlockedRef.current?.(data.message || 'Interview has ended');
 
           return false;
         }
-        throw new Error(data.error || "Failed to claim session");
+        throw new Error(data.error || 'Failed to claim session');
       }
 
-      setStatus("active");
+      setStatus('active');
 
       return true;
     } catch (error) {
-      console.error("[SessionSecurity L2] Failed to claim session:", error);
+      console.error('[SessionSecurity L2] Failed to claim session:', error);
       // Don't block on network errors
-      setStatus("active");
+      setStatus('active');
 
       return true;
     } finally {
@@ -221,14 +250,19 @@ export function useSessionSecurity({
   }, [enabled, responseToken, setStatus]); // No state.status — uses statusRef
 
   const sendHeartbeat = useCallback(async () => {
-    if (!enabled || !responseToken || !sessionIdRef.current || statusRef.current !== "active") {
+    if (
+      !enabled ||
+      !responseToken ||
+      !sessionIdRef.current ||
+      statusRef.current !== 'active'
+    ) {
       return;
     }
 
     try {
-      const response = await fetch("/api/session/heartbeat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/session/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token: responseToken,
           session_id: sessionIdRef.current,
@@ -239,21 +273,21 @@ export function useSessionSecurity({
         const data = await response.json();
 
         if (response.status === 409 || response.status === 401) {
-          setStatus("blocked", data.message || "Session invalidated");
-          onSessionBlockedRef.current?.(data.message || "Session invalidated");
+          setStatus('blocked', data.message || 'Session invalidated');
+          onSessionBlockedRef.current?.(data.message || 'Session invalidated');
         }
       }
     } catch (error) {
-      console.warn("[SessionSecurity L2] Heartbeat failed (network):", error);
+      console.warn('[SessionSecurity L2] Heartbeat failed (network):', error);
     }
   }, [enabled, responseToken, setStatus]); // No state.status — uses statusRef
 
   // Claim session once on mount — not re-triggered by status changes
   useEffect(() => {
-    if (!enabled || !responseToken || !sessionIdRef.current) return;
+    if (!enabled || !responseToken || !sessionIdRef.current) {return;}
 
     const claimTimeout = setTimeout(() => {
-      if (statusRef.current !== "blocked") {
+      if (statusRef.current !== 'blocked') {
         claimSession();
       }
     }, 400);
@@ -263,9 +297,12 @@ export function useSessionSecurity({
 
   // Start heartbeat — only restarts if interval value changes, not on status changes
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
-    heartbeatIntervalRef.current = setInterval(sendHeartbeat, heartbeatInterval);
+    heartbeatIntervalRef.current = setInterval(
+      sendHeartbeat,
+      heartbeatInterval
+    );
 
     return () => {
       if (heartbeatIntervalRef.current) {
@@ -280,16 +317,16 @@ export function useSessionSecurity({
   // Subscribes once — not re-triggered by status changes
   // ==========================================
   useEffect(() => {
-    if (!enabled || !responseToken || !sessionIdRef.current) return;
+    if (!enabled || !responseToken || !sessionIdRef.current) {return;}
 
     const channel = supabaseClient
       .channel(`session:${responseToken}`)
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "UPDATE",
-          schema: "public",
-          table: "response",
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'response',
           filter: `token=eq.${responseToken}`,
         },
         (payload) => {
@@ -299,17 +336,18 @@ export function useSessionSecurity({
             newData.active_session_id &&
             newData.active_session_id !== sessionIdRef.current
           ) {
-            setStatus("blocked", "Session was taken over by another device");
-            onSessionBlockedRef.current?.("Session was taken over by another device");
+            setStatus('blocked', 'Session was taken over by another device');
+            onSessionBlockedRef.current?.(
+              'Session was taken over by another device'
+            );
           }
 
           if (newData.is_ended === true) {
-            setStatus("expired", "Interview has ended");
+            setStatus('expired', 'Interview has ended');
           }
         }
       )
-      .subscribe((status) => {
-      });
+      .subscribe((status) => {});
 
     realtimeChannelRef.current = channel;
 
@@ -328,7 +366,7 @@ export function useSessionSecurity({
     const handleBeforeUnload = () => {
       if (responseToken && sessionIdRef.current) {
         navigator.sendBeacon(
-          "/api/session/release",
+          '/api/session/release',
           JSON.stringify({
             token: responseToken,
             session_id: sessionIdRef.current,
@@ -337,15 +375,15 @@ export function useSessionSecurity({
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
 
       if (responseToken && sessionIdRef.current) {
-        fetch("/api/session/release", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        fetch('/api/session/release', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             token: responseToken,
             session_id: sessionIdRef.current,
@@ -360,10 +398,10 @@ export function useSessionSecurity({
     sessionId: state.sessionId,
     status: state.status,
     blockedReason: state.blockedReason,
-    isBlocked: state.status === "blocked",
-    isActive: state.status === "active",
-    isChecking: state.status === "checking",
-    isExpired: state.status === "expired",
+    isBlocked: state.status === 'blocked',
+    isActive: state.status === 'active',
+    isChecking: state.status === 'checking',
+    isExpired: state.status === 'expired',
   };
 }
 
@@ -378,12 +416,12 @@ async function getBrowserFingerprint(): Promise<string> {
     screen.height,
     screen.colorDepth,
     new Date().getTimezoneOffset(),
-    navigator.hardwareConcurrency || "unknown",
+    navigator.hardwareConcurrency || 'unknown',
     // @ts-ignore
-    navigator.deviceMemory || "unknown",
+    navigator.deviceMemory || 'unknown',
   ];
 
-  const fingerprint = components.join("|");
+  const fingerprint = components.join('|');
 
   let hash = 0;
   for (let i = 0; i < fingerprint.length; i++) {

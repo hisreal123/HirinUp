@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Plain async encrypted API call — works inside useEffect and anywhere (no React hooks needed).
@@ -9,7 +9,7 @@ import {
   generateEphemeralKeypair,
   encryptPayload,
   decryptResponse,
-} from "@/lib/crypto";
+} from '@/lib/crypto';
 
 export async function encryptedApiCall<T = any>(
   url: string,
@@ -28,8 +28,8 @@ export async function encryptedApiCall<T = any>(
   );
 
   const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ data: encrypted, iv, cpk: publicKeyJwk }),
   });
 

@@ -1,56 +1,51 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Switch} from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import React, { useState, useEffect } from "react";
-import { useOrganization } from "@clerk/nextjs";
-import { useInterviews } from "@/contexts/interviews.context";
-import { Share2, Filter, Pencil, UserIcon, Eye, Link2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
-import { ResponseService } from "@/services/responses.service";
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useOrganization } from '@clerk/nextjs';
+import { useInterviews } from '@/contexts/interviews.context';
+import { Share2, Filter, Pencil, UserIcon, Eye, Link2 } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { ResponseService } from '@/services/responses.service';
 // import { ClientService } from "@/services/clients.service"; // replaced with encrypted API call
 // import { OrganizationService } from "@/services/organizations.service"; // replaced with encrypted API call
-import { encryptedApiCall } from "@/lib/encrypted-api";
-import { FeedbackService } from "@/services/feedback.service";
-import { Interview } from "@/types/interview";
-import { Response } from "@/types/response";
-import { formatTimestampToDateHHMM } from "@/lib/utils";
-import CallInfo from "@/components/call/callInfo";
-import SummaryInfo from "@/components/dashboard/interview/summaryInfo";
-import { InterviewService } from "@/services/interviews.service";
-import EditInterview from "@/components/dashboard/interview/editInterview";
-import Modal from "@/components/dashboard/Modal";
-import { toast } from "sonner";
-import SharePopup from "@/components/dashboard/interview/sharePopup";
-import GenerateLinkModal from "@/components/dashboard/interview/generateLinkModal";
-import { useCreateResponse } from "@/hooks/useCreateResponse";
-import { useGetAllResponses } from "@/hooks/useGetAllResponses";
+import { encryptedApiCall } from '@/lib/encrypted-api';
+import { FeedbackService } from '@/services/feedback.service';
+import { Interview } from '@/types/interview';
+import { Response } from '@/types/response';
+import { formatTimestampToDateHHMM } from '@/lib/utils';
+import CallInfo from '@/components/call/callInfo';
+import SummaryInfo from '@/components/dashboard/interview/summaryInfo';
+import { InterviewService } from '@/services/interviews.service';
+import EditInterview from '@/components/dashboard/interview/editInterview';
+import Modal from '@/components/dashboard/Modal';
+import { toast } from 'sonner';
+import SharePopup from '@/components/dashboard/interview/sharePopup';
+import GenerateLinkModal from '@/components/dashboard/interview/generateLinkModal';
+import { useCreateResponse } from '@/hooks/useCreateResponse';
+import { useGetAllResponses } from '@/hooks/useGetAllResponses';
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
-import { CandidateStatus } from "@/lib/enum";
-import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
-import ResponsesTable from "@/components/dashboard/interview/responsesTable";
-import LinksTable from "@/components/dashboard/interview/linksTable";
-import FeedbackTable from "@/components/dashboard/interview/feedbackTable";
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { CandidateStatus } from '@/lib/enum';
+import LoaderWithText from '@/components/loaders/loader-with-text/loaderWithText';
+import ResponsesTable from '@/components/dashboard/interview/responsesTable';
+import LinksTable from '@/components/dashboard/interview/linksTable';
+import FeedbackTable from '@/components/dashboard/interview/feedbackTable';
 
 const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
 
@@ -59,40 +54,36 @@ function InterviewHome() {
   const params = useParams();
   const searchParams = useSearchParams();
   const interviewId = params?.interviewId as string;
-  const callId = searchParams?.get("call") || "";
-  const isEditMode = searchParams?.get("edit") === "true";
+  const callId = searchParams?.get('call') || '';
+  const isEditMode = searchParams?.get('edit') === 'true';
   const [interview, setInterview] = useState<Interview>();
   const [responses, setResponses] = useState<Response[]>();
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const { getInterviewById } = useInterviews();
   const [isSharePopupOpen, setIsSharePopupOpen] = useState(false);
-  const [shareUrl, setShareUrl] = useState<string>("");
+  const [shareUrl, setShareUrl] = useState<string>('');
   const [isGenerateLinkModalOpen, setIsGenerateLinkModalOpen] = useState(false);
-  const [sharedGeneratedLink, setSharedGeneratedLink] = useState<string>("");
+  const [sharedGeneratedLink, setSharedGeneratedLink] = useState<string>('');
   const router = useRouter();
   const [isActive, setIsActive] = useState<boolean>(true);
-  const [currentPlan, setCurrentPlan] = useState<string>("");
+  const [currentPlan, setCurrentPlan] = useState<string>('');
   const [isGeneratingInsights, setIsGeneratingInsights] =
     useState<boolean>(false);
   const [isViewed, setIsViewed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const { organization } = useOrganization();
-  const [filterStatus, setFilterStatus] = useState<string>("ALL");
-  const [organizationNameSlug, setOrganizationNameSlug] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"details" | "responses" | "links" | "feedback">("details");
+  const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [organizationNameSlug, setOrganizationNameSlug] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<
+    'details' | 'responses' | 'links' | 'feedback'
+  >('details');
 
   const createResponseMutation = useCreateResponse();
-  const { data: responsesData, isLoading: responsesLoading, refetch: refetchResponses } = useGetAllResponses(interviewId, true);
-
-  // Initial loading screen - show spinner for 2 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialLoading(false);
-    }, 2000); // 2 seconds
-
-    return () => clearTimeout(timer);
-  }, []);
+  const {
+    data: responsesData,
+    isLoading: responsesLoading,
+    refetch: refetchResponses,
+  } = useGetAllResponses(interviewId, true);
 
   // Update local state when query data changes
   useEffect(() => {
@@ -100,7 +91,7 @@ function InterviewHome() {
       setResponses(responsesData);
     }
   }, [responsesData]);
- 
+
   const generateAndSetSharedLink = async () => {
     return new Promise<string | null>((resolve) => {
       createResponseMutation.mutate(
@@ -109,44 +100,46 @@ function InterviewHome() {
           onSuccess: (data) => {
             if (data?.response_id) {
               const responseId = data.response_id;
-        const orgName = organizationNameSlug || interview?.readable_slug || "organization";
-        const generatedUrl = `${base_url}/join/${orgName}/${interviewId}/${responseId}`;
-        setSharedGeneratedLink(generatedUrl);
+              const orgName =
+                organizationNameSlug ||
+                interview?.readable_slug ||
+                'organization';
+              const generatedUrl = `${base_url}/join/${orgName}/${interviewId}/${responseId}`;
+              setSharedGeneratedLink(generatedUrl);
               // Refetch responses to update the list
               refetchResponses();
               resolve(generatedUrl);
-      } else {
-        toast.error("Failed to generate link", {
-          position: "bottom-right",
-          duration: 3000,
-        });
+            } else {
+              toast.error('Failed to generate link', {
+                position: 'bottom-right',
+                duration: 3000,
+              });
               resolve(null);
-      }
+            }
           },
           onError: () => {
-      toast.error("Failed to generate link", {
-        position: "bottom-right",
-        duration: 3000,
-      });
+            toast.error('Failed to generate link', {
+              position: 'bottom-right',
+              duration: 3000,
+            });
             resolve(null);
           },
-        },
+        }
       );
     });
   };
 
   const seeInterviewPreviewPage = async () => {
     if (sharedGeneratedLink) {
-      window.open(sharedGeneratedLink, "_blank");
+      window.open(sharedGeneratedLink, '_blank');
     } else {
       // If no shared link exists, generate one first
       const link = await generateAndSetSharedLink();
       if (link) {
-        window.open(link, "_blank");
+        window.open(link, '_blank');
       }
     }
   };
-
 
   useEffect(() => {
     if (!interviewId) {
@@ -161,16 +154,21 @@ function InterviewHome() {
         setIsViewed(response.is_viewed);
         setLoading(true);
 
-        // Fetch organization from database and create slug
+        // Fetch organization once — extract both slug and plan
         if (response.organization_id) {
-          const orgData = await encryptedApiCall("/api/get-organization", { id: response.organization_id });
+          const orgData = await encryptedApiCall('/api/get-organization', {
+            id: response.organization_id,
+          });
           if (orgData?.name) {
             const slug = orgData.name
               .toLowerCase()
               .trim()
-              .replace(/\s+/g, "-")
-              .replace(/[^a-z0-9-]/g, "");
+              .replace(/\s+/g, '-')
+              .replace(/[^a-z0-9-]/g, '');
             setOrganizationNameSlug(slug);
+          }
+          if (orgData?.plan) {
+            setCurrentPlan(orgData.plan);
           }
         }
       } catch (error) {
@@ -185,30 +183,14 @@ function InterviewHome() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [interviewId]);
 
-  useEffect(() => {
-    const fetchOrganizationData = async () => {
-      try {
-        if (organization?.id) {
-          const data = await encryptedApiCall("/api/get-organization", { id: organization.id });
-          if (data?.plan) {
-            setCurrentPlan(data.plan);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching organization data:", error);
-      }
-    };
-
-    fetchOrganizationData();
-  }, [organization]);
   // Responses are now fetched via TanStack Query hook
   // Update loading state based on responses query
   useEffect(() => {
     if (responsesLoading) {
-        setLoading(true);
+      setLoading(true);
     } else {
-        setLoading(false);
-      }
+      setLoading(false);
+    }
   }, [responsesLoading]);
 
   useEffect(() => {
@@ -218,10 +200,11 @@ function InterviewHome() {
 
     const fetchFeedbacks = async () => {
       try {
-        const feedbackData = await FeedbackService.getFeedbacksByInterviewId(interviewId);
+        const feedbackData =
+          await FeedbackService.getFeedbacksByInterviewId(interviewId);
         setFeedbacks(feedbackData);
       } catch (error) {
-        console.error("Error fetching feedbacks:", error);
+        console.error('Error fetching feedbacks:', error);
       }
     };
 
@@ -232,8 +215,8 @@ function InterviewHome() {
   const handleDeleteResponse = (deletedCallId: string) => {
     // Refetch responses to get updated list
     refetchResponses();
-      if (callId === deletedCallId) {
-        router.push(`/interviews/${interviewId}`);
+    if (callId === deletedCallId) {
+      router.push(`/interviews/${interviewId}`);
     }
   };
 
@@ -255,20 +238,20 @@ function InterviewHome() {
 
       await InterviewService.updateInterview(
         { is_active: updatedIsActive },
-        interviewId,
+        interviewId
       );
 
-      toast.success("Interview status updated", {
+      toast.success('Interview status updated', {
         description: `The interview is now ${
-          updatedIsActive ? "active" : "inactive"
+          updatedIsActive ? 'active' : 'inactive'
         }.`,
-        position: "bottom-right",
+        position: 'bottom-right',
         duration: 3000,
       });
     } catch (error) {
       console.error(error);
-      toast.error("Error", {
-        description: "Failed to update the interview status.",
+      toast.error('Error', {
+        description: 'Failed to update the interview status.',
         duration: 3000,
       });
     }
@@ -297,45 +280,36 @@ function InterviewHome() {
     setIsSharePopupOpen(false);
   };
 
-  const filterResponses = () => {
-    if (!responses) {
-      return [];
-    }
-    
-    // Only show completed responses: must have both call_id AND details
-    const completedResponses = responses.filter(
+  // Memoized — only recomputes when responses or filterStatus changes
+  const filteredResponses = useMemo(() => {
+    if (!responses) {return [];}
+    const completed = responses.filter(
       (response) => response.call_id && response.details
     );
+    if (filterStatus === 'ALL') {return completed;}
     
-    if (filterStatus == "ALL") {
-      return completedResponses;
-    }
-
-    return completedResponses.filter(
-      (response) => response?.candidate_status == filterStatus,
+return completed.filter(
+      (response) => response?.candidate_status === filterStatus
     );
-  };
+  }, [responses, filterStatus]);
 
-  // Calculate response statistics
-  const totalResponses = responses?.length || 0;
-  const totalAnsweredLinks = responses?.filter((response) => {
-    // A link is answered if the interview was completed
-    return response.is_ended === true;
-  }).length || 0;
-  const emptyResponses = totalResponses - totalAnsweredLinks; // Responses that haven't been completed
-  const totalFeedbacks = feedbacks?.length || 0;
-  const totalLinks = responses?.length || 0; // Each response represents a generated link
-
-  // Show initial loading spinner for 2 seconds
-  if (isInitialLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen w-full bg-white">
-        <div className="flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
-        </div>
-      </div>
-    );
-  }
+  // Memoized stats — avoids re-filtering on unrelated renders
+  const stats = useMemo(() => {
+    const totalResponses = responses?.length || 0;
+    const totalAnsweredLinks =
+      responses?.filter((r) => r.is_ended === true).length || 0;
+    const emptyResponses = totalResponses - totalAnsweredLinks;
+    const totalFeedbacks = feedbacks?.length || 0;
+    const totalLinks = totalResponses;
+    
+return {
+      totalResponses,
+      totalAnsweredLinks,
+      emptyResponses,
+      totalFeedbacks,
+      totalLinks,
+    };
+  }, [responses, feedbacks]);
 
   return (
     <div className="flex flex-col w-full h-full m-2 bg-white">
@@ -349,8 +323,7 @@ function InterviewHome() {
             <div className="font-bold text-md">{interview?.name}</div>
 
             <div className="flex flex-row gap-3 my-auto">
-              <UserIcon className="my-auto" size={16} />:{" "}
-              {String(responses?.length)}
+              <UserIcon className="my-auto" size={16} />: {stats.totalResponses}
             </div>
 
             <TooltipProvider>
@@ -383,9 +356,7 @@ function InterviewHome() {
                   <Button
                     className="bg-transparent shadow-none text-xs text-secondary px-0 h-7 hover:scale-110 relative"
                     onClick={(event) => {
-                      router.push(
-                        `/interviews/${interviewId}?edit=true`,
-                      );
+                      router.push(`/interviews/${interviewId}?edit=true`);
                     }}
                   >
                     <Pencil size={16} />
@@ -402,7 +373,7 @@ function InterviewHome() {
             </TooltipProvider>
 
             <label className="inline-flex cursor-pointer">
-              {currentPlan == "free_trial_over" ? (
+              {currentPlan == 'free_trial_over' ? (
                 <>
                   <span className="ms-3 my-auto text-sm">Inactive</span>
                   <TooltipProvider>
@@ -423,7 +394,7 @@ function InterviewHome() {
                   <Switch
                     checked={isActive}
                     className={`ms-3 my-auto ${
-                      isActive ? "bg-secondary" : "bg-[#E6E7EB]"
+                      isActive ? 'bg-secondary' : 'bg-[#E6E7EB]'
                     }`}
                     onCheckedChange={handleToggle}
                   />
@@ -449,7 +420,9 @@ function InterviewHome() {
                   side="bottom"
                   sideOffset={4}
                 >
-                  <span className="text-black flex flex-row gap-4">Generate Link</span>
+                  <span className="text-black flex flex-row gap-4">
+                    Generate Link
+                  </span>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -525,30 +498,30 @@ function InterviewHome() {
               </div>
 
               <ScrollArea className="h-[calc(100vh-250px)] p-1 rounded-md border-none">
-                {filterResponses().length > 0 ? (
-                  filterResponses().map((response) => (
+                {filteredResponses.length > 0 ? (
+                  filteredResponses.map((response) => (
                     <div
                       className={`p-2 rounded-md hover:bg-indigo-100 border-2 my-1 text-left text-xs ${
                         callId == response.call_id
-                          ? "bg-indigo-200"
-                          : "border-indigo-100"
+                          ? 'bg-indigo-200'
+                          : 'border-indigo-100'
                       } flex flex-row justify-between cursor-pointer w-full`}
                       key={response?.id}
                       onClick={() => {
                         if (response.call_id) {
-                        router.push(
-                          `/interviews/${interviewId}?call=${response.call_id}`,
-                        );
-                        handleResponseClick(response);
+                          router.push(
+                            `/interviews/${interviewId}?call=${response.call_id}`
+                          );
+                          handleResponseClick(response);
                         }
                       }}
                     >
                       <div className="flex flex-row gap-1 items-center w-full">
-                        {response.candidate_status === "NOT_SELECTED" ? (
+                        {response.candidate_status === 'NOT_SELECTED' ? (
                           <div className="w-[5%] h-full bg-red-500 rounded-sm" />
-                        ) : response.candidate_status === "POTENTIAL" ? (
+                        ) : response.candidate_status === 'POTENTIAL' ? (
                           <div className="w-[5%] h-full bg-yellow-500 rounded-sm" />
-                        ) : response.candidate_status === "SELECTED" ? (
+                        ) : response.candidate_status === 'SELECTED' ? (
                           <div className="w-[5%] h-full bg-green-500 rounded-sm" />
                         ) : (
                           <div className="w-[5%] h-full bg-gray-400 rounded-sm" />
@@ -558,11 +531,11 @@ function InterviewHome() {
                             <p className="font-medium mb-[2px]">
                               {response?.name
                                 ? `${response?.name}'s Response`
-                                : "Anonymous"}
+                                : 'Anonymous'}
                             </p>
                             <p className="">
                               {formatTimestampToDateHHMM(
-                                String(response?.created_at),
+                                String(response?.created_at)
                               )}
                             </p>
                           </div>
@@ -576,7 +549,7 @@ function InterviewHome() {
                             )}
                             <div
                               className={`w-6 h-6 flex items-center justify-center ${
-                                response.is_viewed ? "h-full" : ""
+                                response.is_viewed ? 'h-full' : ''
                               }`}
                             >
                               {response.analytics &&
@@ -637,7 +610,7 @@ function InterviewHome() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-3xl font-bold text-primary">
-                            {totalResponses}
+                            {stats.totalResponses}
                           </div>
                         </CardContent>
                       </Card>
@@ -649,7 +622,7 @@ function InterviewHome() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-3xl font-bold text-secondary">
-                            {emptyResponses}
+                            {stats.emptyResponses}
                           </div>
                         </CardContent>
                       </Card>
@@ -661,7 +634,7 @@ function InterviewHome() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-3xl font-bold text-primary">
-                            {totalFeedbacks}
+                            {stats.totalFeedbacks}
                           </div>
                         </CardContent>
                       </Card>
@@ -673,7 +646,7 @@ function InterviewHome() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-3xl font-bold text-primary">
-                            {totalLinks}
+                            {stats.totalLinks}
                           </div>
                         </CardContent>
                       </Card>
@@ -685,30 +658,45 @@ function InterviewHome() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-3xl font-bold text-secondary">
-                            {totalAnsweredLinks}
+                            {stats.totalAnsweredLinks}
                           </div>
                         </CardContent>
                       </Card>
                     </div>
-                    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "details" | "responses" | "links" | "feedback")} className="w-full">
+                    <Tabs
+                      value={activeTab}
+                      className="w-full"
+                      onValueChange={(value) =>
+                        setActiveTab(
+                          value as
+                            | 'details'
+                            | 'responses'
+                            | 'links'
+                            | 'feedback'
+                        )
+                      }
+                    >
                       <TabsList>
                         <TabsTrigger value="details">Details</TabsTrigger>
                         <TabsTrigger value="responses">
-                          Responses ({totalAnsweredLinks})
+                          Responses ({stats.totalAnsweredLinks})
                         </TabsTrigger>
                         <TabsTrigger value="links">
-                          All Links ({totalLinks})
+                          All Links ({stats.totalLinks})
                         </TabsTrigger>
                         <TabsTrigger value="feedback">
-                          Feedback ({totalFeedbacks})
+                          Feedback ({stats.totalFeedbacks})
                         </TabsTrigger>
                       </TabsList>
                       <TabsContent value="details" className="mt-4">
-                        <SummaryInfo responses={responses} interview={interview} />
+                        <SummaryInfo
+                          responses={responses}
+                          interview={interview}
+                        />
                       </TabsContent>
                       <TabsContent value="responses" className="mt-4">
                         <ResponsesTable
-                          data={filterResponses() || []}
+                          data={filteredResponses}
                           interviewId={interviewId}
                         />
                       </TabsContent>
@@ -740,11 +728,13 @@ function InterviewHome() {
       {isGenerateLinkModalOpen && interview && (
         <GenerateLinkModal
           open={isGenerateLinkModalOpen}
-          onClose={() => setIsGenerateLinkModalOpen(false)}
           interviewId={interview.id}
-          organizationName={organizationNameSlug || interview.readable_slug || "organization"}
+          organizationName={
+            organizationNameSlug || interview.readable_slug || 'organization'
+          }
           sharedLink={sharedGeneratedLink}
           setSharedLink={setSharedGeneratedLink}
+          onClose={() => setIsGenerateLinkModalOpen(false)}
         />
       )}
     </div>

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { serverDecryptPayload, serverEncryptResponse } from "@/lib/crypto";
-import { logger } from "@/lib/logger";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { serverDecryptPayload, serverEncryptResponse } from '@/lib/crypto';
+import { logger } from '@/lib/logger';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,20 +22,25 @@ export async function POST(req: Request) {
     const { interview_id } = body;
 
     if (!interview_id) {
-
-      return NextResponse.json({ error: "interview_id is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: 'interview_id is required' },
+        { status: 400 }
+      );
     }
 
     const { data, error } = await supabase
-      .from("response")
-      .select("email")
-      .eq("interview_id", interview_id)
-      .eq("is_ended", false);
+      .from('response')
+      .select('email')
+      .eq('interview_id', interview_id)
+      .eq('is_ended', false);
 
     if (error) {
-      logger.error("[get-emails] Error:", error);
+      logger.error('[get-emails] Error:', error);
 
-      return NextResponse.json({ error: "Failed to fetch emails" }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to fetch emails' },
+        { status: 500 }
+      );
     }
 
     if (raw.cpk) {
@@ -46,8 +51,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json(data || [], { status: 200 });
   } catch (err: any) {
-    logger.error("[get-emails] Error:", err.message);
+    logger.error('[get-emails] Error:', err.message);
 
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

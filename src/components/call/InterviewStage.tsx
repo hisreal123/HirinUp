@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useEffect, useCallback, useRef } from "react";
-import { useAudioDetection } from "@/hooks/useAudioDetection";
-import { InterviewView } from "./InterviewView";
-import { AudioDetectionModal } from "./AudioDetectionModal";
+import React, { useEffect, useCallback, useRef } from 'react';
+import { useAudioDetection } from '@/hooks/useAudioDetection';
+import { InterviewView } from './InterviewView';
+import { AudioDetectionModal } from './AudioDetectionModal';
 
 interface InterviewStageProps {
   lastInterviewerResponse: string;
@@ -34,11 +34,15 @@ export function InterviewStage({
   onStopAudioLevelDetection,
   onTriggerSilenceDetection,
 }: InterviewStageProps) {
-  const audioMessage = "I can see you, but I'm not receiving any audio yet. Let's quickly check a few things together.";
+  const audioMessage =
+    "I can see you, but I'm not receiving any audio yet. Let's quickly check a few things together.";
 
-  const handleAudioMessage = useCallback((message: string) => {
-    setLastInterviewerResponse(message);
-  }, [setLastInterviewerResponse]);
+  const handleAudioMessage = useCallback(
+    (message: string) => {
+      setLastInterviewerResponse(message);
+    },
+    [setLastInterviewerResponse]
+  );
 
   const {
     audioNotDetected,
@@ -60,8 +64,17 @@ export function InterviewStage({
   useEffect(() => {
     onPerformAudioChecks(() => performAudioChecks());
     onStopAudioLevelDetection(() => stopAudioLevelDetection());
-    onTriggerSilenceDetection((skipMessage) => triggerSilenceDetection(skipMessage));
-  }, [performAudioChecks, stopAudioLevelDetection, triggerSilenceDetection, onPerformAudioChecks, onStopAudioLevelDetection, onTriggerSilenceDetection]);
+    onTriggerSilenceDetection((skipMessage) =>
+      triggerSilenceDetection(skipMessage)
+    );
+  }, [
+    performAudioChecks,
+    stopAudioLevelDetection,
+    triggerSilenceDetection,
+    onPerformAudioChecks,
+    onStopAudioLevelDetection,
+    onTriggerSilenceDetection,
+  ]);
 
   // Notify parent of audio detection state changes
   useEffect(() => {

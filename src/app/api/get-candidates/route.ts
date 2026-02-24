@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { serverDecryptPayload, serverEncryptResponse } from "@/lib/crypto";
-import { logger } from "@/lib/logger";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { serverDecryptPayload, serverEncryptResponse } from '@/lib/crypto';
+import { logger } from '@/lib/logger';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,25 +20,34 @@ export async function POST(req: Request) {
     }
 
     const { data, error } = await supabase
-      .from("candidate")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .from('candidate')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (error) {
-      logger.warn("[get-candidates] Query error:", { error });
-      return NextResponse.json({ error: "Failed to fetch candidates" }, { status: 500 });
+      logger.warn('[get-candidates] Query error:', { error });
+      
+return NextResponse.json(
+        { error: 'Failed to fetch candidates' },
+        { status: 500 }
+      );
     }
 
     const result = data || [];
 
     if (raw.cpk) {
       const encrypted = await serverEncryptResponse(result, raw.cpk);
-      return NextResponse.json(encrypted, { status: 200 });
+      
+return NextResponse.json(encrypted, { status: 200 });
     }
 
     return NextResponse.json(result, { status: 200 });
   } catch (err: any) {
-    logger.error("[get-candidates] Error:", err.message);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    logger.error('[get-candidates] Error:', err.message);
+    
+return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

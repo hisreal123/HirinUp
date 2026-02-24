@@ -1,24 +1,25 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
+import { useMemo } from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { getCountries, getCountryCallingCode } from "react-phone-number-input";
-import en from "react-phone-number-input/locale/en";
-import type { Country } from "react-phone-number-input";
+} from '@/components/ui/select';
+import { getCountries, getCountryCallingCode } from 'react-phone-number-input';
+import en from 'react-phone-number-input/locale/en';
+import type { Country } from 'react-phone-number-input';
 
 // Get flag emoji from country code
 function getFlagEmoji(countryCode: string) {
   const codePoints = countryCode
     .toUpperCase()
-    .split("")
+    .split('')
     .map((char) => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
+  
+return String.fromCodePoint(...codePoints);
 }
 
 interface CountrySelectProps {
@@ -38,9 +39,9 @@ export function CountrySelect({
 
   return (
     <Select
-      value={value || ""}
-      onValueChange={(val) => onChange(val as Country)}
+      value={value || ''}
       disabled={disabled}
+      onValueChange={(val) => onChange(val as Country)}
     >
       <SelectTrigger className="w-[80px] h-8 border-0 bg-transparent focus:ring-0 focus:ring-offset-0 px-2">
         <SelectValue>

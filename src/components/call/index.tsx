@@ -1,55 +1,72 @@
-"use client";
+'use client';
 
 import {
   ArrowUpRightSquareIcon,
   AlarmClockIcon,
   CheckCircleIcon,
   AlertTriangle,
-} from "lucide-react";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Card, CardHeader, CardTitle } from "../ui/card";
-import { useResponses } from "@/contexts/responses.context";
-import { RetellWebClient } from "retell-client-js-sdk";
+} from 'lucide-react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
+import { Card, CardHeader, CardTitle } from '../ui/card';
+import { useResponses } from '@/contexts/responses.context';
+import { RetellWebClient } from 'retell-client-js-sdk';
 // import { useGetAllEmails } from "@/hooks/useGetAllEmails"; // replaced with encrypted API call
-import { encryptedApiCall } from "@/lib/encrypted-api";
-import { useCreateOrUpdateCandidate } from "@/hooks/useCreateOrUpdateCandidate";
+import { encryptedApiCall } from '@/lib/encrypted-api';
+import { useCreateOrUpdateCandidate } from '@/hooks/useCreateOrUpdateCandidate';
 // import { useRegisterCall } from "@/hooks/useRegisterCall";
-import { useUpdateResponseByToken } from "@/hooks/useUpdateResponseByToken";
+import { useUpdateResponseByToken } from '@/hooks/useUpdateResponseByToken';
 // import { useCreateResponse } from "@/hooks/useCreateResponse";
-import { useSaveResponse } from "@/hooks/useSaveResponse";
-import { useEncryptedCreateResponse } from "@/hooks/useEncryptedCreateResponse";
-import { useEncryptedRegisterCall } from "@/hooks/useEncryptedRegisterCall";
-import { useAnalyzeCall } from "@/hooks/useAnalyzeCall";
-import { toast } from "sonner";
-import { Interview } from "@/types/interview";
-import { FeedbackData } from "@/types/response";
-import { FeedbackService } from "@/services/feedback.service";
+import { useSaveResponse } from '@/hooks/useSaveResponse';
+import { useEncryptedCreateResponse } from '@/hooks/useEncryptedCreateResponse';
+import { useEncryptedRegisterCall } from '@/hooks/useEncryptedRegisterCall';
+import { useAnalyzeCall } from '@/hooks/useAnalyzeCall';
+import { toast } from 'sonner';
+import { Interview } from '@/types/interview';
+import { FeedbackData } from '@/types/response';
+import { FeedbackService } from '@/services/feedback.service';
 import {
   TabSwitchWarning,
   useTabSwitchPrevention,
-} from "./tabSwitchPrevention";
-import { useSessionSecurity } from "@/hooks/useSessionSecurity";
-import { SessionBlocked } from "./SessionBlocked";
+} from './tabSwitchPrevention';
+import { useSessionSecurity } from '@/hooks/useSessionSecurity';
+import { SessionBlocked } from './SessionBlocked';
 // import { InterviewerService } from "@/services/interviewers.service"; // replaced with encrypted API call
-import { ResponseService } from "@/services/responses.service";
-import { CandidateService } from "@/services/candidates.service";
-import { setWebClientInstance } from "@/hooks/useAudioDetection";
-import { useCandidateForm } from "@/hooks/useCandidateForm";
-import { WelcomeSlide } from "./WelcomeSlide";
-import { CandidateForm } from "./CandidateForm";
-import { InterviewStage } from "./InterviewStage";
-import { EndScreen } from "./EndScreen";
-import { verifyTurnstile } from "@/actions/verify-turnstile";
+import { ResponseService } from '@/services/responses.service';
+import { CandidateService } from '@/services/candidates.service';
+import { setWebClientInstance } from '@/hooks/useAudioDetection';
+import { useCandidateForm } from '@/hooks/useCandidateForm';
+import { WelcomeSlide } from './WelcomeSlide';
+import { CandidateForm } from './CandidateForm';
+import { InterviewStage } from './InterviewStage';
+import { EndScreen } from './EndScreen';
+import { verifyTurnstile } from '@/actions/verify-turnstile';
 
 const webClient = new RetellWebClient();
 setWebClientInstance(webClient);
 
+// Helper function to format seconds to MM:SS — defined outside component to avoid recreation on every render
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  
+return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
 // First call duration (in milliseconds) - auto-ends after this time
-const FIRST_CALL_DURATION = (Number(process.env.NEXT_PUBLIC_FIRST_CALL_DURATION) || 10) * 1000;
+const FIRST_CALL_DURATION =
+  (Number(process.env.NEXT_PUBLIC_FIRST_CALL_DURATION) || 10) * 1000;
 
 // Silence detection timing for second call (in milliseconds)
-const SILENCE_WAIT_TIME = (Number(process.env.NEXT_PUBLIC_SILENCE_WAIT_TIME) || 40) * 1000;
-const SILENCE_MESSAGE_TIME = (Number(process.env.NEXT_PUBLIC_SILENCE_MESSAGE_TIME) || 5) * 1000;
+const SILENCE_WAIT_TIME =
+  (Number(process.env.NEXT_PUBLIC_SILENCE_WAIT_TIME) || 40) * 1000;
+const SILENCE_MESSAGE_TIME =
+  (Number(process.env.NEXT_PUBLIC_SILENCE_MESSAGE_TIME) || 5) * 1000;
 
 type CallPhase = 'first_call' | 'verification_modal' | 'second_call';
 
@@ -87,29 +104,41 @@ function getLocalFlowState(token?: string): Record<string, string> {
   }
 }
 
-function setLocalFlowState(token: string | undefined, updates: Record<string, string>) {
+function setLocalFlowState(
+  token: string | undefined,
+  updates: Record<string, string>
+) {
   if (!token) {
     return;
   }
   try {
     const current = getLocalFlowState(token);
-    localStorage.setItem(`call_flow_state_${token}`, JSON.stringify({ ...current, ...updates }));
+    localStorage.setItem(
+      `call_flow_state_${token}`,
+      JSON.stringify({ ...current, ...updates })
+    );
   } catch (e) {
     // ignore localStorage errors
   }
 }
 
-function Call({ interview, responseToken, initialCallPhase = 'first_call' }: InterviewProps) {
+function Call({
+  interview,
+  responseToken,
+  initialCallPhase = 'first_call',
+}: InterviewProps) {
   const { createResponse } = useResponses();
   const createResponseMutation = useEncryptedCreateResponse();
   const [emailsData, setEmailsData] = useState<Array<{ email: string }>>([]);
 
   // Fetch previous candidate emails via encrypted API (replaces direct Supabase call)
   useEffect(() => {
-    if (!interview?.id) return;
-    encryptedApiCall<Array<{ email: string }>>("/api/get-emails", { interview_id: interview.id })
+    if (!interview?.id) {return;}
+    encryptedApiCall<Array<{ email: string }>>('/api/get-emails', {
+      interview_id: interview.id,
+    })
       .then((data) => setEmailsData(data || []))
-      .catch((err) => console.error("[Call] Failed to fetch emails:", err));
+      .catch((err) => console.error('[Call] Failed to fetch emails:', err));
   }, [interview?.id]);
   const createOrUpdateCandidateMutation = useCreateOrUpdateCandidate();
   const registerCallMutation = useEncryptedRegisterCall();
@@ -117,18 +146,18 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
   const saveResponseMutation = useSaveResponse();
   const analyzeCallMutation = useAnalyzeCall();
   const [lastInterviewerResponse, setLastInterviewerResponse] =
-    useState<string>("");
-  const [lastUserResponse, setLastUserResponse] = useState<string>("");
-  const [activeTurn, setActiveTurn] = useState<string>("");
+    useState<string>('');
+  const [lastUserResponse, setLastUserResponse] = useState<string>('');
+  const [activeTurn, setActiveTurn] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
   const [isCalling, setIsCalling] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState<"welcome" | "candidateForm">(
-    "welcome",
+  const [currentSlide, setCurrentSlide] = useState<'welcome' | 'candidateForm'>(
+    'welcome'
   );
   const [isOldUser, setIsOldUser] = useState<boolean>(false);
-  const [callId, setCallId] = useState<string>("");
+  const [callId, setCallId] = useState<string>('');
   const [candidateId, setCandidateId] = useState<number | null>(null);
   const { tabSwitchCount } = useTabSwitchPrevention();
 
@@ -139,22 +168,21 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
     blockedReason: sessionBlockedReason,
     isChecking: isSessionChecking,
   } = useSessionSecurity({
-    responseToken: responseToken || "",
+    responseToken: responseToken || '',
     enabled: !!responseToken && !isEnded,
-    onSessionBlocked: (reason) => {
-    },
+    onSessionBlocked: (reason) => {},
   });
 
   const [isFeedbackSubmitted, setIsFeedbackSubmitted] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [interviewerImg, setInterviewerImg] = useState("");
+  const [interviewerImg, setInterviewerImg] = useState('');
   const [interviewTimeDuration, setInterviewTimeDuration] =
-    useState<string>("30");
+    useState<string>('30');
   const [time, setTime] = useState(0);
-  const [currentTimeDuration, setCurrentTimeDuration] = useState<string>("0");
   const [callStartTime, setCallStartTime] = useState<number | null>(null);
   const [totalModalTime, setTotalModalTime] = useState<number>(0);
-  const [modalStartTime, setModalStartTime] = useState<number | null>(null);
+  // Use a ref instead of state so handleTimerPausedChange has no state dependency
+  const modalStartTimeRef = useRef<number | null>(null);
   const [micPermissionDenied, setMicPermissionDenied] =
     useState<boolean>(false);
   const [isTimerPaused, setIsTimerPaused] = useState<boolean>(false);
@@ -193,12 +221,12 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
   const timeRef = useRef<number>(0);
 
   // Refs to track values without causing re-registration of listeners
-  const lastUserResponseRef2 = useRef<string>("");
+  const lastUserResponseRef2 = useRef<string>('');
   const audioNotDetectedStateRef = useRef<boolean>(false);
-  
+
   // Ref to track responseToken for use in event handlers (avoids stale closure)
   const responseTokenRef = useRef<string | undefined>(responseToken);
-  
+
   // Keep responseTokenRef updated when prop changes
   useEffect(() => {
     responseTokenRef.current = responseToken;
@@ -238,7 +266,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
         fn(true);
       }
     },
-    [],
+    []
   );
 
   const handleAudioNotDetectedChange = useCallback((detected: boolean) => {
@@ -252,13 +280,13 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       setIsTimerPaused(paused);
       isTimerPausedRef.current = paused;
 
-      // Track modal time
-      if (paused && !modalStartTime) {
-        setModalStartTime(Date.now());
-      } else if (!paused && modalStartTime) {
-        const modalDuration = (Date.now() - modalStartTime) / 1000;
+      // Track modal time via ref — no state dep so this callback stays stable
+      if (paused && !modalStartTimeRef.current) {
+        modalStartTimeRef.current = Date.now();
+      } else if (!paused && modalStartTimeRef.current) {
+        const modalDuration = (Date.now() - modalStartTimeRef.current) / 1000;
         setTotalModalTime((prev) => prev + modalDuration);
-        setModalStartTime(null);
+        modalStartTimeRef.current = null;
       }
 
       // Also reset audioNotDetected when resuming
@@ -274,20 +302,21 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
         }
       }
     },
-    [modalStartTime],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   // Clear silence timer when user actually responds (transcript changes)
   // Also keep ref in sync for use in event listeners
   useEffect(() => {
     const currentResponseLength = lastUserResponse?.length || 0;
-    lastUserResponseRef2.current = lastUserResponse || "";
+    lastUserResponseRef2.current = lastUserResponse || '';
 
     if (
       currentResponseLength > lastUserResponseLengthRef.current &&
       silenceTimerRef.current
     ) {
-        clearTimeout(silenceTimerRef.current);
+      clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
       if (messageTimerRef.current) {
         clearTimeout(messageTimerRef.current);
@@ -300,7 +329,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
   }, [lastUserResponse]);
 
   const handleFeedbackSubmit = async (
-    formData: Omit<FeedbackData, "interview_id">,
+    formData: Omit<FeedbackData, 'interview_id'>
   ) => {
     try {
       const result = await FeedbackService.submitFeedback({
@@ -309,15 +338,15 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       });
 
       if (result) {
-        toast.success("Thank you for your feedback!");
+        toast.success('Thank you for your feedback!');
         setIsFeedbackSubmitted(true);
         setIsDialogOpen(false);
       } else {
-        toast.error("Failed to submit feedback. Please try again.");
+        toast.error('Failed to submit feedback. Please try again.');
       }
     } catch (error) {
-      console.error("Error submitting feedback:", error);
-      toast.error("An error occurred. Please try again later.");
+      console.error('Error submitting feedback:', error);
+      toast.error('An error occurred. Please try again later.');
     }
   };
 
@@ -348,36 +377,29 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
     };
   }, [isCalling, isEnded]);
 
-  // Keep timeRef in sync so beforeunload can read the latest timer value synchronously
   useEffect(() => {
     timeRef.current = time;
   }, [time]);
 
-  // Helper function to format seconds to MM:SS
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  // Calculate time used and time left using incremental timer
-  const timeUsedSeconds = Math.floor(time / 100); // Convert to seconds
-  const totalTimeSeconds = Number(interviewTimeDuration) * 60;
-  const timeLeftSeconds = Math.max(0, totalTimeSeconds - timeUsedSeconds);
+  // Memoized derived timer values — avoids recalculation on unrelated rerenders
+  const timeUsedSeconds = useMemo(() => Math.floor(time / 100), [time]);
+  const totalTimeSeconds = useMemo(
+    () => Number(interviewTimeDuration) * 60,
+    [interviewTimeDuration]
+  );
+  const timeLeftSeconds = useMemo(
+    () => Math.max(0, totalTimeSeconds - timeUsedSeconds),
+    [totalTimeSeconds, timeUsedSeconds]
+  );
 
   const [isTimeUp, setIsTimeUp] = useState<boolean>(false);
 
-  // Update current duration display and check for end condition
+  // Check timer end condition — display values are now derived via useMemo, no state update needed here
   useEffect(() => {
     const currentDuration = Math.floor(time / 100);
-    setCurrentTimeDuration(String(currentDuration));
 
-    // Add logging to debug timer issues
     const rawTimeLimit = Number(interviewTimeDuration) * 60;
-    // Safety: if timeLimit is 0 or NaN, fall back to 30 minutes
-    const timeLimit = (rawTimeLimit > 0) ? rawTimeLimit : 1800;
-
-    // Log every 10 seconds for debugging
+    const timeLimit = rawTimeLimit > 0 ? rawTimeLimit : 1800;
 
     // Check if time is up
     if (currentDuration >= timeLimit && !isTimeUp) {
@@ -389,17 +411,16 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
     if (currentDuration >= timeLimit && !isEnded && isCalling) {
       // Safety check: don't end while timer is paused (modal is open)
       if (isTimerPausedRef.current) {
-
         return;
       }
 
-      console.error("[Timer] *** FORCE ENDING CALL NOW ***", {
+      console.error('[Timer] *** FORCE ENDING CALL NOW ***', {
         currentDuration,
         timeLimit,
         interviewTimeDuration,
         actualMinutesElapsed: currentDuration / 60,
         expectedMinutes: Number(interviewTimeDuration),
-        reason: "Timer enforcement - exact timing",
+        reason: 'Timer enforcement - exact timing',
         timestamp: new Date().toISOString(),
         isTimerPaused,
       });
@@ -450,7 +471,9 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
             const savedTime = Number(saved);
             setTime(savedTime);
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) {
+          /* ignore */
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -481,57 +504,63 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       // Persist elapsed timer so it can be restored if second call is resumed after refresh
       if (callPhaseRef.current === 'second_call' && responseTokenRef.current) {
         try {
-          localStorage.setItem(`elapsed_timer_${responseTokenRef.current}`, String(timeRef.current));
-        } catch (e) { /* ignore */ }
+          localStorage.setItem(
+            `elapsed_timer_${responseTokenRef.current}`,
+            String(timeRef.current)
+          );
+        } catch (e) {
+          /* ignore */
+        }
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
+    
+return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 
   useEffect(() => {
-    webClient.on("call_started", () => {
+    webClient.on('call_started', () => {
       const startTime = Date.now();
       const phase = callPhaseRef.current;
       setIsCalling(true);
       setCallStartTime(startTime);
 
       if (phase === 'first_call') {
-        
         // First call: auto-end after FIRST_CALL_DURATION, no audio detection
         firstCallTimerRef.current = setTimeout(() => {
           webClient.stopCall();
         }, FIRST_CALL_DURATION);
 
         // Still request mic permission for second call, but don't start audio detection
-    const requestMicPermission = async () => {
-      if (hasRequestedPermission.current) return;
-      hasRequestedPermission.current = true;
+        const requestMicPermission = async () => {
+          if (hasRequestedPermission.current) {return;}
+          hasRequestedPermission.current = true;
 
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
+            });
             stream.getTracks().forEach((track) => track.stop());
-        setMicPermissionDenied(false);
-      } catch (error) {
-            console.error("[First Call] Microphone permission denied:", error);
-        setMicPermissionDenied(true);
-      }
-    };
+            setMicPermissionDenied(false);
+          } catch (error) {
+            console.error('[First Call] Microphone permission denied:', error);
+            setMicPermissionDenied(true);
+          }
+        };
 
-    requestMicPermission();
+        requestMicPermission();
       } else if (phase === 'second_call') {
       }
     });
 
-    webClient.on("call_ended", () => {
+    webClient.on('call_ended', () => {
       const phase = callPhaseRef.current;
       const token = responseTokenRef.current; // Use ref to get current value
       setIsCalling(false);
 
       if (phase === 'first_call') {
-        
         if (firstCallTimerRef.current) {
           clearTimeout(firstCallTimerRef.current);
           firstCallTimerRef.current = null;
@@ -553,27 +582,28 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
           // Write to localStorage immediately
           setLocalFlowState(token, { first_call_started: firstCallTs });
           const localState = getLocalFlowState(token);
-          
+
           // Also update DB for persistence
           ResponseService.updateResponseByToken(
             { call_flow_state: localState },
-            token,
-          ).then(() => {
-          }).catch((err) => {
-            console.error("[First Call] DB update FAILED:", err);
-          });
+            token
+          )
+            .then(() => {})
+            .catch((err) => {
+              console.error('[First Call] DB update FAILED:', err);
+            });
         } else {
-          console.error("[First Call] ERROR: No token available!");
+          console.error('[First Call] ERROR: No token available!');
         }
       } else {
         // Second call ended
-        
+
         // If page is unloading (refresh/close), skip completion logic
         if (isPageUnloadingRef.current) {
           return;
         }
 
-      setIsEnded(true);
+        setIsEnded(true);
         if (stopAudioLevelDetectionRef.current) {
           stopAudioLevelDetectionRef.current();
         }
@@ -583,20 +613,21 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
         if (token) {
           setLocalFlowState(token, { second_call_completed: completedTs });
           const localState = getLocalFlowState(token);
-          
+
           ResponseService.updateResponseByToken(
             { call_flow_state: localState },
-            token,
-          ).then(() => {
-          }).catch((err) => {
-            console.error("[Second Call] DB update FAILED:", err);
-          });
+            token
+          )
+            .then(() => {})
+            .catch((err) => {
+              console.error('[Second Call] DB update FAILED:', err);
+            });
         }
       }
     });
 
-    webClient.on("agent_start_talking", () => {
-      setActiveTurn("agent");
+    webClient.on('agent_start_talking', () => {
+      setActiveTurn('agent');
 
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
@@ -609,12 +640,11 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       agentStoppedTalkingTimeRef.current = null;
     });
 
-    webClient.on("agent_stop_talking", () => {
-      setActiveTurn("user");
+    webClient.on('agent_stop_talking', () => {
+      setActiveTurn('user');
 
       // No silence detection during first call — it auto-ends via timer
       if (callPhaseRef.current === 'first_call') {
-
         return;
       }
 
@@ -641,20 +671,19 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
           return;
         }
 
-        
         // End the meeting after 40 seconds of silence
         webClient.stopCall();
       }, SILENCE_WAIT_TIME);
     });
 
-    webClient.on("error", (error) => {
-      console.error("An error occurred:", error);
+    webClient.on('error', (error) => {
+      console.error('An error occurred:', error);
       webClient.stopCall();
       setIsEnded(true);
       setIsCalling(false);
     });
 
-    webClient.on("update", (update) => {
+    webClient.on('update', (update) => {
       if (update.transcript) {
         const transcripts: transcriptType[] = update.transcript;
         const roleContents: { [key: string]: string } = {};
@@ -666,9 +695,9 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
         // Don't update interviewer response when modal is open (timer paused)
         // This prevents the AI from repeating messages or asking new questions
         if (!isTimerPausedRef.current) {
-        setLastInterviewerResponse(roleContents["agent"]);
+          setLastInterviewerResponse(roleContents['agent']);
         }
-        setLastUserResponse(roleContents["user"]);
+        setLastUserResponse(roleContents['user']);
       }
     });
 
@@ -711,30 +740,36 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
 
     // Verify Turnstile token first
     if (candidateForm.turnstileToken) {
-      const turnstileResult = await verifyTurnstile(candidateForm.turnstileToken);
+      const turnstileResult = await verifyTurnstile(
+        candidateForm.turnstileToken
+      );
       if (!turnstileResult.success) {
-        toast.error(turnstileResult.error || "Verification failed. Please try again.");
+        toast.error(
+          turnstileResult.error || 'Verification failed. Please try again.'
+        );
         setLoading(false);
         // Reset the turnstile token so user needs to complete again
-        candidateForm.setTurnstileToken("");
-        return;
+        candidateForm.setTurnstileToken('');
+        
+return;
       }
     } else {
-      toast.error("Please complete the verification challenge.");
+      toast.error('Please complete the verification challenge.');
       setLoading(false);
-      return;
+      
+return;
     }
 
     const data = {
       mins: interview?.time_duration,
       objective: interview?.objective,
-      questions: interview?.questions?.map((q) => q?.question).join(", ") || "",
-      name: candidateForm.fullName || "not provided",
+      questions: interview?.questions?.map((q) => q?.question).join(', ') || '',
+      name: candidateForm.fullName || 'not provided',
     };
 
     // Check if user is old using cached emails data
     const oldUserEmails: string[] = (emailsData || []).map(
-      (item) => item.email,
+      (item) => item.email
     );
     const OldUser =
       oldUserEmails.includes(candidateForm.email) ||
@@ -744,7 +779,8 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
     if (OldUser) {
       setIsOldUser(true);
       setLoading(false);
-      return;
+      
+return;
     }
 
     try {
@@ -801,15 +837,15 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       const callResponse = registerCallResponse?.registerCallResponse;
 
       if (!callResponse?.call_id) {
-        console.error("[Call] No call_id received from Retell");
-        toast.error("Failed to register call. Please try again.");
+        console.error('[Call] No call_id received from Retell');
+        toast.error('Failed to register call. Please try again.');
         setLoading(false);
-        return;
+        
+return;
       }
 
       const retellCallId = callResponse.call_id;
       setCallId(retellCallId);
-
 
       // IMPORTANT: Save call_id to response IMMEDIATELY after registration
       // This ensures the link is marked as "used" even if the call fails to start
@@ -827,7 +863,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
             token: responseToken,
           });
         } catch (error) {
-          console.error("[Call] Failed to update response by token:", error);
+          console.error('[Call] Failed to update response by token:', error);
           // Fallback: create new response if update fails
           await createResponseMutation.mutateAsync({
             interview_id: interview.id,
@@ -853,7 +889,10 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       // Store candidate name for resume scenarios
       if (responseToken && candidateForm.fullName) {
         try {
-          localStorage.setItem(`candidate_name_${responseToken}`, candidateForm.fullName);
+          localStorage.setItem(
+            `candidate_name_${responseToken}`,
+            candidateForm.fullName
+          );
         } catch (e) {
           // ignore
         }
@@ -868,24 +907,24 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
             accessToken: callResponse.access_token,
           })
           .catch((err) => {
-            console.error("Error starting call:", err);
+            console.error('Error starting call:', err);
             // Call_id is already saved, so link is marked as used even if call fails
             toast.error(
-              "Failed to start call. The interview link has been marked as used.",
+              'Failed to start call. The interview link has been marked as used.'
             );
             throw err;
           });
         setIsCalling(true);
         setIsStarted(true);
       } else {
-        console.error("[Call] No access token received from Retell");
+        console.error('[Call] No access token received from Retell');
         toast.error(
-          "Failed to get call access token. The interview link has been marked as used.",
+          'Failed to get call access token. The interview link has been marked as used.'
         );
       }
     } catch (error) {
-      console.error("Error starting conversation:", error);
-      toast.error("Failed to start interview. Please try again.");
+      console.error('Error starting conversation:', error);
+      toast.error('Failed to start interview. Please try again.');
     }
 
     setLoading(false);
@@ -899,7 +938,8 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       let candidateName = candidateForm.fullName;
       if (!candidateName && responseToken) {
         try {
-          candidateName = localStorage.getItem(`candidate_name_${responseToken}`) || "";
+          candidateName =
+            localStorage.getItem(`candidate_name_${responseToken}`) || '';
         } catch (e) {
           // ignore
         }
@@ -908,8 +948,9 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       const data = {
         mins: interview?.time_duration,
         objective: interview?.objective,
-        questions: interview?.questions?.map((q) => q?.question).join(", ") || "",
-        name: candidateName || "not provided",
+        questions:
+          interview?.questions?.map((q) => q?.question).join(', ') || '',
+        name: candidateName || 'not provided',
       };
 
       // Register a new call with Retell
@@ -925,8 +966,8 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       const callResponse = registerCallResponse?.registerCallResponse;
 
       if (!callResponse?.call_id || !callResponse?.access_token) {
-        console.error("[Second Call] Failed to register call");
-        toast.error("Failed to start second call. Please try again.");
+        console.error('[Second Call] Failed to register call');
+        toast.error('Failed to start second call. Please try again.');
         setIsPreparingCall(false);
 
         return;
@@ -940,7 +981,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       if (responseToken) {
         setLocalFlowState(responseToken, { modal_closed: modalClosedTs });
         const localState = getLocalFlowState(responseToken);
-        
+
         // Await DB update for call_id
         await updateResponseByTokenMutation.mutateAsync({
           payload: {
@@ -959,8 +1000,8 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       await webClient
         .startCall({ accessToken: callResponse.access_token })
         .catch((err) => {
-          console.error("[Second Call] Error starting call:", err);
-          toast.error("Failed to start call.");
+          console.error('[Second Call] Error starting call:', err);
+          toast.error('Failed to start call.');
           setIsPreparingCall(false);
           throw err;
         });
@@ -969,24 +1010,30 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       // If user refreshes after this point, they'll be redirected to expired page
       const secondCallStartedTs = new Date().toISOString();
       if (responseToken) {
-        setLocalFlowState(responseToken, { second_call_started: secondCallStartedTs });
+        setLocalFlowState(responseToken, {
+          second_call_started: secondCallStartedTs,
+        });
         const localState = getLocalFlowState(responseToken);
-        
+
         // Update DB with second_call_started flag
         ResponseService.updateResponseByToken(
           { call_flow_state: localState },
-          responseToken,
-        ).then(() => {
-        }).catch((err) => {
-          console.error("[Second Call] DB update FAILED (second_call_started):", err);
-        });
+          responseToken
+        )
+          .then(() => {})
+          .catch((err) => {
+            console.error(
+              '[Second Call] DB update FAILED (second_call_started):',
+              err
+            );
+          });
       }
 
       setIsPreparingCall(false);
       setIsCalling(true);
     } catch (error) {
-      console.error("[Second Call] Error:", error);
-      toast.error("Failed to start second call.");
+      console.error('[Second Call] Error:', error);
+      toast.error('Failed to start second call.');
       setIsPreparingCall(false);
     }
   };
@@ -998,11 +1045,14 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
   }, [interview]);
 
   useEffect(() => {
-    if (!interview.interviewer_id) { return; }
+    if (!interview.interviewer_id) {
+      return;
+    }
     const fetchInterviewer = async () => {
-      const interviewer = await encryptedApiCall("/api/get-interviewer", { id: interview.interviewer_id })
-        .catch(() => null);
-      setInterviewerImg(interviewer?.image || "/interviewers/default.png");
+      const interviewer = await encryptedApiCall('/api/get-interviewer', {
+        id: interview.interviewer_id,
+      }).catch(() => null);
+      setInterviewerImg(interviewer?.image || '/interviewers/default.png');
     };
     fetchInterviewer();
   }, [interview.interviewer_id]);
@@ -1018,7 +1068,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
       // Use TanStack Query mutation to save response and invalidate cache
       saveResponseMutation.mutate({
         payload: { is_ended: true, tab_switch_count: tabSwitchCount },
-          callId,
+        callId,
       });
 
       // Also fetch and save call details as a fallback (in case webhook doesn't fire)
@@ -1029,7 +1079,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
         // Retry logic: try multiple times with increasing delays
         const retryFetchDetails = (
           attempt: number = 1,
-          maxAttempts: number = 3,
+          maxAttempts: number = 3
         ) => {
           const delay = attempt * 3000; // 3s, 6s, 9s
 
@@ -1041,16 +1091,16 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
                 onError: (error) => {
                   console.error(
                     `[Call] Failed to fetch call details on attempt ${attempt}:`,
-                    error,
+                    error
                   );
                   if (attempt < maxAttempts) {
                     retryFetchDetails(attempt + 1, maxAttempts);
                   } else {
-                    console.error("[Call] Max retry attempts reached.");
+                    console.error('[Call] Max retry attempts reached.');
                     hasFetchedDetailsRef.current = false;
                   }
                 },
-              },
+              }
             );
           }, delay);
         };
@@ -1087,7 +1137,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
     return (
       <div className="flex flex-col items-center justify-center min-h-screen w-full bg-white">
         <div className="flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600" />
           <p className="mt-4 text-gray-600 text-sm">Verifying session...</p>
         </div>
       </div>
@@ -1107,7 +1157,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
                   <div className="flex flex-col">
                     <div className="text-xs text-gray-600">Time Used</div>
                     <div
-                      className={`text-sm font-bold ${isTimerPaused ? "text-amber-600" : "text-gray-800"}`}
+                      className={`text-sm font-bold ${isTimerPaused ? 'text-amber-600' : 'text-gray-800'}`}
                     >
                       {formatTime(timeUsedSeconds)}
                     </div>
@@ -1130,9 +1180,9 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
                   <div className="flex flex-col items-end">
                     <div className="text-xs text-gray-600">Time Left</div>
                     <div
-                      className={`text-sm font-bold ${isTimeUp ? "text-red-600" : timeLeftSeconds < 60 ? "text-red-600" : "text-gray-800"}`}
+                      className={`text-sm font-bold ${isTimeUp ? 'text-red-600' : timeLeftSeconds < 60 ? 'text-red-600' : 'text-gray-800'}`}
                     >
-                      {isTimeUp ? "00:00" : formatTime(timeLeftSeconds)}
+                      {isTimeUp ? '00:00' : formatTime(timeLeftSeconds)}
                     </div>
                   </div>
                 </div>
@@ -1141,23 +1191,19 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
                   <div
                     className={`h-[10px] rounded-md transition-all ${
                       isTimeUp
-                        ? "bg-red-500"
+                        ? 'bg-red-500'
                         : isTimerPaused
-                          ? "bg-amber-500"
+                          ? 'bg-amber-500'
                           : isEnded
-                            ? "bg-secondary"
-                            : "bg-secondary"
+                            ? 'bg-secondary'
+                            : 'bg-secondary'
                     }`}
-                  style={{
-                    width: isEnded
-                      ? "100%"
-                      : `${
-                          (Number(currentTimeDuration) /
-                            (Number(interviewTimeDuration) * 60)) *
-                          100
-                        }%`,
-                  }}
-                />
+                    style={{
+                      width: isEnded
+                        ? '100%'
+                        : `${totalTimeSeconds > 0 ? (timeUsedSeconds / totalTimeSeconds) * 100 : 0}%`,
+                    }}
+                  />
                   {isTimeUp && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="text-[8px] font-bold text-white drop-shadow-md">
@@ -1169,7 +1215,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
                     <div
                       className="absolute inset-0 flex items-center justify-center pointer-events-none"
                       style={{
-                        width: `${(Number(currentTimeDuration) / (Number(interviewTimeDuration) * 60)) * 100}%`,
+                        width: `${totalTimeSeconds > 0 ? (timeUsedSeconds / totalTimeSeconds) * 100 : 0}%`,
                       }}
                     >
                       <div className="text-[8px] font-bold text-white drop-shadow-md">
@@ -1198,7 +1244,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
                   </div>
                   {isStarted && (
                     <div className="ml-4 text-xs text-gray-500">
-                      ({formatTime(timeUsedSeconds)} /{" "}
+                      ({formatTime(timeUsedSeconds)} /{' '}
                       {formatTime(totalTimeSeconds)})
                     </div>
                   )}
@@ -1226,9 +1272,9 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
                       stream.getTracks().forEach((track) => track.stop());
                       setMicPermissionDenied(false);
                     } catch (error) {
-                      console.error("Permission still denied:", error);
+                      console.error('Permission still denied:', error);
                       toast.error(
-                        "Microphone access denied. Please check your browser settings.",
+                        'Microphone access denied. Please check your browser settings.'
                       );
                     }
                   }}
@@ -1241,49 +1287,49 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
             {!isStarted &&
               !isEnded &&
               !isOldUser &&
-              currentSlide === "welcome" && (
-              <WelcomeSlide
-                interview={interview}
-                loading={loading}
-                onProceed={() => setCurrentSlide("candidateForm")}
-                onExit={onEndCallClick}
-              />
-            )}
+              currentSlide === 'welcome' && (
+                <WelcomeSlide
+                  interview={interview}
+                  loading={loading}
+                  onProceed={() => setCurrentSlide('candidateForm')}
+                  onExit={onEndCallClick}
+                />
+              )}
 
             {!isStarted &&
               !isEnded &&
               !isOldUser &&
-              currentSlide === "candidateForm" && (
-              <CandidateForm
-                interview={interview}
-                loading={loading}
-                email={candidateForm.email}
-                setEmail={candidateForm.setEmail}
-                fullName={candidateForm.fullName}
-                setFullName={candidateForm.setFullName}
-                phone={candidateForm.phone}
-                setPhone={candidateForm.setPhone}
-                gender={candidateForm.gender}
-                setGender={candidateForm.setGender}
-                country={candidateForm.country}
-                setCountry={candidateForm.setCountry}
-                twitter={candidateForm.twitter}
-                setTwitter={candidateForm.setTwitter}
-                linkedin={candidateForm.linkedin}
-                setLinkedin={candidateForm.setLinkedin}
-                workExperienceYears={candidateForm.workExperienceYears}
-                setWorkExperienceYears={candidateForm.setWorkExperienceYears}
-                isValidEmail={candidateForm.isValidEmail}
-                isValidPhone={candidateForm.isValidPhone}
-                isValidTwitter={candidateForm.isValidTwitter}
-                isValidLinkedin={candidateForm.isValidLinkedin}
+              currentSlide === 'candidateForm' && (
+                <CandidateForm
+                  interview={interview}
+                  loading={loading}
+                  email={candidateForm.email}
+                  setEmail={candidateForm.setEmail}
+                  fullName={candidateForm.fullName}
+                  setFullName={candidateForm.setFullName}
+                  phone={candidateForm.phone}
+                  setPhone={candidateForm.setPhone}
+                  gender={candidateForm.gender}
+                  setGender={candidateForm.setGender}
+                  country={candidateForm.country}
+                  setCountry={candidateForm.setCountry}
+                  twitter={candidateForm.twitter}
+                  setTwitter={candidateForm.setTwitter}
+                  linkedin={candidateForm.linkedin}
+                  setLinkedin={candidateForm.setLinkedin}
+                  workExperienceYears={candidateForm.workExperienceYears}
+                  setWorkExperienceYears={candidateForm.setWorkExperienceYears}
+                  isValidEmail={candidateForm.isValidEmail}
+                  isValidPhone={candidateForm.isValidPhone}
+                  isValidTwitter={candidateForm.isValidTwitter}
+                  isValidLinkedin={candidateForm.isValidLinkedin}
                   turnstileToken={candidateForm.turnstileToken}
                   setTurnstileToken={candidateForm.setTurnstileToken}
-                onGoBack={() => setCurrentSlide("welcome")}
-                onStartInterview={startConversation}
-                onExit={onEndCallClick}
-              />
-            )}
+                  onGoBack={() => setCurrentSlide('welcome')}
+                  onStartInterview={startConversation}
+                  onExit={onEndCallClick}
+                />
+              )}
 
             {/* Interview stage - audio detection only runs when this is mounted */}
             {isStarted && !isEnded && !isOldUser && (
@@ -1324,7 +1370,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
                       not eligible to respond. Thank you!
                     </p>
                     <p className="text-center">
-                      {"\n"}
+                      {'\n'}
                       You can close this tab now.
                     </p>
                   </div>
@@ -1339,7 +1385,7 @@ function Call({ interview, responseToken, initialCallPhase = 'first_call' }: Int
           target="_blank"
         >
           <div className="text-center text-md font-normal shadow-none mr-2">
-            Powered by{" "}
+            Powered by{' '}
             <span className="font-bold">
               Hirin<span className="text-indigo-600">Up</span>
             </span>

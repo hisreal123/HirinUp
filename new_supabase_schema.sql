@@ -57,7 +57,7 @@ CREATE TABLE interview (
     questions JSONB DEFAULT '[]'::jsonb,
     quotes JSONB[] DEFAULT ARRAY[]::JSONB[],
     insights TEXT[] DEFAULT ARRAY[]::TEXT[],
-    respondents TEXT[] DEFAULT ARRAY[]::TEXT[],
+    respondents TEXT[] DEFAULT NULL,
     question_count INTEGER DEFAULT 0,
     response_count INTEGER DEFAULT 0,
     time_duration TEXT
@@ -172,4 +172,3 @@ COMMENT ON INDEX idx_response_interview_email_unique IS 'Prevents duplicate resp
 COMMENT ON COLUMN response.active_session_id IS 'Unique session ID for the currently active tab/device. NULL means no active session.';
 COMMENT ON COLUMN response.session_fingerprint IS 'Browser fingerprint hash for device identification.';
 COMMENT ON COLUMN response.last_heartbeat IS 'Timestamp of the last heartbeat from the active session. Used to detect stale sessions.';
-

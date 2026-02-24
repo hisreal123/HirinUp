@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect } from 'react';
 
 interface HoneypotProps {
   onBotDetected?: () => void;
@@ -32,14 +32,14 @@ export function Honeypot({ onBotDetected }: HoneypotProps) {
     const email2 = email2Ref.current;
     const phone = phoneRef.current;
 
-    website?.addEventListener("input", checkForBot);
-    email2?.addEventListener("input", checkForBot);
-    phone?.addEventListener("input", checkForBot);
+    website?.addEventListener('input', checkForBot);
+    email2?.addEventListener('input', checkForBot);
+    phone?.addEventListener('input', checkForBot);
 
     return () => {
-      website?.removeEventListener("input", checkForBot);
-      email2?.removeEventListener("input", checkForBot);
-      phone?.removeEventListener("input", checkForBot);
+      website?.removeEventListener('input', checkForBot);
+      email2?.removeEventListener('input', checkForBot);
+      phone?.removeEventListener('input', checkForBot);
     };
   }, [onBotDetected]);
 
@@ -50,14 +50,14 @@ export function Honeypot({ onBotDetected }: HoneypotProps) {
       <div
         aria-hidden="true"
         style={{
-          position: "absolute",
-          left: "-9999px",
-          top: "-9999px",
+          position: 'absolute',
+          left: '-9999px',
+          top: '-9999px',
           opacity: 0,
           height: 0,
           width: 0,
-          overflow: "hidden",
-          pointerEvents: "none",
+          overflow: 'hidden',
+          pointerEvents: 'none',
         }}
       >
         <label htmlFor="website">Website (leave blank)</label>
@@ -107,21 +107,22 @@ export function useHoneypot() {
       websiteRef.current?.value ||
       email2Ref.current?.value ||
       phoneRef.current?.value;
-    return !!hasInput; // Returns true if bot detected
+    
+return !!hasInput; // Returns true if bot detected
   };
 
-  const HoneypotFields = () => (
-    <div
+  function HoneypotFields() {
+  return <div
       aria-hidden="true"
       style={{
-        position: "absolute",
-        left: "-9999px",
-        top: "-9999px",
+        position: 'absolute',
+        left: '-9999px',
+        top: '-9999px',
         opacity: 0,
         height: 0,
         width: 0,
-        overflow: "hidden",
-        pointerEvents: "none",
+        overflow: 'hidden',
+        pointerEvents: 'none',
       }}
     >
       <input
@@ -139,14 +140,14 @@ export function useHoneypot() {
         autoComplete="off"
       />
       <input
-        ref={phoneRef} 
+        ref={phoneRef}
         type="tel"
         name="phone_number"
         tabIndex={-1}
         autoComplete="off"
       />
     </div>
-  );
+}
 
   return { checkHoneypot, HoneypotFields };
 }

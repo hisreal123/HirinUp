@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Copy, Check } from "lucide-react";
-import { toast } from "sonner";
-import MiniLoader from "@/components/loaders/mini-loader/miniLoader";
-import { useCreateResponse } from "@/hooks/useCreateResponse";
+import React, { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Copy, Check } from 'lucide-react';
+import { toast } from 'sonner';
+import MiniLoader from '@/components/loaders/mini-loader/miniLoader';
+import { useCreateResponse } from '@/hooks/useCreateResponse';
 
 interface GenerateLinkModalProps {
   open: boolean;
@@ -22,11 +22,11 @@ function GenerateLinkModal({
   sharedLink,
   setSharedLink,
 }: GenerateLinkModalProps) {
-  const [generatedLink, setGeneratedLink] = useState<string>("");
+  const [generatedLink, setGeneratedLink] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
   const isGeneratingRef = useRef(false);
-  
+
   const createResponseMutation = useCreateResponse();
 
   const generateLink = async () => {
@@ -43,45 +43,45 @@ function GenerateLinkModal({
           isGeneratingRef.current = false;
           if (data?.response_id) {
             const responseId = data.response_id;
-        // New format: /join/[organization_name]/[interview_id]/[response_id]
-        const link = `${base_url}/join/${organizationName}/${interviewId}/${responseId}`;
-        setGeneratedLink(link);
-        setSharedLink(link); // Update shared link state
-        toast.success("Interview link generated successfully!", {
-          position: "bottom-right",
-          duration: 3000,
-        });
-      } else {
-        toast.error("Failed to generate link", {
-          position: "bottom-right",
-          duration: 3000,
-        });
-      }
+            // New format: /join/[organization_name]/[interview_id]/[response_id]
+            const link = `${base_url}/join/${organizationName}/${interviewId}/${responseId}`;
+            setGeneratedLink(link);
+            setSharedLink(link); // Update shared link state
+            toast.success('Interview link generated successfully!', {
+              position: 'bottom-right',
+              duration: 3000,
+            });
+          } else {
+            toast.error('Failed to generate link', {
+              position: 'bottom-right',
+              duration: 3000,
+            });
+          }
         },
         onError: () => {
           isGeneratingRef.current = false;
         },
-        },
-      );
+      }
+    );
   };
 
   const copyToClipboard = () => {
-    if (!generatedLink) return;
+    if (!generatedLink) {return;}
 
     navigator.clipboard
       .writeText(generatedLink)
       .then(() => {
         setCopied(true);
-        toast.success("Link copied to clipboard!", {
-          position: "bottom-right",
+        toast.success('Link copied to clipboard!', {
+          position: 'bottom-right',
           duration: 2000,
         });
         setTimeout(() => setCopied(false), 2000);
       })
       .catch((err) => {
-        console.error("Failed to copy:", err);
-        toast.error("Failed to copy link", {
-          position: "bottom-right",
+        console.error('Failed to copy:', err);
+        toast.error('Failed to copy link', {
+          position: 'bottom-right',
           duration: 3000,
         });
       });
@@ -90,14 +90,14 @@ function GenerateLinkModal({
   useEffect(() => {
     // Use shared link if available when modal opens
     if (open && sharedLink) {
-        setGeneratedLink(sharedLink);
-      }
+      setGeneratedLink(sharedLink);
+    }
     // Reset generated link when modal closes
     if (!open) {
-      setGeneratedLink("");
+      setGeneratedLink('');
     }
   }, [open, sharedLink]);
-  
+
   useEffect(() => {
     // Update generated link when shared link changes
     if (sharedLink && sharedLink !== generatedLink) {
@@ -105,7 +105,7 @@ function GenerateLinkModal({
     }
   }, [sharedLink, generatedLink]);
 
-  if (!open) return null;
+  if (!open) {return null;}
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -131,12 +131,12 @@ function GenerateLinkModal({
                 <input
                   type="text"
                   value={generatedLink}
-                  readOnly
                   className="flex-1 p-2 border border-gray-300 bg-gray-50 rounded text-sm"
+                  readOnly
                 />
                 <Button
-                  onClick={copyToClipboard}
                   className="px-4 bg-secondary hover:bg-secondary/90 text-white"
+                  onClick={copyToClipboard}
                 >
                   {copied ? (
                     <Check size={16} className="text-white" />
@@ -152,23 +152,21 @@ function GenerateLinkModal({
           </div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-sm text-gray-600">Click generate to create a link</p>
+            <p className="text-sm text-gray-600">
+              Click generate to create a link
+            </p>
           </div>
         )}
 
         <div className="flex gap-3 mt-6">
           <Button
-            onClick={generateLink}
             disabled={createResponseMutation.isPending}
             className="flex-1 bg-secondary hover:bg-secondary/90 text-white"
+            onClick={generateLink}
           >
-            {generatedLink ? "Generate New Link" : "Generate Link"}
+            {generatedLink ? 'Generate New Link' : 'Generate Link'}
           </Button>
-          <Button
-            onClick={onClose}
-            variant="outline"
-            className="flex-1"
-          >
+          <Button variant="outline" className="flex-1" onClick={onClose}>
             Close
           </Button>
         </div>
@@ -178,4 +176,3 @@ function GenerateLinkModal({
 }
 
 export default GenerateLinkModal;
-

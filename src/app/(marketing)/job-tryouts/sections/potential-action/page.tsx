@@ -15,7 +15,8 @@ export default function WhyJobTryoutsSection() {
       y: 0,
     },
   };
-  return (
+  
+return (
     <section className="w-full py-24 bg-white">
       <div className="max-w-6xl mx-auto px-4">
         {/* ---------- WHY JOB TRYOUTS ---------- */}

@@ -25,7 +25,7 @@ export default function NavDropdown({
       <div
         className="flex items-center gap-2 text-white hover:text-[#6300ff]"
         onClick={() => {
-          if (!hasItems) setMenu?.(false);
+          if (!hasItems) {setMenu?.(false);}
         }}
       >
         {label}
@@ -55,8 +55,8 @@ export default function NavDropdown({
               <Link
                 key={index}
                 href={item.href || '#'}
-                onClick={() => setMenu?.(false)}
                 className="block px-4 py-3 hover:bg-[#6300ff] hover:text-white"
+                onClick={() => setMenu?.(false)}
               >
                 {item.title}
               </Link>

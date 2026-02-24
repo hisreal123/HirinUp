@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useClerk } from "@clerk/nextjs";
-import { ShieldX, LogOut, Home } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useClerk } from '@clerk/nextjs';
+import { ShieldX, LogOut, Home } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function NotAllowedPage() {
   const { signOut } = useClerk();
@@ -33,8 +33,8 @@ export default function NotAllowedPage() {
 
         <div className="space-y-3">
           <Button
-            onClick={() => signOut({ redirectUrl: "/admin/signin" })}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+            onClick={() => signOut({ redirectUrl: '/admin/signin' })}
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out
@@ -43,7 +43,7 @@ export default function NotAllowedPage() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => (window.location.href = "/home")}
+            onClick={() => (window.location.href = '/home')}
           >
             <Home className="h-4 w-4 mr-2" />
             Go to Home

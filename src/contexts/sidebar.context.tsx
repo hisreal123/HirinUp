@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface SidebarContextProps {
   isCollapsed: boolean;
@@ -29,8 +29,8 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 export const useSidebar = () => {
   const context = useContext(SidebarContext);
   if (!context) {
-    throw new Error("useSidebar must be used within SidebarProvider");
+    throw new Error('useSidebar must be used within SidebarProvider');
   }
-  return context;
+  
+return context;
 };
-

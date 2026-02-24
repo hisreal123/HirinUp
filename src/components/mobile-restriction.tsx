@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 const MOBILE_BREAKPOINT = 1024; // Desktop/large devices only (1024px and above)
 
@@ -22,10 +22,10 @@ export default function MobileRestriction({
     checkDevice();
 
     // Check on resize
-    window.addEventListener("resize", checkDevice);
+    window.addEventListener('resize', checkDevice);
 
     return () => {
-      window.removeEventListener("resize", checkDevice);
+      window.removeEventListener('resize', checkDevice);
     };
   }, []);
 
@@ -34,7 +34,7 @@ export default function MobileRestriction({
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto" />
         </div>
       </div>
     );
@@ -67,7 +67,7 @@ export default function MobileRestriction({
             This application is optimized for desktop and large devices.
           </p>
           <div className="mt-auto">
-             <p className="px-2 py-1 text-2xl font-bold gradient-text">
+            <p className="px-2 py-1 text-2xl font-bold gradient-text">
               Hirin<span className="text-primary">Up</span>
             </p>
           </div>
@@ -79,5 +79,3 @@ export default function MobileRestriction({
   // Allow desktop/large devices
   return <>{children}</>;
 }
-
-

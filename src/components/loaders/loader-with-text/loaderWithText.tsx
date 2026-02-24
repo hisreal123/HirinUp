@@ -1,18 +1,18 @@
-import { CircularProgress } from "@nextui-org/progress";
+import { CircularProgress } from '@nextui-org/progress';
 
 interface LoaderWithTextProps {
   text?: string;
 }
 
-function LoaderWithText({ text = "Loading" }: LoaderWithTextProps) {
+function LoaderWithText({ text = 'Loading' }: LoaderWithTextProps) {
   return (
     <div className="relative flex flex-col items-center justify-center h-screen">
       <CircularProgress
         classNames={{
-          base: "animate-spin",
-          svg: "w-36 h-36 ",
-          indicator: "stroke-secondary",
-          track: "stroke-secondary/20",
+          base: 'animate-spin',
+          svg: 'w-36 h-36 ',
+          indicator: 'stroke-secondary',
+          track: 'stroke-secondary/20',
         }}
         strokeWidth={2}
         disableAnimation={true}

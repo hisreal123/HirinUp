@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   ColumnDef,
@@ -9,17 +9,17 @@ import {
   getPaginationRowModel,
   SortingState,
   useReactTable,
-} from "@tanstack/react-table";
-import { ArrowUpDown, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from '@tanstack/react-table';
+import { ArrowUpDown, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -27,9 +27,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { useState } from "react";
-import { formatDateReadable } from "@/lib/utils";
+} from '@/components/ui/table';
+import { useState } from 'react';
+import { formatDateReadable } from '@/lib/utils';
 
 interface Feedback {
   id: number;
@@ -46,17 +46,17 @@ interface FeedbackTableProps {
 
 function FeedbackTable({ data }: FeedbackTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [globalFilter, setGlobalFilter] = useState('');
 
   const columns: ColumnDef<Feedback>[] = [
     {
-      accessorKey: "email",
+      accessorKey: 'email',
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="h-8 px-2"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             Email
             <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -64,18 +64,19 @@ function FeedbackTable({ data }: FeedbackTableProps) {
         );
       },
       cell: ({ row }) => {
-        const email = row.getValue("email") as string | null;
-        return <div className="font-medium">{email || "Anonymous"}</div>;
+        const email = row.getValue('email') as string | null;
+        
+return <div className="font-medium">{email || 'Anonymous'}</div>;
       },
     },
     {
-      accessorKey: "satisfaction",
+      accessorKey: 'satisfaction',
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="h-8 px-2"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             Satisfaction
             <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -83,19 +84,21 @@ function FeedbackTable({ data }: FeedbackTableProps) {
         );
       },
       cell: ({ row }) => {
-        const satisfaction = row.getValue("satisfaction") as number | null;
+        const satisfaction = row.getValue('satisfaction') as number | null;
         if (satisfaction === null) {
           return <span className="text-gray-400">-</span>;
         }
-        return <div className="font-medium">{satisfaction}/5</div>;
+        
+return <div className="font-medium">{satisfaction}/5</div>;
       },
     },
     {
-      accessorKey: "feedback",
-      header: "Feedback",
+      accessorKey: 'feedback',
+      header: 'Feedback',
       cell: ({ row }) => {
-        const feedback = row.getValue("feedback") as string | null;
-        return (
+        const feedback = row.getValue('feedback') as string | null;
+        
+return (
           <div className="max-w-md">
             {feedback ? (
               <p className="text-sm text-gray-700 line-clamp-3">{feedback}</p>
@@ -107,13 +110,13 @@ function FeedbackTable({ data }: FeedbackTableProps) {
       },
     },
     {
-      accessorKey: "created_at",
+      accessorKey: 'created_at',
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="h-8 px-2"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             Created At
             <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -121,8 +124,9 @@ function FeedbackTable({ data }: FeedbackTableProps) {
         );
       },
       cell: ({ row }) => {
-        const date = row.getValue("created_at") as string;
-        return <span>{formatDateReadable(date)}</span>;
+        const date = row.getValue('created_at') as string;
+        
+return <span>{formatDateReadable(date)}</span>;
       },
     },
   ];
@@ -139,10 +143,10 @@ function FeedbackTable({ data }: FeedbackTableProps) {
     globalFilterFn: (row, columnId, filterValue) => {
       const search = filterValue.toLowerCase();
       const feedback = row.original;
-      const email = (feedback.email || "").toLowerCase();
-      const feedbackText = (feedback.feedback || "").toLowerCase();
-      const satisfaction = (feedback.satisfaction || "").toString();
-      
+      const email = (feedback.email || '').toLowerCase();
+      const feedbackText = (feedback.feedback || '').toLowerCase();
+      const satisfaction = (feedback.satisfaction || '').toString();
+
       return (
         email.includes(search) ||
         feedbackText.includes(search) ||
@@ -177,8 +181,8 @@ function FeedbackTable({ data }: FeedbackTableProps) {
           type="text"
           placeholder="Search by email, feedback, satisfaction..."
           value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
           className="pl-10"
+          onChange={(e) => setGlobalFilter(e.target.value)}
         />
       </div>
 
@@ -206,14 +210,20 @@ function FeedbackTable({ data }: FeedbackTableProps) {
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -248,11 +258,16 @@ function FeedbackTable({ data }: FeedbackTableProps) {
             <span className="text-sm text-gray-700">per page</span>
           </div>
           <div className="text-sm text-gray-700">
-            Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
+            Showing{' '}
+            {table.getState().pagination.pageIndex *
+              table.getState().pagination.pageSize +
+              1}{' '}
+            to{' '}
             {Math.min(
-              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+              (table.getState().pagination.pageIndex + 1) *
+                table.getState().pagination.pageSize,
               table.getFilteredRowModel().rows.length
-            )}{" "}
+            )}{' '}
             of {table.getFilteredRowModel().rows.length} feedback
           </div>
         </div>
@@ -260,21 +275,22 @@ function FeedbackTable({ data }: FeedbackTableProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            onClick={() => table.previousPage()}
           >
             Previous
           </Button>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-700">
-              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+              Page {table.getState().pagination.pageIndex + 1} of{' '}
+              {table.getPageCount()}
             </span>
           </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            onClick={() => table.nextPage()}
           >
             Next
           </Button>
@@ -285,4 +301,3 @@ function FeedbackTable({ data }: FeedbackTableProps) {
 }
 
 export default FeedbackTable;
-

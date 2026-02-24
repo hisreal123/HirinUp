@@ -131,24 +131,24 @@ export default function HeroSection() {
         <div className="flex justify-center mt-16 mb-16">
           <div className="flex items-center rounded-full border border-white  p-1">
             <button
-              onClick={() => setBilling('monthly')}
               className={clsx(
                 'px-9 py-4 text-base rounded-full transition',
                 billing === 'monthly'
                   ? 'bg-[linear-gradient(80deg,#171064_0%,#6300FF_100%)] text-white'
                   : 'text-white hover:text-white'
               )}
+              onClick={() => setBilling('monthly')}
             >
               Monthly
             </button>
             <button
-              onClick={() => setBilling('annually')}
               className={clsx(
                 'px-9 py-4 text-base rounded-full transition',
                 billing === 'annually'
                   ? 'bg-[linear-gradient(80deg,#171064_0%,#6300FF_100%)] text-white'
                   : 'text-white hover:text-white'
               )}
+              onClick={() => setBilling('annually')}
             >
               Annually
               <span className="ml-3 text-[11px] font-medium px-2 py-1 border border-white rounded-full bg-white/10 text-white">

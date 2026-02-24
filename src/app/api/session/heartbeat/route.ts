@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { logger } from "@/lib/logger";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/lib/logger';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
     if (!token || !session_id) {
       return NextResponse.json(
-        { error: "token and session_id are required" },
+        { error: 'token and session_id are required' },
         { status: 400 }
       );
     }
@@ -27,14 +27,14 @@ export async function POST(req: Request) {
 
     // Check current session state
     const { data: response, error: fetchError } = await supabase
-      .from("response")
-      .select("active_session_id, is_ended")
-      .eq("token", token)
+      .from('response')
+      .select('active_session_id, is_ended')
+      .eq('token', token)
       .single();
 
     if (fetchError || !response) {
       return NextResponse.json(
-        { error: "Response not found" },
+        { error: 'Response not found' },
         { status: 404 }
       );
     }
@@ -42,22 +42,23 @@ export async function POST(req: Request) {
     // Check if interview ended
     if (response.is_ended) {
       return NextResponse.json(
-        { error: "Interview ended", message: "This interview has ended" },
+        { error: 'Interview ended', message: 'This interview has ended' },
         { status: 410 }
       );
     }
 
     // Check if session was taken over
     if (response.active_session_id !== session_id) {
-      logger.warn("[Session Heartbeat] Session mismatch:", {
+      logger.warn('[Session Heartbeat] Session mismatch:', {
         token,
         expectedSession: session_id,
         currentSession: response.active_session_id,
       });
-      return NextResponse.json(
+      
+return NextResponse.json(
         {
-          error: "Session invalid",
-          message: "Your session was taken over by another tab or device",
+          error: 'Session invalid',
+          message: 'Your session was taken over by another tab or device',
         },
         { status: 409 }
       );
@@ -65,24 +66,26 @@ export async function POST(req: Request) {
 
     // Update heartbeat
     const { error: updateError } = await supabase
-      .from("response")
+      .from('response')
       .update({ last_heartbeat: new Date().toISOString() })
-      .eq("token", token)
-      .eq("active_session_id", session_id);
+      .eq('token', token)
+      .eq('active_session_id', session_id);
 
     if (updateError) {
-      logger.error("[Session Heartbeat] Failed to update:", updateError);
-      return NextResponse.json(
-        { error: "Failed to update heartbeat" },
+      logger.error('[Session Heartbeat] Failed to update:', updateError);
+      
+return NextResponse.json(
+        { error: 'Failed to update heartbeat' },
         { status: 500 }
       );
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    logger.error("[Session Heartbeat] Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
+    logger.error('[Session Heartbeat] Error:', error);
+    
+return NextResponse.json(
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

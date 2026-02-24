@@ -1,13 +1,13 @@
-import { Question } from "@/types/interview";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Question } from '@/types/interview';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 
 interface QuestionCardProps {
   questionNumber: number;
@@ -36,8 +36,8 @@ const questionCard = ({
                     <Button
                       className={`text-xs h-7  hover:bg-indigo-800  ${
                         questionData?.follow_up_count == 1
-                          ? "bg-indigo-600"
-                          : "opacity-50"
+                          ? 'bg-indigo-600'
+                          : 'opacity-50'
                       } `}
                       onClick={() =>
                         onQuestionChange(questionData.id, {
@@ -61,8 +61,8 @@ const questionCard = ({
                     <Button
                       className={`text-xs h-7  hover:bg-indigo-800 ${
                         questionData?.follow_up_count == 2
-                          ? "bg-indigo-600"
-                          : "opacity-50"
+                          ? 'bg-indigo-600'
+                          : 'opacity-50'
                       } `}
                       onClick={() =>
                         onQuestionChange(questionData.id, {
@@ -86,8 +86,8 @@ const questionCard = ({
                     <Button
                       className={`text-xs h-7 hover:bg-indigo-800  ${
                         questionData?.follow_up_count == 3
-                          ? "bg-indigo-600"
-                          : "opacity-50"
+                          ? 'bg-indigo-600'
+                          : 'opacity-50'
                       } `}
                       onClick={() =>
                         onQuestionChange(questionData.id, {

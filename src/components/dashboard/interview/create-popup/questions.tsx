@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
-import { useClerk, useOrganization } from "@clerk/nextjs";
-import { InterviewBase, Question } from "@/types/interview";
-import { useInterviews } from "@/contexts/interviews.context";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import QuestionCard from "@/components/dashboard/interview/create-popup/questionCard";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { ChevronLeft } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
+import { useClerk, useOrganization } from '@clerk/nextjs';
+import { InterviewBase, Question } from '@/types/interview';
+import { useInterviews } from '@/contexts/interviews.context';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import QuestionCard from '@/components/dashboard/interview/create-popup/questionCard';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
 interface Props {
   interviewData: InterviewBase;
@@ -22,10 +22,10 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
   const [isClicked, setIsClicked] = useState(false);
 
   const [questions, setQuestions] = useState<Question[]>(
-    interviewData.questions,
+    interviewData.questions
   );
   const [description, setDescription] = useState<string>(
-    interviewData.description.trim(),
+    interviewData.description.trim()
   );
   const { fetchInterviews } = useInterviews();
 
@@ -35,8 +35,8 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
   const handleInputChange = (id: string, newQuestion: Question) => {
     setQuestions(
       questions.map((question) =>
-        question.id === id ? { ...question, ...newQuestion } : question,
-      ),
+        question.id === id ? { ...question, ...newQuestion } : question
+      )
     );
   };
 
@@ -45,9 +45,9 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
       setQuestions(
         questions.map((question) => ({
           ...question,
-          question: "",
+          question: '',
           follow_up_count: 1,
-        })),
+        }))
       );
 
       return;
@@ -59,15 +59,15 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
     if (questions.length < interviewData.question_count) {
       setQuestions([
         ...questions,
-        { id: uuidv4(), question: "", follow_up_count: 1 },
+        { id: uuidv4(), question: '', follow_up_count: 1 },
       ]);
     }
   };
 
   const onSave = async () => {
     try {
-      interviewData.user_id = user?.id || "";
-      interviewData.organization_id = organization?.id || "";
+      interviewData.user_id = user?.id || '';
+      interviewData.organization_id = organization?.id || '';
 
       interviewData.questions = questions;
       interviewData.description = description;
@@ -77,24 +77,33 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
         ...interviewData,
         interviewer_id: interviewData.interviewer_id.toString(),
         response_count: interviewData.response_count.toString(),
-        logo_url: organization?.imageUrl || "",
+        logo_url: organization?.imageUrl || '',
       };
 
-      const response = await axios.post("/api/create-interview", {
+      const response = await axios.post('/api/create-interview', {
         organizationName: organization?.name,
         interviewData: sanitizedInterviewData,
       });
-      setIsClicked(false);
+
+      if (response.status !== 200) {
+        console.error('Failed to create interview:', response.data?.error);
+        setIsClicked(false);
+
+        return;
+      }
+
       fetchInterviews();
       setOpen(false);
     } catch (error) {
-      console.error("Error creating interview:", error);
+      console.error('Error creating interview:', error);
+    } finally {
+      setIsClicked(false);
     }
   };
 
   useEffect(() => {
     if (questions.length > prevQuestionLengthRef.current) {
-      endOfListRef.current?.scrollIntoView({ behavior: "smooth" });
+      endOfListRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
     prevQuestionLengthRef.current = questions.length;
   }, [questions.length]);
@@ -103,7 +112,7 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
     <div>
       <div
         className={`text-center px-1 flex flex-col justify-top items-center w-[38rem] ${
-          interviewData.question_count > 1 ? "h-[29rem]" : ""
+          interviewData.question_count > 1 ? 'h-[29rem]' : ''
         } `}
       >
         <div className="relative flex justify-center w-full">
@@ -148,9 +157,9 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
         )}
       </div>
       <p className="mt-3 mb-1 ml-2 font-medium">
-        Interview Description{" "}
+        Interview Description{' '}
         <span
-          style={{ fontSize: "0.7rem", lineHeight: "0.66rem" }}
+          style={{ fontSize: '0.7rem', lineHeight: '0.66rem' }}
           className="font-light text-xs italic w-full text-left block"
         >
           Note: Interviewees will see this description.
@@ -173,8 +182,8 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
           disabled={
             isClicked ||
             questions.length < interviewData.question_count ||
-            description.trim() === "" ||
-            questions.some((question) => question.question.trim() === "")
+            description.trim() === '' ||
+            questions.some((question) => question.question.trim() === '')
           }
           className="bg-indigo-600 hover:bg-indigo-800 mr-5 mt-2"
           onClick={() => {

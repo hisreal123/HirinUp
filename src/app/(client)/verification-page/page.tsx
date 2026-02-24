@@ -21,7 +21,10 @@ function VerificationPage() {
   const { checkHoneypot, HoneypotFields } = useHoneypot();
 
   // Count words in reason text
-  const wordCount = reason.trim().split(/\s+/).filter(word => word.length > 0).length;
+  const wordCount = reason
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 0).length;
   const minWords = 30;
   const isReasonValid = wordCount >= minWords;
 
@@ -42,14 +45,13 @@ function VerificationPage() {
       name: legalName.trim(),
       email: professionalEmail.trim(),
     };
-    
+
     try {
       // Encode as base64, then URL-encode to handle special characters
       const jsonString = JSON.stringify(dataToEncode);
       const base64Encoded = btoa(jsonString);
       const urlSafeToken = encodeURIComponent(base64Encoded);
-      
-      
+
       // Redirect to response page with encoded token
       router.push(`/verification-response/${urlSafeToken}`);
     } catch (error) {
@@ -151,10 +153,10 @@ function VerificationPage() {
                 <span
                   className={`text-xs ${
                     isReasonValid
-                      ? 'text-gray-500'  
+                      ? 'text-gray-500'
                       : wordCount > 0
-                      ? 'text-red-500'
-                      : 'text-gray-400'
+                        ? 'text-red-500'
+                        : 'text-gray-400'
                   }`}
                 >
                   {wordCount} / {minWords} words
@@ -176,7 +178,8 @@ function VerificationPage() {
               />
               {reason && !isReasonValid && (
                 <p className="text-xs text-red-500">
-                  Please provide at least {minWords} words. You currently have {wordCount} word{wordCount !== 1 ? 's' : ''}.
+                  Please provide at least {minWords} words. You currently have{' '}
+                  {wordCount} word{wordCount !== 1 ? 's' : ''}.
                 </p>
               )}
             </div>
@@ -227,7 +230,9 @@ function VerificationPage() {
 
             <Button
               type="submit"
-              disabled={!notIllegal || !agreeTerms || !isReasonValid || isSubmitting}
+              disabled={
+                !notIllegal || !agreeTerms || !isReasonValid || isSubmitting
+              }
               className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
@@ -245,12 +250,12 @@ function VerificationPage() {
                       r="10"
                       stroke="currentColor"
                       strokeWidth="4"
-                    ></circle>
+                     />
                     <path
                       className="opacity-75"
                       fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
+                     />
                   </svg>
                   Submitting...
                 </span>

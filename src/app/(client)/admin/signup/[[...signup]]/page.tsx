@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { SignUp } from "@clerk/nextjs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Mail, ShieldX, Loader2 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useState } from 'react';
+import { SignUp } from '@clerk/nextjs';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Mail, ShieldX, Loader2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 function ClerkSignUpView({ lockedEmail }: { lockedEmail?: string }) {
   return (
@@ -15,7 +15,9 @@ function ClerkSignUpView({ lockedEmail }: { lockedEmail?: string }) {
           routing="path"
           path="/admin/signup"
           forceRedirectUrl="/dashboard"
-          initialValues={lockedEmail ? { emailAddress: lockedEmail } : undefined}
+          initialValues={
+            lockedEmail ? { emailAddress: lockedEmail } : undefined
+          }
         />
       </div>
       <div className="block md:hidden px-3 h-[60%] my-auto">
@@ -36,7 +38,7 @@ function ClerkSignUpView({ lockedEmail }: { lockedEmail?: string }) {
 
 function AdminSignUpPage() {
   const pathname = usePathname();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
@@ -44,7 +46,7 @@ function AdminSignUpPage() {
   // Clerk navigates to sub-paths like /admin/signup/verify-email-address
   // during multi-step sign-up. Render the Clerk component directly so the
   // email gate doesn't override Clerk's own UI.
-  if (pathname !== "/admin/signup") {
+  if (pathname !== '/admin/signup') {
     return <ClerkSignUpView />;
   }
 
@@ -53,31 +55,35 @@ function AdminSignUpPage() {
     setError(null);
 
     if (!email.trim()) {
-      setError("Please enter your email address.");
-      return;
+      setError('Please enter your email address.');
+      
+return;
     }
 
     setIsChecking(true);
 
     try {
-      const res = await fetch("/api/check-allowlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/check-allowlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),
       });
 
       const data = await res.json();
 
       if (!data.ok) {
-        setError("This email is not authorized to sign up. Please contact your administrator for access.");
+        setError(
+          'This email is not authorized to sign up. Please contact your administrator for access.'
+        );
         setIsChecking(false);
-        return;
+        
+return;
       }
 
       // Store verified email in state — no URL param to tamper with
       setVerifiedEmail(email.trim());
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError('Something went wrong. Please try again.');
     } finally {
       setIsChecking(false);
     }
@@ -102,9 +108,12 @@ function AdminSignUpPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="text-sm font-medium text-gray-700"
+              >
                 Work Email
               </label>
               <div className="relative">
@@ -114,9 +123,9 @@ function AdminSignUpPage() {
                   type="email"
                   placeholder="you@company.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
                   required
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
@@ -139,14 +148,17 @@ function AdminSignUpPage() {
                   Checking...
                 </>
               ) : (
-                "Continue"
+                'Continue'
               )}
             </Button>
           </form>
 
           <p className="text-center text-sm text-gray-500">
-            Already have an account?{" "}
-            <a href="/admin/signin" className="text-indigo-600 hover:text-indigo-500 font-medium">
+            Already have an account?{' '}
+            <a
+              href="/admin/signin"
+              className="text-indigo-600 hover:text-indigo-500 font-medium"
+            >
               Sign in
             </a>
           </p>

@@ -62,7 +62,6 @@ export default function SliderReviw() {
       <div className="px-[1%] mb-14">
         <Swiper
           modules={[Navigation]}
-          onSwiper={(s) => (stepperSwiperRef.current = s)}
           slidesPerView={3}
           allowTouchMove={false}
           breakpoints={{
@@ -70,6 +69,7 @@ export default function SliderReviw() {
             768: { slidesPerView: 2 },
             1280: { slidesPerView: 3 },
           }}
+          onSwiper={(s) => (stepperSwiperRef.current = s)}
         >
           {STEPPER_IMAGES.map((img, i) => (
             <SwiperSlide key={i}>
@@ -83,12 +83,6 @@ export default function SliderReviw() {
       <div className="px-[2%]">
         <Swiper
           modules={[Navigation]}
-          onSwiper={(s) => {
-            cardSwiperRef.current = s;
-            setIsBeginning(s.isBeginning);
-            setIsEnd(s.isEnd);
-          }}
-          onSlideChange={handleSlideChange}
           slidesPerView={3}
           spaceBetween={40}
           breakpoints={{
@@ -96,6 +90,12 @@ export default function SliderReviw() {
             768: { slidesPerView: 2 },
             1280: { slidesPerView: 3 },
           }}
+          onSwiper={(s) => {
+            cardSwiperRef.current = s;
+            setIsBeginning(s.isBeginning);
+            setIsEnd(s.isEnd);
+          }}
+          onSlideChange={handleSlideChange}
         >
           {steps.map((step, i) => (
             <SwiperSlide key={i}>
@@ -119,19 +119,19 @@ export default function SliderReviw() {
       {/* ───────── NAVIGATION ───────── */}
       <div className="flex justify-end gap-3 mt-12 px-[4%]">
         <button
-          onClick={() => cardSwiperRef.current?.slidePrev()}
           className={`prev-btn w-10 h-10 rounded-full border text-black flex items-center justify-center
             ${isBeginning ? '' : 'border-purple-600 text-white bg-purple-600'}
           `}
+          onClick={() => cardSwiperRef.current?.slidePrev()}
         >
           ‹
         </button>
 
         <button
-          onClick={() => cardSwiperRef.current?.slideNext()}
           className={`next-btn w-10 h-10 rounded-full flex items-center justify-center
             ${isEnd ? 'bg-gray-300 text-white' : 'bg-purple-600 text-white'}
           `}
+          onClick={() => cardSwiperRef.current?.slideNext()}
         >
           ›
         </button>

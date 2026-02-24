@@ -1,5 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
-import { CandidateService } from "@/services/candidates.service";
+import { useMutation } from '@tanstack/react-query';
+import { CandidateService } from '@/services/candidates.service';
 
 interface CandidateData {
   email?: string | null;
@@ -22,8 +22,10 @@ export const useCreateOrUpdateCandidate = () => {
       candidateData: CandidateData;
       email?: string | null;
     }): Promise<number | null> => {
-      return await CandidateService.createOrUpdateCandidate(candidateData, email);
+      return await CandidateService.createOrUpdateCandidate(
+        candidateData,
+        email
+      );
     },
   });
 };
-
