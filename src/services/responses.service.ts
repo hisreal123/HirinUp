@@ -166,7 +166,8 @@ const getAllEmailAddressesForInterview = async (interviewId: string) => {
     const { data, error } = await supabase
       .from("response")
       .select(`email`)
-      .eq("interview_id", interviewId);
+      .eq("interview_id", interviewId)
+      .eq("is_ended", false);
 
     return data || [];
   } catch (error) {
