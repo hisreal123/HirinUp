@@ -3,7 +3,7 @@
 import { Interview, Question } from '@/types/interview';
 import React, { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Plus, SaveIcon, TrashIcon } from 'lucide-react';
+import { Plus, SaveIcon, TrashIcon, Pencil, X } from 'lucide-react';
 import { useInterviewers } from '@/contexts/interviewers.context';
 import QuestionCard from '@/components/dashboard/interview/create-popup/questionCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,6 +15,7 @@ import { CardTitle } from '../../ui/card';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { ArrowLeft } from 'lucide-react';
 import {
   AlertDialog,
@@ -39,6 +40,9 @@ function EditInterview({ interview }: EditInterviewProps) {
   const [description, setDescription] = useState<string>(
     interview?.description || ''
   );
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditingObjective, setIsEditingObjective] = useState(false);
+  const [isEditingQuestions, setIsEditingQuestions] = useState(false);
   const [objective, setObjective] = useState<string>(
     interview?.objective || ''
   );
@@ -170,12 +174,22 @@ function EditInterview({ interview }: EditInterviewProps) {
           </div>
         </div>
         <div className="flex flex-row justify-between">
-          <p className="mt-3 mb-1 ml-2 font-medium">
-            Interview Description{' '}
-            <span className="text-xs ml-2 font-normal">
-              (Your respondents will see this.)
-            </span>
-          </p>
+          <div className="flex items-center gap-2 mt-3 mb-1 ml-2">
+            <p className="font-medium">
+              Interview Description{' '}
+              <span className="text-xs ml-2 font-normal">
+                (Your respondents will see this.)
+              </span>
+            </p>
+            <button
+              type="button"
+              title={isEditingDescription ? 'Cancel editing' : 'Edit description'}
+              className="text-gray-400 hover:text-indigo-600 transition-colors"
+              onClick={() => setIsEditingDescription((prev) => !prev)}
+            >
+              {isEditingDescription ? <X size={15} /> : <Pencil size={15} />}
+            </button>
+          </div>
           <div className="flex flex-row gap-3">
             <Button
               disabled={isClicked}
@@ -219,27 +233,45 @@ function EditInterview({ interview }: EditInterviewProps) {
             </AlertDialog>
           </div>
         </div>
-        <textarea
-          value={description}
-          className="h-fit mt-3 ml-2 py-2 border-2 rounded-md w-[75%] px-2 border-gray-400"
-          placeholder="Enter your interview description here."
-          rows={3}
-          onChange={(e) => {
-            setDescription(e.target.value);
-          }}
-          onBlur={(e) => {
-            setDescription(e.target.value.trim());
-          }}
-        />
-        <p className="mt-3 mb-1 ml-2 font-medium">Objective</p>
-        <textarea
-          value={objective}
-          className="h-fit mt-3 ml-2 py-2 border-2 rounded-md w-[75%] px-2 border-gray-400"
-          placeholder="Enter your interview objective here."
-          rows={3}
-          onChange={(e) => setObjective(e.target.value)}
-          onBlur={(e) => setObjective(e.target.value.trim())}
-        />
+        {isEditingDescription ? (
+          <div className="ml-2 w-[75%]">
+            <RichTextEditor
+              value={description}
+              placeholder="Enter your interview description here."
+              onChange={(html) => setDescription(html)}
+            />
+          </div>
+        ) : (
+          <div
+            className="ml-2 w-[75%] mt-3 px-3 py-2 text-sm border-2 border-gray-200 rounded-md min-h-[5rem] prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: description || '<span class="text-gray-400">No description set.</span>' }}
+          />
+        )}
+        <div className="flex items-center gap-2 mt-3 mb-1 ml-2">
+          <p className="font-medium">Objective</p>
+          <button
+            type="button"
+            title={isEditingObjective ? 'Cancel editing' : 'Edit objective'}
+            className="text-gray-400 hover:text-indigo-600 transition-colors"
+            onClick={() => setIsEditingObjective((prev) => !prev)}
+          >
+            {isEditingObjective ? <X size={15} /> : <Pencil size={15} />}
+          </button>
+        </div>
+        {isEditingObjective ? (
+          <textarea
+            value={objective}
+            className="h-fit mt-1 ml-2 py-2 border-2 rounded-md w-[75%] px-2 border-gray-400"
+            placeholder="Enter your interview objective here."
+            rows={3}
+            onChange={(e) => setObjective(e.target.value)}
+            onBlur={(e) => setObjective(e.target.value.trim())}
+          />
+        ) : (
+          <div className="ml-2 w-[75%] mt-1 px-3 py-2 text-sm border-2 border-gray-200 rounded-md min-h-[5rem] whitespace-pre-wrap">
+            {objective || <span className="text-gray-400">No objective set.</span>}
+          </div>
+        )}
         <div className="flex flex-row gap-3">
           <div>
             <p className="mt-3 mb-1 ml-2 font-medium">Interviewer</p>
@@ -357,33 +389,54 @@ function EditInterview({ interview }: EditInterviewProps) {
             />
           </div>
         </div>
-        <p className="mt-3 mb-1 ml-2 font-medium">Questions</p>
-        <ScrollArea className="flex ml-2 p-2 pr-4 mb-4 flex-col justify-center items-center w-[75%] max-h-[500px] bg-slate-100 rounded-md text-sm mt-3">
-          {questions.map((question, index) => (
-            <QuestionCard
-              key={question.id}
-              questionNumber={index + 1}
-              questionData={question}
-              onDelete={handleDeleteQuestion}
-              onQuestionChange={handleInputChange}
-            />
-          ))}
-          <div ref={endOfListRef} />
-          {questions.length < numQuestions ? (
-            <div
-              className="border-indigo-600 opacity-75 hover:opacity-100 w-fit text-center rounded-full mx-auto"
-              onClick={handleAddQuestion}
-            >
-              <Plus
-                size={45}
-                strokeWidth={2.2}
-                className="text-indigo-600 text-center cursor-pointer"
+        <div className="flex items-center gap-2 mt-3 mb-1 ml-2">
+          <p className="font-medium">Questions</p>
+          <button
+            type="button"
+            title={isEditingQuestions ? 'Cancel editing' : 'Edit questions'}
+            className="text-gray-400 hover:text-indigo-600 transition-colors"
+            onClick={() => setIsEditingQuestions((prev) => !prev)}
+          >
+            {isEditingQuestions ? <X size={15} /> : <Pencil size={15} />}
+          </button>
+        </div>
+        {isEditingQuestions ? (
+          <ScrollArea className="flex ml-2 p-2 pr-4 mb-4 flex-col justify-center items-center w-[75%] max-h-[500px] bg-slate-100 rounded-md text-sm mt-3">
+            {questions.map((question, index) => (
+              <QuestionCard
+                key={question.id}
+                questionNumber={index + 1}
+                questionData={question}
+                onDelete={handleDeleteQuestion}
+                onQuestionChange={handleInputChange}
               />
-            </div>
-          ) : (
-            <></>
-          )}
-        </ScrollArea>
+            ))}
+            <div ref={endOfListRef} />
+            {questions.length < numQuestions ? (
+              <div
+                className="border-indigo-600 opacity-75 hover:opacity-100 w-fit text-center rounded-full mx-auto"
+                onClick={handleAddQuestion}
+              >
+                <Plus
+                  size={45}
+                  strokeWidth={2.2}
+                  className="text-indigo-600 text-center cursor-pointer"
+                />
+              </div>
+            ) : (
+              <></>
+            )}
+          </ScrollArea>
+        ) : (
+          <div className="ml-2 w-[75%] mt-3 mb-4 bg-slate-100 rounded-md text-sm px-3 py-2">
+            {questions.map((question, index) => (
+              <div key={question.id} className="py-1.5 border-b border-gray-200 last:border-0">
+                <span className="font-medium text-gray-500 mr-2">{index + 1}.</span>
+                {question.question || <span className="text-gray-400 italic">No question set.</span>}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

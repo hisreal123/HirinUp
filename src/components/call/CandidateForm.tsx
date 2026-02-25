@@ -193,7 +193,7 @@ export const CandidateForm = memo(function CandidateForm({
         <h2 className="text-lg font-semibold mb-4 text-center">
           Candidate Information
         </h2>
-        <div className="grid grid-cols-2 gap-3 px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-3 gap-x-6 px-4">
           {!interview?.is_anonymous && (
             <div className="space-y-2">
               <Label htmlFor="email">

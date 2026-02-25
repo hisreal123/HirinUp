@@ -20,63 +20,59 @@ export const InterviewView = memo(function InterviewView({
 }: InterviewViewProps) {
   return (
     <>
-      <div className="flex flex-col">
-        <div className="flex flex-row p-2 grow">
-          <div className="border-x-2 border-grey w-[50%] my-auto min-h-[70%]">
-            <div className="flex flex-col justify-evenly">
-              <div
-                className={`text-[22px] w-[80%] md:text-[26px] mt-4 min-h-[250px] mx-auto px-6`}
-              >
-                {lastInterviewerResponse}
-              </div>
-              <div className="flex flex-col mx-auto justify-center items-center align-middle">
-                {interviewerImg ? (
-                  <Image
-                    src={interviewerImg}
-                    alt="Image of the interviewer"
-                    width={120}
-                    height={120}
-                    className={`object-cover object-center mx-auto my-auto ${
-                      activeTurn === 'agent'
-                        ? 'border-4 border-primary rounded-full'
-                        : ''
-                    }`}
-                  />
-                ) : (
-                  <div
-                    className={`w-[120px] h-[120px] rounded-full bg-gray-200 flex items-center justify-center mx-auto my-auto ${
-                      activeTurn === 'agent' ? 'border-4 border-primary' : ''
-                    }`}
-                  >
-                    <span className="text-gray-500 text-sm">No Image</span>
-                  </div>
-                )}
-                <div className="font-semibold">Interviewer</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-evenly w-[50%]">
-            <div
-              ref={lastUserResponseRef}
-              className={`text-[22px] w-[80%] md:text-[26px] mt-4 mx-auto h-[250px] px-6 overflow-y-auto`}
-            >
-              {lastUserResponse}
-            </div>
-            <div className="flex flex-col mx-auto justify-center items-center align-middle">
+      <div className="flex flex-row p-2">
+        {/* Interviewer column */}
+        <div className="border-x-2 border-grey w-[50%] flex flex-col py-4 px-3">
+          {/* Avatar — top-left */}
+          <div className="flex flex-col items-start mb-3 flex-shrink-0">
+            {interviewerImg ? (
               <Image
-                src={`/user-icon.png`}
-                alt="Picture of the user"
-                width={120}
-                height={120}
-                className={`object-cover object-center mx-auto my-auto ${
-                  activeTurn === 'user'
-                    ? 'border-4 border-primary rounded-full'
-                    : ''
+                src={interviewerImg}
+                alt="Image of the interviewer"
+                width={70}
+                height={70}
+                className={`object-cover object-center rounded-full ${
+                  activeTurn === 'agent' ? 'border-4 border-primary' : ''
                 }`}
               />
-              <div className="font-semibold">You</div>
-            </div>
+            ) : (
+              <div
+                className={`w-[70px] h-[70px] rounded-full bg-gray-200 flex items-center justify-center ${
+                  activeTurn === 'agent' ? 'border-4 border-primary' : ''
+                }`}
+              >
+                <span className="text-gray-500 text-xs">No Image</span>
+              </div>
+            )}
+            <div className="font-semibold mt-1 text-sm">Interviewer</div>
+          </div>
+          {/* Scrollable response text */}
+          <div className="w-full max-h-[200px] overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed">
+            {lastInterviewerResponse}
+          </div>
+        </div>
+
+        {/* Candidate column */}
+        <div className="w-[50%] flex flex-col py-4 px-3">
+          {/* Avatar — top-right */}
+          <div className="flex flex-col items-end mb-3 flex-shrink-0">
+            <Image
+              src={`/user-icon.png`}
+              alt="Picture of the user"
+              width={70}
+              height={70}
+              className={`object-cover object-center rounded-full ${
+                activeTurn === 'user' ? 'border-4 border-primary' : ''
+              }`}
+            />
+            <div className="font-semibold mt-1 text-sm">You</div>
+          </div>
+          {/* Scrollable response text */}
+          <div
+            ref={lastUserResponseRef}
+            className="w-full max-h-[200px] overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed"
+          >
+            {lastUserResponse}
           </div>
         </div>
       </div>

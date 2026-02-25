@@ -183,10 +183,13 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
               <span className="font-medium">{interviewer?.name}</span>
             </p>
           </div>
-          <p className="my-3 ml-2 text-sm">
-            Interview Description:{' '}
-            <span className="font-medium">{interview?.description}</span>
-          </p>
+          <div className="my-3 ml-2 text-sm">
+            <p className="font-medium mb-1">Interview Description:</p>
+            <div
+              className="prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: interview?.description || '' }}
+            />
+          </div>
           <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-4 rounded-2xl bg-slate-50 shadow-md">
             <ScrollArea className="h-[250px]">
               <DataTable data={tableData} interviewId={interview?.id || ''} />

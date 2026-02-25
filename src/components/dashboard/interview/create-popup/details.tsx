@@ -6,7 +6,6 @@ import { InterviewBase, Question } from '@/types/interview';
 import { ChevronRight, ChevronLeft, Info } from 'lucide-react';
 import Image from 'next/image';
 import { CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import FileUpload from '../fileUpload';
@@ -41,7 +40,6 @@ function DetailsPopup({
   const [isClicked, setIsClicked] = useState(false);
   const [openInterviewerDetails, setOpenInterviewerDetails] = useState(false);
   const [interviewerDetails, setInterviewerDetails] = useState<Interviewer>();
-
   const [name, setName] = useState(interviewData.name);
   const [selectedInterviewer, setSelectedInterviewer] = useState(
     interviewData.interviewer_id
@@ -77,9 +75,10 @@ function DetailsPopup({
     setIsClicked(true);
 
     try {
+      const plainObjective = objective.replace(/<[^>]*>/g, '').trim();
       const data = {
         name: name.trim(),
-        objective: objective.trim(),
+        objective: plainObjective,
         number: Number(numQuestions),
         context: uploadedDocumentContext,
       };
@@ -90,8 +89,8 @@ function DetailsPopup({
       if (response.error) {
         setLoading(false);
         setIsClicked(false);
-        
-return;
+
+        return;
       }
 
       // Check if response has the expected data
@@ -101,8 +100,8 @@ return;
         });
         setLoading(false);
         setIsClicked(false);
-        
-return;
+
+        return;
       }
 
       const generatedQuestionsResponse = JSON.parse(response.response);
@@ -113,8 +112,8 @@ return;
         });
         setLoading(false);
         setIsClicked(false);
-        
-return;
+
+        return;
       }
 
       const questionsArray = generatedQuestionsResponse.questions;
@@ -161,7 +160,7 @@ return;
     const updatedInterviewData = {
       ...interviewData,
       name: name.trim(),
-      objective: objective.trim(),
+      objective: objective.replace(/<[^>]*>/g, '').trim(),
       questions: [{ id: uuidv4(), question: '', follow_up_count: 1 }],
       interviewer_id: selectedInterviewer,
       question_count: Number(numQuestions),
@@ -186,7 +185,7 @@ return;
 
   return (
     <>
-      <div className="text-center w-[38rem]">
+      <div className="text-center w-[50rem]">
         <h1 className="text-xl font-semibold">Create an Interview</h1>
         <div className="flex flex-col justify-center items-start mt-4 ml-10 mr-8">
           <div className="flex flex-row justify-center items-center">
@@ -267,10 +266,11 @@ return;
             )}
           </div>
           <h3 className="text-sm font-medium">Objective:</h3>
-          <Textarea
-            value={objective}
-            className="h-24 mt-2 border-2 border-gray-500 w-[33.2rem]"
+          <textarea
+            className="border-2 border-gray-500 rounded-md mt-2 w-full px-3 py-2 text-sm focus:outline-none resize-none"
+            rows={4}
             placeholder="e.g. Find best candidates based on their technical skills and previous projects."
+            value={objective}
             onChange={(e) => setObjective(e.target.value)}
             onBlur={(e) => setObjective(e.target.value.trim())}
           />
@@ -357,7 +357,7 @@ return;
             <Button
               disabled={
                 (name &&
-                objective &&
+                objective.replace(/<[^>]*>/g, '').trim() &&
                 numQuestions &&
                 duration &&
                 selectedInterviewer != BigInt(0)
@@ -375,7 +375,7 @@ return;
             <Button
               disabled={
                 (name &&
-                objective &&
+                objective.replace(/<[^>]*>/g, '').trim() &&
                 numQuestions &&
                 duration &&
                 selectedInterviewer != BigInt(0)

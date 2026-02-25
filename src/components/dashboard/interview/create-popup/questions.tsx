@@ -7,6 +7,7 @@ import { useInterviews } from '@/contexts/interviews.context';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import QuestionCard from '@/components/dashboard/interview/create-popup/questionCard';
 import { Button } from '@/components/ui/button';
+import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { Plus } from 'lucide-react';
 import { ChevronLeft } from 'lucide-react';
 
@@ -109,9 +110,9 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
   }, [questions.length]);
 
   return (
-    <div>
+    <div className="w-[50rem] overflow-hidden">
       <div
-        className={`text-center px-1 flex flex-col justify-top items-center w-[38rem] ${
+        className={`text-center px-1 flex flex-col justify-top items-center w-full ${
           interviewData.question_count > 1 ? 'h-[29rem]' : ''
         } `}
       >
@@ -165,24 +166,17 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
           Note: Interviewees will see this description.
         </span>
       </p>
-      <textarea
+      <RichTextEditor
         value={description}
-        className="h-fit mt-3 mx-2 py-2 border-2 rounded-md px-2 w-full border-gray-400"
         placeholder="Enter your interview description."
-        rows={3}
-        onChange={(e) => {
-          setDescription(e.target.value);
-        }}
-        onBlur={(e) => {
-          setDescription(e.target.value.trim());
-        }}
+        onChange={(html) => setDescription(html)}
       />
       <div className="flex flex-row justify-end items-end w-full">
         <Button
           disabled={
             isClicked ||
             questions.length < interviewData.question_count ||
-            description.trim() === '' ||
+            description.replace(/<[^>]*>/g, '').trim() === '' ||
             questions.some((question) => question.question.trim() === '')
           }
           className="bg-indigo-600 hover:bg-indigo-800 mr-5 mt-2"
