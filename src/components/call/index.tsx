@@ -36,7 +36,6 @@ import {
 } from './tabSwitchPrevention';
 import { useSessionSecurity } from '@/hooks/useSessionSecurity';
 import { SessionBlocked } from './SessionBlocked';
-// import { InterviewerService } from "@/services/interviewers.service"; // replaced with encrypted API call
 import { ResponseService } from '@/services/responses.service';
 import { CandidateService } from '@/services/candidates.service';
 import { setWebClientInstance } from '@/hooks/useAudioDetection';
@@ -50,12 +49,11 @@ import { verifyTurnstile } from '@/actions/verify-turnstile';
 const webClient = new RetellWebClient();
 setWebClientInstance(webClient);
 
-// Helper function to format seconds to MM:SS — defined outside component to avoid recreation on every render
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  
-return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
 // First call duration (in milliseconds) - auto-ends after this time
@@ -133,7 +131,9 @@ function Call({
 
   // Fetch previous candidate emails via encrypted API (replaces direct Supabase call)
   useEffect(() => {
-    if (!interview?.id) {return;}
+    if (!interview?.id) {
+      return;
+    }
     encryptedApiCall<Array<{ email: string }>>('/api/get-emails', {
       interview_id: interview.id,
     })
@@ -259,8 +259,6 @@ function Call({
   const handleTriggerSilenceDetection = useCallback(
     (fn: (skipMessage?: boolean) => void) => {
       triggerSilenceDetectionRef.current = fn;
-      // If we were waiting for InterviewStage to mount before showing the
-      // verification modal (e.g. session check was still in progress), fire now.
       if (pendingModalTriggerRef.current) {
         pendingModalTriggerRef.current = false;
         fn(true);
@@ -510,8 +508,8 @@ function Call({
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
-return () => {
+
+    return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
@@ -531,7 +529,9 @@ return () => {
 
         // Still request mic permission for second call, but don't start audio detection
         const requestMicPermission = async () => {
-          if (hasRequestedPermission.current) {return;}
+          if (hasRequestedPermission.current) {
+            return;
+          }
           hasRequestedPermission.current = true;
 
           try {
@@ -746,14 +746,14 @@ return () => {
         setLoading(false);
         // Reset the turnstile token so user needs to complete again
         candidateForm.setTurnstileToken('');
-        
-return;
+
+        return;
       }
     } else {
       toast.error('Please complete the verification challenge.');
       setLoading(false);
-      
-return;
+
+      return;
     }
 
     const data = {
@@ -767,16 +767,17 @@ return;
     const oldUserEmails: string[] = (emailsData || []).map(
       (item) => item.email
     );
+    const hasAllowlist =
+      Array.isArray(interview?.respondents) && interview.respondents.length > 0;
     const OldUser =
       oldUserEmails.includes(candidateForm.email) ||
-      (interview?.respondents &&
-        !interview?.respondents.includes(candidateForm.email));
+      (hasAllowlist && !interview!.respondents.includes(candidateForm.email));
 
     if (OldUser) {
       setIsOldUser(true);
       setLoading(false);
-      
-return;
+
+      return;
     }
 
     try {
@@ -836,8 +837,8 @@ return;
         console.error('[Call] No call_id received from Retell');
         toast.error('Failed to register call. Please try again.');
         setLoading(false);
-        
-return;
+
+        return;
       }
 
       const retellCallId = callResponse.call_id;
@@ -896,8 +897,6 @@ return;
 
       // Now start the call (after call_id is saved)
       if (callResponse?.access_token) {
-        setLoading(false);
-
         await webClient
           .startCall({
             accessToken: callResponse.access_token,
@@ -908,6 +907,7 @@ return;
             toast.error(
               'Failed to start call. The interview link has been marked as used.'
             );
+            setLoading(false);
             throw err;
           });
         setIsCalling(true);
@@ -1141,10 +1141,10 @@ return;
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex justify-center items-center min-h-screen h-fit">
       {isStarted && <TabSwitchWarning />}
       <div className="bg-floralwhite rounded-md md:w-[80%] w-[90%]">
-        <Card className="h-[88vh] rounded-lg text-xl font-bold transition-all md:block dark:border-white">
+        <Card className="h-fit min-h-[88vh] rounded-lg text-xl font-bold transition-all md:block dark:border-white">
           <div>
             {isStarted && (
               <div className="m-4">

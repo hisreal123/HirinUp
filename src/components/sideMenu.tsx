@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { PlayCircleIcon, SpeechIcon, Users, LucideIcon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { OrganizationSwitcher } from '@clerk/nextjs';
@@ -43,12 +42,12 @@ function SideMenu() {
   return (
     <div
       className={`z-[10] bg-slate-100 fixed top-[64px] left-0 h-full transition-all duration-300 ${
-        isCollapsed ? 'w-[80px] p-2' : 'w-[250px] p-6'
+        isCollapsed ? 'w-[80px] p-2' : 'w-[80px] p-2 xl:w-[250px] xl:p-6'
       }`}
     >
       <div className="flex flex-col space-y-5 gap-4">
         {!isCollapsed && (
-          <div className="mb-2 border border-primary/50 rounded-md px-2 py-1 shadow-sm">
+          <div className="hidden xl:block mb-2 border border-primary/50 rounded-md px-2 py-1 shadow-sm">
             <OrganizationSwitcher
               afterCreateOrganizationUrl="/dashboard"
               hidePersonal={true}
@@ -75,14 +74,14 @@ function SideMenu() {
                 } text-primary ${
                   isCollapsed
                     ? 'justify-center px-2'
-                    : 'justify-start gap-2 px-4'
+                    : 'justify-center px-2 xl:justify-start xl:gap-2 xl:px-4'
                 }`}
-                title={isCollapsed ? item.label : undefined}
+                title={item.label}
                 onClick={() => router.push(item.path)}
               >
                 <Icon className="font-thin text-primary w-5 h-5" />
                 {!isCollapsed && (
-                  <span className="block font-bold gradient-text">
+                  <span className="hidden xl:block font-bold gradient-text">
                     {item.label}
                   </span>
                 )}

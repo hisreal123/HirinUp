@@ -57,7 +57,7 @@ export function WelcomeSlide({
       : 'animate-in fade-in duration-300';
 
   return (
-    <div className="relative w-[80%] mx-auto mt-2 h-full p-2 m-2 bg-slate-50 rounded-md shadow-md">
+    <div className="relative w-[90%] mx-auto mt-2 h-fit p-2 m-2 bg-slate-50 rounded-md shadow-md">
       <div>
         {interview?.logo_url && (
           <div className="p-1 flex justify-center">
@@ -71,12 +71,14 @@ export function WelcomeSlide({
           </div>
         )}
 
-        <div className="p-2 font-normal overflow-hidden relative h-fit text-sm w-[80%] mx-auto mb-4 whitespace-pre-line min-h-[120px]">
+        <div className="p-2 font-normal overflow-hidden relative h-fit text-sm w-[90%] mx-auto mb-4 min-h-[120px]">
           {/* Slide 1: Description */}
           {step === 'description' && (
-            <div key="description" className={`mb-5 ${descriptionAnimation}`}>
-              {interview?.description}
-            </div>
+            <div
+              key="description"
+              className={`mb-5 prose prose-sm max-w-none ${descriptionAnimation}`}
+              dangerouslySetInnerHTML={{ __html: interview?.description || '' }}
+            />
           )}
 
           {/* Slide 2: Interview Guidelines */}

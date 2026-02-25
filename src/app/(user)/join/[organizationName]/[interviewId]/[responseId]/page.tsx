@@ -223,7 +223,9 @@ function InterviewInterface() {
     let cancelled = false;
 
     const validateAll = async () => {
-      if (cancelled) {return;}
+      if (cancelled) {
+        return;
+      }
       setIsValidating(true);
       setValidationError(null);
 
@@ -233,7 +235,9 @@ function InterviewInterface() {
           token: responseId,
         });
 
-        if (cancelled) {return;}
+        if (cancelled) {
+          return;
+        }
 
         if (!response) {
           console.error('Response not found for token:', responseId);
@@ -241,7 +245,7 @@ function InterviewInterface() {
           setResponseNotFound(true);
           setIsValidating(false);
 
-return;
+          return;
         }
 
         // Compare with actual interview.id (not the interviewId from URL)
@@ -255,7 +259,7 @@ return;
           setResponseNotFound(true);
           setIsValidating(false);
 
-return;
+          return;
         }
 
         // Double-check expiration (in case early check didn't catch it)
@@ -263,7 +267,7 @@ return;
           setIsExpired(true);
           setIsValidating(false);
 
-return;
+          return;
         }
 
         // Step 2: Validate Organization exists and matches URL
@@ -273,7 +277,7 @@ return;
           setOrganizationNotFound(true);
           setIsValidating(false);
 
-return;
+          return;
         }
 
         // Retry up to 2 times for transient network/server errors.
@@ -302,7 +306,9 @@ return;
           }
         }
 
-        if (cancelled) {return;}
+        if (cancelled) {
+          return;
+        }
 
         if (!organization) {
           const isNotFound =
@@ -317,7 +323,7 @@ return;
           setOrganizationNotFound(true);
           setIsValidating(false);
 
-return;
+          return;
         }
 
         // Validate organization name matches URL (normalize for comparison)
@@ -340,16 +346,18 @@ return;
           setOrganizationNotFound(true);
           setIsValidating(false);
 
-return;
+          return;
         }
 
         if (!cancelled) {
           setIsValidating(false);
         }
       } catch (error) {
-        if (cancelled) {return;}
+        if (cancelled) {
+          return;
+        }
         console.error('Error during validation:', error);
-        setValidationError('Validation error occurred');
+        setValidationError('Validation error occurred, Kindly Refresh');
         setIsValidating(false);
         setResponseNotFound(true);
       }
@@ -426,7 +434,7 @@ return;
             title="Page Not Found"
             description={
               validationError ||
-              "The link you're trying to access is invalid or has expired. <br/> Please check the URL and try again."
+              'The link you\'re trying to access is invalid or has expired. <br className="text-center"/> Kindly Check the URL, Refresh and try again.'
             }
             image="/invalid-url.png"
           />
@@ -448,7 +456,7 @@ return;
 
   return (
     <div>
-      {isDevToolsOpen && <DevToolsBlocker />}
+      {/* {isDevToolsOpen && <DevToolsBlocker />} */}
       <div className="hidden md:block p-8 mx-auto form-container">
         {!interview ? (
           interviewNotFound ? (

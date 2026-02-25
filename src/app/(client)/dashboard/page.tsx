@@ -127,7 +127,7 @@ function Interviews() {
           </div>
         </div>
         <div
-          className={`relative mt-1 ${viewMode === 'grid' ? 'grid grid-cols-4 gap-4' : 'flex flex-col gap-4'}`}
+          className={`relative mt-1 ${viewMode === 'grid' ? 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'flex flex-col gap-4'}`}
         >
           {currentPlan == 'free_trial_over' ? (
             <Card
