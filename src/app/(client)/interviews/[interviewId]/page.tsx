@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useOrganization } from '@clerk/nextjs';
 import { useInterviews } from '@/contexts/interviews.context';
 import { Share2, Filter, Pencil, UserIcon, Eye, Link2 } from 'lucide-react';
@@ -27,6 +27,7 @@ import SharePopup from '@/components/dashboard/interview/sharePopup';
 import GenerateLinkModal from '@/components/dashboard/interview/generateLinkModal';
 import { useCreateResponse } from '@/hooks/useCreateResponse';
 import { useGetAllResponses } from '@/hooks/useGetAllResponses';
+import { useGetInterviewById } from '@/hooks/useGetInterviewById';
 import {
   Tooltip,
   TooltipTrigger,
@@ -59,7 +60,7 @@ function InterviewHome() {
   const [interview, setInterview] = useState<Interview>();
   const [responses, setResponses] = useState<Response[]>();
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
-  const { getInterviewById } = useInterviews();
+  useInterviews();
   const [isSharePopupOpen, setIsSharePopupOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>('');
   const [isGenerateLinkModalOpen, setIsGenerateLinkModalOpen] = useState(false);
@@ -141,57 +142,33 @@ function InterviewHome() {
     }
   };
 
+  const {
+    data: interviewData,
+    isLoading: interviewLoading,
+  } = useGetInterviewById(interviewId);
+
   useEffect(() => {
-    if (!interviewId) {
-      return;
-    }
+    if (!interviewData) { return; }
+    setInterview(interviewData);
+    setIsActive(interviewData.is_active);
 
-    const fetchInterview = async () => {
-      try {
-        const response = await getInterviewById(interviewId);
-        setInterview(response);
-        setIsActive(response.is_active);
-        setIsViewed(response.is_viewed);
-        setLoading(true);
-
-        // Fetch organization once — extract both slug and plan
-        if (response.organization_id) {
-          const orgData = await encryptedApiCall('/api/get-organization', {
-            id: response.organization_id,
-          });
+    if (interviewData.organization_id) {
+      encryptedApiCall('/api/get-organization', { id: interviewData.organization_id })
+        .then((orgData: any) => {
           if (orgData?.name) {
-            const slug = orgData.name
-              .toLowerCase()
-              .trim()
-              .replace(/\s+/g, '-')
-              .replace(/[^a-z0-9-]/g, '');
+            const slug = orgData.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
             setOrganizationNameSlug(slug);
           }
-          if (orgData?.plan) {
-            setCurrentPlan(orgData.plan);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInterview();
-    // Only refetch when interviewId changes, not on other state changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [interviewId]);
-
-  // Responses are now fetched via TanStack Query hook
-  // Update loading state based on responses query
-  useEffect(() => {
-    if (responsesLoading) {
-      setLoading(true);
-    } else {
-      setLoading(false);
+          if (orgData?.plan) { setCurrentPlan(orgData.plan); }
+        })
+        .catch(console.error);
     }
-  }, [responsesLoading]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interviewData]);
+
+  useEffect(() => {
+    setLoading(interviewLoading || responsesLoading);
+  }, [interviewLoading, responsesLoading]);
 
   useEffect(() => {
     if (!interviewId) {

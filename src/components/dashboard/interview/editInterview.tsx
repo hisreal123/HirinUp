@@ -4,6 +4,7 @@ import { Interview, Question } from '@/types/interview';
 import React, { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Plus, SaveIcon, TrashIcon, Pencil, X } from 'lucide-react';
+import MiniLoader from '@/components/loaders/mini-loader/miniLoader';
 import { useInterviewers } from '@/contexts/interviewers.context';
 import QuestionCard from '@/components/dashboard/interview/create-popup/questionCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useInterviews } from '@/contexts/interviews.context';
 import { InterviewService } from '@/services/interviews.service';
+import { useQueryClient } from '@tanstack/react-query';
 import { CardTitle } from '../../ui/card';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -18,17 +20,7 @@ import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { normalizeDescriptionToHtml } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import DeleteInterviewModal from '@/components/dashboard/interview/deleteInterviewModal';
 
 type EditInterviewProps = {
   interview: Interview | undefined;
@@ -37,6 +29,7 @@ type EditInterviewProps = {
 function EditInterview({ interview }: EditInterviewProps) {
   const { interviewers } = useInterviewers();
   const { fetchInterviews } = useInterviews();
+  const queryClient = useQueryClient();
 
   const [description, setDescription] = useState<string>(
     normalizeDescriptionToHtml(interview?.description || '')
@@ -50,7 +43,7 @@ function EditInterview({ interview }: EditInterviewProps) {
   const [numQuestions, setNumQuestions] = useState<number>(
     interview?.question_count || 1
   );
-  const [duration, setDuration] = useState<Number>(
+  const [duration, setDuration] = useState<number>(
     Number(interview?.time_duration)
   );
   const [questions, setQuestions] = useState<Question[]>(
@@ -64,6 +57,7 @@ function EditInterview({ interview }: EditInterviewProps) {
   );
 
   const [isClicked, setIsClicked] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const endOfListRef = useRef<HTMLDivElement>(null);
   const prevQuestionLengthRef = useRef(questions.length);
@@ -103,15 +97,12 @@ function EditInterview({ interview }: EditInterviewProps) {
   };
 
   const onSave = async () => {
-    const questionCount =
-      questions.length < numQuestions ? questions.length : numQuestions;
-
     const interviewData = {
       objective: objective,
       questions: questions,
       interviewer_id: Number(selectedInterviewer),
-      question_count: questionCount,
-      time_duration: Number(duration),
+      question_count: numQuestions,
+      time_duration: String(duration),
       description: description,
       is_anonymous: isAnonymous,
     };
@@ -120,37 +111,56 @@ function EditInterview({ interview }: EditInterviewProps) {
       if (!interview) {
         return;
       }
-      const response = await InterviewService.updateInterview(
-        interviewData,
-        interview?.id
-      );
-      setIsClicked(false);
+      const res = await fetch('/api/update-interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: interview.id, payload: interviewData }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data?.error || 'Failed to update the interview.', {
+          position: 'bottom-right',
+          duration: 3000,
+        });
+
+        return;
+      }
+
       fetchInterviews();
+      queryClient.invalidateQueries({ queryKey: ['interview', interview.id] });
       toast.success('Interview updated successfully.', {
         position: 'bottom-right',
         duration: 3000,
       });
       router.push(`/interviews/${interview?.id}`);
     } catch (error) {
-      console.error('Error creating interview:', error);
+      console.error('Error updating interview:', error);
+    } finally {
+      setIsClicked(false);
     }
   };
 
   const onDeleteInterviewClick = async () => {
-    if (!interview) {
-      return;
-    }
+    if (!interview) { return; }
 
-    try {
-      await InterviewService.deleteInterview(interview.id);
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error deleting interview:', error);
-      toast.error('Failed to delete the interview.', {
+    const res = await fetch('/api/delete-interview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: interview.id }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      toast.error(data?.error || 'Failed to delete the interview.', {
         position: 'bottom-right',
         duration: 3000,
       });
+      throw new Error(data?.error || 'Failed to delete interview');
     }
+
+    router.push('/dashboard');
+    fetchInterviews();
   };
 
   useEffect(() => {
@@ -194,44 +204,28 @@ function EditInterview({ interview }: EditInterviewProps) {
           <div className="flex flex-row gap-3">
             <Button
               disabled={isClicked}
-              className="bg-indigo-600 hover:bg-indigo-800 mt-2"
+              className="bg-indigo-600 hover:bg-indigo-800 mt-2 min-w-[90px]"
               onClick={() => {
                 setIsClicked(true);
                 onSave();
               }}
             >
-              Save <SaveIcon size={16} className="ml-2" />
+              {isClicked ? <MiniLoader /> : <><span>Save</span><SaveIcon size={16} className="ml-2" /></>}
             </Button>
-            <AlertDialog>
-              <AlertDialogTrigger>
-                <Button
-                  disabled={isClicked}
-                  className="bg-red-500 hover:bg-red-600 mr-5 mt-2 p-2"
-                >
-                  <TrashIcon size={16} className="" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    this interview.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-indigo-600 hover:bg-indigo-800"
-                    onClick={async () => {
-                      await onDeleteInterviewClick();
-                    }}
-                  >
-                    Continue
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Button
+              disabled={isClicked}
+              className="bg-red-500 hover:bg-red-600 mr-5 mt-2 p-2"
+              onClick={() => setDeleteModalOpen(true)}
+            >
+              <TrashIcon size={16} />
+            </Button>
+
+            <DeleteInterviewModal
+              open={deleteModalOpen}
+              interviewName={interview?.name || ''}
+              onClose={() => setDeleteModalOpen(false)}
+              onConfirm={onDeleteInterviewClick}
+            />
           </div>
         </div>
         {isEditingDescription ? (
@@ -349,7 +343,7 @@ function EditInterview({ interview }: EditInterviewProps) {
               type="number"
               step="1"
               max="20"
-              min={questions.length.toString()}
+              min="1"
               className="border-2 text-center focus:outline-none  bg-slate-100 rounded-md border-gray-500 w-14 px-2 py-0.5 ml-3"
               value={numQuestions}
               onChange={(e) => {
@@ -361,7 +355,20 @@ function EditInterview({ interview }: EditInterviewProps) {
                   if (Number(value) > 20) {
                     value = '20';
                   }
-                  setNumQuestions(Number(value));
+                  const newCount = Number(value);
+                  setNumQuestions(newCount);
+                  if (newCount > questions.length) {
+                    setQuestions((prev) => [
+                      ...prev,
+                      ...Array.from({ length: newCount - prev.length }, () => ({
+                        id: uuidv4(),
+                        question: '',
+                        follow_up_count: 1,
+                      })),
+                    ]);
+                  } else if (newCount < questions.length) {
+                    setQuestions((prev) => prev.slice(0, newCount));
+                  }
                 }
               }}
             />

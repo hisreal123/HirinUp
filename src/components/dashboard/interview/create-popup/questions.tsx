@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { Plus } from 'lucide-react';
 import { ChevronLeft } from 'lucide-react';
+import MiniLoader from '@/components/loaders/mini-loader/miniLoader';
 import { normalizeDescriptionToHtml } from '@/lib/utils';
 
 interface Props {
@@ -180,13 +181,13 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
             description.replace(/<[^>]*>/g, '').trim() === '' ||
             questions.some((question) => question.question.trim() === '')
           }
-          className="bg-indigo-600 hover:bg-indigo-800 mr-5 mt-2"
+          className="bg-indigo-600 hover:bg-indigo-800 mr-5 mt-2 min-w-[80px]"
           onClick={() => {
             setIsClicked(true);
             onSave();
           }}
         >
-          Save
+          {isClicked ? <MiniLoader /> : 'Create'}
         </Button>
       </div>
     </div>
