@@ -24,6 +24,7 @@ function GenerateLinkModal({
 }: GenerateLinkModalProps) {
   const [generatedLink, setGeneratedLink] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [isTwoFlow, setIsTwoFlow] = useState(false);
   const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
   const isGeneratingRef = useRef(false);
 
@@ -37,7 +38,7 @@ function GenerateLinkModal({
 
     isGeneratingRef.current = true;
     createResponseMutation.mutate(
-      { interview_id: interviewId },
+      { interview_id: interviewId, is_two_flow: isTwoFlow },
       {
         onSuccess: (data) => {
           isGeneratingRef.current = false;
@@ -157,6 +158,19 @@ function GenerateLinkModal({
             </p>
           </div>
         )}
+
+        <label className={`flex items-center gap-2 mt-4 select-none ${createResponseMutation.isPending ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+          <input
+            type="checkbox"
+            checked={isTwoFlow}
+            onChange={(e) => setIsTwoFlow(e.target.checked)}
+            disabled={createResponseMutation.isPending}
+            className="w-4 h-4 accent-indigo-600 disabled:cursor-not-allowed"
+          />
+          <span className="text-sm text-gray-700">
+            Enable two-call verification flow
+          </span>
+        </label>
 
         <div className="flex gap-3 mt-6">
           <Button

@@ -15,6 +15,7 @@ export interface Response {
   tab_switch_count: number;
   turnstile_verified: boolean;
   call_flow_state: CallFlowState;
+  is_two_flow: boolean;
 }
 
 export interface CallFlowState {

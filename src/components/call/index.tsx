@@ -72,6 +72,7 @@ type InterviewProps = {
   interview: Interview;
   responseToken?: string;
   initialCallPhase?: CallPhase;
+  isTwoFlow?: boolean;
 };
 
 type registerCallResponseType = {
@@ -124,6 +125,7 @@ function Call({
   interview,
   responseToken,
   initialCallPhase = 'first_call',
+  isTwoFlow = false,
 }: InterviewProps) {
   const { createResponse } = useResponses();
   const createResponseMutation = useEncryptedCreateResponse();
@@ -188,9 +190,14 @@ function Call({
   const [isTimerPaused, setIsTimerPaused] = useState<boolean>(false);
   const [isPreparingCall, setIsPreparingCall] = useState<boolean>(false);
 
-  // Two-call system: tracks which phase we're in
-  const [callPhase, setCallPhase] = useState<CallPhase>(initialCallPhase);
-  const callPhaseRef = useRef<CallPhase>(initialCallPhase);
+  // Two-call system: tracks which phase we're in.
+  // Single-call flow (isTwoFlow=false) starts directly in second_call phase
+  // so the first-call timer and verification modal are never triggered.
+  const effectiveInitialPhase: CallPhase = isTwoFlow
+    ? initialCallPhase
+    : 'second_call';
+  const [callPhase, setCallPhase] = useState<CallPhase>(effectiveInitialPhase);
+  const callPhaseRef = useRef<CallPhase>(effectiveInitialPhase);
 
   // Refs to track pause states for the timer interval
   const isTimerPausedRef = useRef<boolean>(false);
@@ -912,6 +919,19 @@ function Call({
           });
         setIsCalling(true);
         setIsStarted(true);
+
+        // Single-call flow: mark as started so page refresh can resume in second_call phase
+        if (!isTwoFlow && responseToken) {
+          const startedTs = new Date().toISOString();
+          setLocalFlowState(responseToken, { second_call_started: startedTs });
+          const localState = getLocalFlowState(responseToken);
+          ResponseService.updateResponseByToken(
+            { call_flow_state: localState },
+            responseToken
+          ).catch((err) =>
+            console.error('[Single Call] DB update FAILED:', err)
+          );
+        }
       } else {
         console.error('[Call] No access token received from Retell');
         toast.error(

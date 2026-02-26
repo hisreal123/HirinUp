@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       call_id,
       candidate_id,
       turnstile_token,
+      is_two_flow,
     } = body;
 
     if (!interview_id) {
@@ -112,6 +113,7 @@ export async function POST(req: Request) {
         is_analysed: false,
         is_viewed: false,
         turnstile_verified: turnstileVerified,
+        is_two_flow: is_two_flow === true,
       })
       .select('id, token')
       .single();
