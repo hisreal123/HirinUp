@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { Response } from '@/types/response';
 import { toast } from 'sonner';
+import { useUpdateResponseByToken } from '@/hooks/useUpdateResponseByToken';
 import {
   Select,
   SelectContent,
@@ -52,12 +53,24 @@ function LinksTable({
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
   const [globalFilter, setGlobalFilter] = useState('');
   const [deleteToken, setDeleteToken] = useState<string | null>(null);
+  const updateResponseMutation = useUpdateResponseByToken();
 
   const copyToClipboard = (link: string) => {
     navigator.clipboard.writeText(link);
     setCopiedLink(link);
     toast.success('Link copied to clipboard');
     setTimeout(() => setCopiedLink(null), 2000);
+  };
+
+  const handleToggleTwoFlow = (token: string, newValue: boolean) => {
+    updateResponseMutation.mutate(
+      { payload: { is_two_flow: newValue }, token },
+      {
+        onError: () => {
+          toast.error('Failed to update call type. Please try again.');
+        },
+      }
+    );
   };
 
   const columns = getLinksColumns({
@@ -68,6 +81,7 @@ function LinksTable({
     setDeleteToken,
     onView: (callId) =>
       router.push(`/interviews/${interviewId}?call=${callId}`),
+    onToggleTwoFlow: handleToggleTwoFlow,
   });
 
   const table = useReactTable({

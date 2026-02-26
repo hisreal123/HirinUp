@@ -71,14 +71,14 @@ export function isLightColor(color: string) {
 // If the description is pure TipTap HTML (no Markdown patterns), it is
 // returned unchanged.
 export function normalizeDescriptionToHtml(description: string): string {
-  if (!description) return '';
+  if (!description) {return '';}
 
   // Detect Markdown patterns (multiline). If none are present and the content
   // already has list/structural HTML, it's TipTap output — return as-is.
   const hasMarkdown = /^[ \t]*[*\-] |^#+[ \t]|^>[ \t]|^\d+\.[ \t]|^(-{3,}|\*{3,}|_{3,})$/m.test(
     description
   );
-  if (!hasMarkdown && /<ul|<ol|<li/i.test(description)) return description;
+  if (!hasMarkdown && /<ul|<ol|<li/i.test(description)) {return description;}
 
   // Strip HTML tags to plain text so we can re-parse as Markdown.
   // Preserve newlines from block-level closing tags.
@@ -96,7 +96,7 @@ export function normalizeDescriptionToHtml(description: string): string {
   let orderedItems: string[] = [];
 
   const flushBullets = () => {
-    if (bulletItems.length === 0) return;
+    if (bulletItems.length === 0) {return;}
     parts.push(
       '<ul>' +
         bulletItems.map((item) => `<li><p>${item}</p></li>`).join('') +
@@ -106,7 +106,7 @@ export function normalizeDescriptionToHtml(description: string): string {
   };
 
   const flushOrdered = () => {
-    if (orderedItems.length === 0) return;
+    if (orderedItems.length === 0) {return;}
     parts.push(
       '<ol>' +
         orderedItems.map((item) => `<li><p>${item}</p></li>`).join('') +
