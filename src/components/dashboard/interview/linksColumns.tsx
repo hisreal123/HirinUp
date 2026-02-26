@@ -1,12 +1,93 @@
 'use client';
 
+import { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ArrowUpDown, Eye, Copy, Check, Trash2 } from 'lucide-react';
 import { Response } from '@/types/response';
 import { formatDateReadable } from '@/lib/utils';
 
 const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
+
+interface CallTypeCellProps {
+  isTwoFlow: boolean;
+  token: string;
+  isUsed: boolean;
+  onToggleTwoFlow: (token: string, newValue: boolean) => void;
+}
+
+function CallTypeCell({ isTwoFlow, token, isUsed, onToggleTwoFlow }: CallTypeCellProps) {
+  const [pendingValue, setPendingValue] = useState<boolean | null>(null);
+
+  const handleSwitchChange = (checked: boolean) => {
+    setPendingValue(checked);
+  };
+
+  const handleConfirm = () => {
+    if (pendingValue !== null) {
+      onToggleTwoFlow(token, pendingValue);
+    }
+    setPendingValue(null);
+  };
+
+  const handleCancel = () => {
+    setPendingValue(null);
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        {isTwoFlow ? (
+          <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+            Two Call
+          </span>
+        ) : (
+          <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+            Single Call
+          </span>
+        )}
+        <Switch
+          checked={isTwoFlow}
+          disabled={isUsed}
+          className={isTwoFlow ? 'bg-indigo-600' : ''}
+          onCheckedChange={handleSwitchChange}
+        />
+      </div>
+
+      <AlertDialog open={pendingValue !== null} onOpenChange={(open) => { if (!open) {handleCancel();} }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change Call Type?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingValue
+                ? 'Switch to Two Call flow? Candidate will go through a test call before the main call.'
+                : 'Switch to Single Call flow? The candidate will go straight into the interview without a test call.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirm}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
 
 export interface LinksColumnOptions {
   interviewId: string;
@@ -15,6 +96,7 @@ export interface LinksColumnOptions {
   copyToClipboard: (link: string) => void;
   setDeleteToken: (token: string) => void;
   onView: (callId: string) => void;
+  onToggleTwoFlow: (token: string, newValue: boolean) => void;
 }
 
 export function getLinksColumns({
@@ -24,6 +106,7 @@ export function getLinksColumns({
   copyToClipboard,
   setDeleteToken,
   onView,
+  onToggleTwoFlow,
 }: LinksColumnOptions): ColumnDef<Response>[] {
   return [
     {
@@ -161,15 +244,16 @@ return <span className="text-sm text-yellow-600">In Progress</span>;
       ),
       cell: ({ row }) => {
         const isTwoFlow = row.getValue('is_two_flow') as boolean;
+        const token = (row.original as any).token as string;
+        const isUsed = !!row.original.call_id;
 
-        return isTwoFlow ? (
-          <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-            Two Call Flow
-          </span>
-        ) : (
-          <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
-            Single Call Flow
-          </span>
+        return (
+          <CallTypeCell
+            isTwoFlow={isTwoFlow}
+            token={token}
+            isUsed={isUsed}
+            onToggleTwoFlow={onToggleTwoFlow}
+          />
         );
       },
     },

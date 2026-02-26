@@ -24,7 +24,7 @@ function GenerateLinkModal({
 }: GenerateLinkModalProps) {
   const [generatedLink, setGeneratedLink] = useState<string>('');
   const [copied, setCopied] = useState(false);
-  const [isTwoFlow, setIsTwoFlow] = useState(false);
+  const [isTwoFlow, setIsTwoFlow] = useState(true);
   const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
   const isGeneratingRef = useRef(false);
 
@@ -163,9 +163,9 @@ function GenerateLinkModal({
           <input
             type="checkbox"
             checked={isTwoFlow}
-            onChange={(e) => setIsTwoFlow(e.target.checked)}
             disabled={createResponseMutation.isPending}
             className="w-4 h-4 accent-indigo-600 disabled:cursor-not-allowed"
+            onChange={(e) => setIsTwoFlow(e.target.checked)}
           />
           <span className="text-sm text-gray-700">
             Enable two-call verification flow

@@ -37,15 +37,15 @@ export function SessionBlocked({ reason, onRetry }: SessionBlockedProps) {
         </div>
 
         <div className="space-y-3">
-          {/* {onRetry && (
+          {onRetry && (
             <Button
-              onClick={onRetry}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+            onClick={onRetry}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Try Again
             </Button>
-          )} */}
+          )}
 
           <Button
             variant="outline"
