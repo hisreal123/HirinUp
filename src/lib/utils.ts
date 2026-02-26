@@ -82,6 +82,7 @@ export function normalizeDescriptionToHtml(description: string): string {
   const lines = raw.split('\n');
   const parts: string[] = [];
   let bulletItems: string[] = [];
+  let orderedItems: string[] = [];
 
   const flushBullets = () => {
     if (bulletItems.length === 0) return;
@@ -93,21 +94,42 @@ export function normalizeDescriptionToHtml(description: string): string {
     bulletItems = [];
   };
 
+  const flushOrdered = () => {
+    if (orderedItems.length === 0) return;
+    parts.push(
+      '<ol>' +
+        orderedItems.map((item) => `<li><p>${item}</p></li>`).join('') +
+        '</ol>'
+    );
+    orderedItems = [];
+  };
+
+  const applyInline = (text: string) =>
+    text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/_(.*?)_/g, '<em>$1</em>');
+
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) {
       flushBullets();
+      flushOrdered();
       continue;
     }
     if (/^[*\-] /.test(trimmed)) {
-      bulletItems.push(trimmed.slice(2).trim());
+      flushOrdered();
+      bulletItems.push(applyInline(trimmed.slice(2).trim()));
+    } else if (/^\d+\. /.test(trimmed)) {
+      flushBullets();
+      orderedItems.push(applyInline(trimmed.replace(/^\d+\. /, '').trim()));
     } else {
       flushBullets();
-      const formatted = trimmed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      parts.push(`<p>${formatted}</p>`);
+      flushOrdered();
+      parts.push(`<p>${applyInline(trimmed)}</p>`);
     }
   }
   flushBullets();
+  flushOrdered();
 
   return parts.join('');
 }
