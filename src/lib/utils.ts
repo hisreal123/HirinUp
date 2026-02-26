@@ -129,6 +129,11 @@ export function normalizeDescriptionToHtml(description: string): string {
     if (!trimmed) {
       flushBullets();
       flushOrdered();
+      // Emit one empty paragraph per blank line so TipTap preserves spacing in
+      // the editor. Deduplicate so consecutive blank lines collapse to one.
+      if (parts.length > 0 && parts[parts.length - 1] !== '<p></p>') {
+        parts.push('<p></p>');
+      }
       continue;
     }
 
