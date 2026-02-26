@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { Plus } from 'lucide-react';
 import { ChevronLeft } from 'lucide-react';
+import { normalizeDescriptionToHtml } from '@/lib/utils';
 
 interface Props {
   interviewData: InterviewBase;
@@ -26,7 +27,7 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
     interviewData.questions
   );
   const [description, setDescription] = useState<string>(
-    interviewData.description.trim()
+    normalizeDescriptionToHtml(interviewData.description.trim())
   );
   const { fetchInterviews } = useInterviews();
 

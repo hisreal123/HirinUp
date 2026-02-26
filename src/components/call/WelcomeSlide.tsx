@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Interview } from '@/types/interview';
 import { ArrowLeft, Info } from 'lucide-react';
+import { normalizeDescriptionToHtml } from '@/lib/utils';
 
 interface WelcomeSlideProps {
   interview: Interview;
@@ -77,7 +78,7 @@ export function WelcomeSlide({
             <div
               key="description"
               className={`mb-5 prose prose-sm max-w-none ${descriptionAnimation}`}
-              dangerouslySetInnerHTML={{ __html: interview?.description || '' }}
+              dangerouslySetInnerHTML={{ __html: normalizeDescriptionToHtml(interview?.description || '') }}
             />
           )}
 

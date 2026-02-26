@@ -63,3 +63,51 @@ export function isLightColor(color: string) {
 
   return brightness > 155;
 }
+
+// Normalizes an interview description to proper HTML.
+// AI-generated descriptions often contain Markdown-style bullets (* item)
+// instead of <ul><li> tags. This converts them so dangerouslySetInnerHTML
+// and TipTap both render the content correctly.
+// If the description already has HTML list tags it is returned unchanged.
+export function normalizeDescriptionToHtml(description: string): string {
+  if (!description) return '';
+  if (/<ul|<ol|<li/i.test(description)) return description;
+
+  const raw = description
+    .replace(/<p[^>]*>/gi, '')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .trim();
+
+  const lines = raw.split('\n');
+  const parts: string[] = [];
+  let bulletItems: string[] = [];
+
+  const flushBullets = () => {
+    if (bulletItems.length === 0) return;
+    parts.push(
+      '<ul>' +
+        bulletItems.map((item) => `<li><p>${item}</p></li>`).join('') +
+        '</ul>'
+    );
+    bulletItems = [];
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushBullets();
+      continue;
+    }
+    if (/^[*\-] /.test(trimmed)) {
+      bulletItems.push(trimmed.slice(2).trim());
+    } else {
+      flushBullets();
+      const formatted = trimmed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      parts.push(`<p>${formatted}</p>`);
+    }
+  }
+  flushBullets();
+
+  return parts.join('');
+}

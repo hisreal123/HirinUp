@@ -8,7 +8,7 @@ import { UserCircleIcon, SmileIcon, Info } from 'lucide-react';
 import { useInterviewers } from '@/contexts/interviewers.context';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { CandidateStatus } from '@/lib/enum';
-import { convertSecondstoMMSS } from '@/lib/utils';
+import { convertSecondstoMMSS, normalizeDescriptionToHtml } from '@/lib/utils';
 import Image from 'next/image';
 import {
   Tooltip,
@@ -187,7 +187,7 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
             <p className="font-medium mb-1">Interview Description:</p>
             <div
               className="prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: interview?.description || '' }}
+              dangerouslySetInnerHTML={{ __html: normalizeDescriptionToHtml(interview?.description || '') }}
             />
           </div>
           <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-4 rounded-2xl bg-slate-50 shadow-md">
