@@ -117,7 +117,7 @@ export default function FooterSection() {
 
         <div className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-white/10 pt-6 md:flex-row">
           <p className="text-xs text-gray-500">
-            © 2025 Talvin. All Rights Reserved.
+            © {new Date().getFullYear()} Talvin. All Rights Reserved.
           </p>
           <div className="flex items-center gap-4 text-gray-400">
             {socialLinks.map(({ href, label, path, viewBox }) => (

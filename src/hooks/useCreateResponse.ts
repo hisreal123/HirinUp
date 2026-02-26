@@ -8,6 +8,7 @@ interface CreateResponseParams {
   call_id?: string;
   candidate_id?: number;
   turnstile_token?: string;
+  is_two_flow?: boolean;
 }
 
 interface CreateResponseResponse {

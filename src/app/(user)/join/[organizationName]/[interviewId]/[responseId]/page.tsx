@@ -99,6 +99,7 @@ function InterviewInterface() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isExpired, setIsExpired] = useState(false);
   const [expirationChecked, setExpirationChecked] = useState(false);
+  const [isTwoFlow, setIsTwoFlow] = useState(false);
   const [initialCallPhase, setInitialCallPhase] = useState<
     'first_call' | 'verification_modal' | 'second_call'
   >('first_call');
@@ -131,6 +132,9 @@ function InterviewInterface() {
 
           return;
         }
+
+        // Read is_two_flow from response record
+        setIsTwoFlow(response?.is_two_flow === true);
 
         // DB is source of truth - localStorage is just a cache
         const dbFlowState =
@@ -479,6 +483,7 @@ function InterviewInterface() {
             interview={interview}
             responseToken={responseId}
             initialCallPhase={initialCallPhase}
+            isTwoFlow={isTwoFlow}
           />
         )}
       </div>

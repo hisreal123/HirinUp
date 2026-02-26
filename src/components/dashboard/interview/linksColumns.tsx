@@ -148,6 +148,32 @@ return <span className="text-sm text-yellow-600">In Progress</span>;
       },
     },
     {
+      accessorKey: 'is_two_flow',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="h-8 px-2"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Call Type
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const isTwoFlow = row.getValue('is_two_flow') as boolean;
+
+        return isTwoFlow ? (
+          <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+            Two Call Flow
+          </span>
+        ) : (
+          <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+            Single Call Flow
+          </span>
+        );
+      },
+    },
+    {
       accessorKey: 'created_at',
       header: ({ column }) => (
         <Button
