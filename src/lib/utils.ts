@@ -65,18 +65,29 @@ export function isLightColor(color: string) {
 }
 
 // Normalizes an interview description to proper HTML.
-// AI-generated descriptions often contain Markdown-style bullets (* item)
-// instead of <ul><li> tags. This converts them so dangerouslySetInnerHTML
-// and TipTap both render the content correctly.
-// If the description already has HTML list tags it is returned unchanged.
+// AI-generated descriptions often contain Markdown-style syntax (* bullets,
+// # headings, > blockquotes, etc.) instead of HTML tags. This converts them
+// so dangerouslySetInnerHTML and TipTap both render the content correctly.
+// If the description is pure TipTap HTML (no Markdown patterns), it is
+// returned unchanged.
 export function normalizeDescriptionToHtml(description: string): string {
   if (!description) return '';
-  if (/<ul|<ol|<li/i.test(description)) return description;
 
+  // Detect Markdown patterns (multiline). If none are present and the content
+  // already has list/structural HTML, it's TipTap output — return as-is.
+  const hasMarkdown = /^[ \t]*[*\-] |^#+[ \t]|^>[ \t]|^\d+\.[ \t]|^(-{3,}|\*{3,}|_{3,})$/m.test(
+    description
+  );
+  if (!hasMarkdown && /<ul|<ol|<li/i.test(description)) return description;
+
+  // Strip HTML tags to plain text so we can re-parse as Markdown.
+  // Preserve newlines from block-level closing tags.
   const raw = description
-    .replace(/<p[^>]*>/gi, '')
     .replace(/<\/p>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<\/blockquote>/gi, '\n')
     .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
     .trim();
 
   const lines = raw.split('\n');
@@ -104,10 +115,14 @@ export function normalizeDescriptionToHtml(description: string): string {
     orderedItems = [];
   };
 
+  // Apply inline Markdown: **bold**, __bold__, *italic*, _italic_
+  // Process double markers first so single-marker regex doesn't partially match them.
   const applyInline = (text: string) =>
     text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/_(.*?)_/g, '<em>$1</em>');
+      .replace(/__(.*?)__/g, '<strong>$1</strong>')
+      .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+      .replace(/_([^_\n]+)_/g, '<em>$1</em>');
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -116,18 +131,58 @@ export function normalizeDescriptionToHtml(description: string): string {
       flushOrdered();
       continue;
     }
-    if (/^[*\-] /.test(trimmed)) {
+
+    // Headings: ### H3, ## H2, # H1
+    if (/^### /.test(trimmed)) {
+      flushBullets();
+      flushOrdered();
+      parts.push(`<h3>${applyInline(trimmed.slice(4).trim())}</h3>`);
+    } else if (/^## /.test(trimmed)) {
+      flushBullets();
+      flushOrdered();
+      parts.push(`<h2>${applyInline(trimmed.slice(3).trim())}</h2>`);
+    } else if (/^# /.test(trimmed)) {
+      flushBullets();
+      flushOrdered();
+      parts.push(`<h1>${applyInline(trimmed.slice(2).trim())}</h1>`);
+    }
+
+    // Blockquote: > text
+    else if (/^> /.test(trimmed)) {
+      flushBullets();
+      flushOrdered();
+      parts.push(
+        `<blockquote><p>${applyInline(trimmed.slice(2).trim())}</p></blockquote>`
+      );
+    }
+
+    // Horizontal rule: ---, ***, ___
+    else if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+      flushBullets();
+      flushOrdered();
+      parts.push('<hr>');
+    }
+
+    // Unordered list: * item or - item
+    else if (/^[*\-] /.test(trimmed)) {
       flushOrdered();
       bulletItems.push(applyInline(trimmed.slice(2).trim()));
-    } else if (/^\d+\. /.test(trimmed)) {
+    }
+
+    // Ordered list: 1. item
+    else if (/^\d+\. /.test(trimmed)) {
       flushBullets();
       orderedItems.push(applyInline(trimmed.replace(/^\d+\. /, '').trim()));
-    } else {
+    }
+
+    // Plain paragraph
+    else {
       flushBullets();
       flushOrdered();
       parts.push(`<p>${applyInline(trimmed)}</p>`);
     }
   }
+
   flushBullets();
   flushOrdered();
 
