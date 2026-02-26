@@ -16,6 +16,7 @@ import Image from 'next/image';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
+import { normalizeDescriptionToHtml } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
 import {
   AlertDialog,
@@ -38,7 +39,7 @@ function EditInterview({ interview }: EditInterviewProps) {
   const { fetchInterviews } = useInterviews();
 
   const [description, setDescription] = useState<string>(
-    interview?.description || ''
+    normalizeDescriptionToHtml(interview?.description || '')
   );
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditingObjective, setIsEditingObjective] = useState(false);
