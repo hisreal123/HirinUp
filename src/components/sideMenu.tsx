@@ -57,6 +57,11 @@ function SideMenu() {
                 variables: {
                   fontSize: '0.9rem',
                 },
+                elements: {
+                  rootBox: 'overflow-hidden rounded-md w-full',
+                  organizationSwitcherTrigger: 'max-w-full w-full',
+                  organizationPreviewMainIdentifier: 'truncate max-w-[130px] block',
+                },
               }}
             />
           </div>
