@@ -103,6 +103,7 @@ function InterviewInterface() {
   const [initialCallPhase, setInitialCallPhase] = useState<
     'first_call' | 'verification_modal' | 'second_call'
   >('first_call');
+  const [orgDisplayName, setOrgDisplayName] = useState<string>('');
 
   useEffect(() => {
     if (interview) {
@@ -354,6 +355,7 @@ function InterviewInterface() {
         }
 
         if (!cancelled) {
+          setOrgDisplayName(organization.name || '');
           setIsValidating(false);
         }
       } catch (error) {
@@ -484,6 +486,7 @@ function InterviewInterface() {
             responseToken={responseId}
             initialCallPhase={initialCallPhase}
             isTwoFlow={isTwoFlow}
+            organizationName={orgDisplayName}
           />
         )}
       </div>

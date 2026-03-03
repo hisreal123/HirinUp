@@ -13,6 +13,7 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
+import Image from 'next/image';
 import { Card, CardHeader, CardTitle } from '../ui/card';
 import { useResponses } from '@/contexts/responses.context';
 import { RetellWebClient } from 'retell-client-js-sdk';
@@ -56,6 +57,49 @@ function formatTime(seconds: number): string {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
+function formatPostedAgo(createdAt: Date | string | undefined): string {
+  if (!createdAt) {
+    return '';
+  }
+
+  const now = Date.now();
+  const then = new Date(createdAt).getTime();
+  const diff = Math.max(0, now - then);
+  const mins = Math.floor(diff / 60000);
+
+  if (mins < 60) {
+    return mins <= 1 ? 'just now' : `${mins} minutes ago`;
+  }
+
+  const hours = Math.floor(mins / 60);
+
+  if (hours < 24) {
+    return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+  }
+
+  const days = Math.floor(hours / 24);
+
+  if (days < 7) {
+    return days === 1 ? 'yesterday' : `${days} days ago`;
+  }
+
+  const weeks = Math.floor(days / 7);
+
+  if (weeks < 5) {
+    return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
+  }
+
+  const months = Math.floor(days / 30);
+
+  if (months < 12) {
+    return months === 1 ? '1 month ago' : `${months} months ago`;
+  }
+
+  const years = Math.floor(days / 365);
+
+  return years === 1 ? '1 year ago' : `${years} years ago`;
+}
+
 // First call duration (in milliseconds) - auto-ends after this time
 const FIRST_CALL_DURATION =
   (Number(process.env.NEXT_PUBLIC_FIRST_CALL_DURATION) || 10) * 1000;
@@ -73,6 +117,7 @@ type InterviewProps = {
   responseToken?: string;
   initialCallPhase?: CallPhase;
   isTwoFlow?: boolean;
+  organizationName?: string;
 };
 
 type registerCallResponseType = {
@@ -126,6 +171,7 @@ function Call({
   responseToken,
   initialCallPhase = 'first_call',
   isTwoFlow = false,
+  organizationName = '',
 }: InterviewProps) {
   const { createResponse } = useResponses();
   const createResponseMutation = useEncryptedCreateResponse();
@@ -158,6 +204,7 @@ function Call({
   const [currentSlide, setCurrentSlide] = useState<'welcome' | 'candidateForm'>(
     'welcome'
   );
+  const [guidelinesOpen, setGuidelinesOpen] = useState(true);
   const [isOldUser, setIsOldUser] = useState<boolean>(false);
   const [callId, setCallId] = useState<string>('');
   const [candidateId, setCandidateId] = useState<number | null>(null);
@@ -1164,16 +1211,18 @@ function Call({
     <div className="flex justify-center items-center min-h-screen h-fit">
       {isStarted && <TabSwitchWarning />}
       <div className="bg-floralwhite rounded-md md:w-[80%] w-[90%]">
-        <Card className="h-fit min-h-[88vh] rounded-lg text-xl font-bold transition-all md:block dark:border-white">
+        <Card className="h-fit min-h-[88vh] rounded-lg text-xl font-bold transition-all md:block dark:border-white border-0 shadow-none">
           <div>
             {isStarted && (
               <div className="m-4">
                 {/* Timer Info Display */}
                 <div className="flex flex-row items-center justify-between mb-2 px-2">
                   <div className="flex flex-col">
-                    <div className="text-xs text-gray-600">Time Used</div>
+                    <div className="text-xs font-semibold text-indigo-500">
+                      Time Used
+                    </div>
                     <div
-                      className={`text-sm font-bold ${isTimerPaused ? 'text-amber-600' : 'text-gray-800'}`}
+                      className={`text-sm font-bold ${isTimerPaused ? 'text-amber-500' : 'text-gray-900'}`}
                     >
                       {formatTime(timeUsedSeconds)}
                     </div>
@@ -1194,9 +1243,11 @@ function Call({
                     )}
                   </div>
                   <div className="flex flex-col items-end">
-                    <div className="text-xs text-gray-600">Time Left</div>
+                    <div className="text-xs font-semibold text-indigo-500">
+                      Time Left
+                    </div>
                     <div
-                      className={`text-sm font-bold ${isTimeUp ? 'text-red-600' : timeLeftSeconds < 60 ? 'text-red-600' : 'text-gray-800'}`}
+                      className={`text-sm font-bold ${isTimeUp ? 'text-red-500' : timeLeftSeconds < 60 ? 'text-red-500' : 'text-gray-900'}`}
                     >
                       {isTimeUp ? '00:00' : formatTime(timeLeftSeconds)}
                     </div>
@@ -1242,21 +1293,48 @@ function Call({
                 </div>
               </div>
             )}
-            <CardHeader className="items-center px-1 py-4">
+            <CardHeader className={`px-1 py-4 ${!isStarted && currentSlide === 'welcome' ? 'items-start' : 'items-center'}`}>
               {!isEnded && (
-                <CardTitle className="flex flex-row items-center text-lg md:text-xl font-bold mb-2">
-                  {interview?.name}
-                </CardTitle>
+                <div className={`flex flex-col mb-2 animate-in fade-in slide-in-from-top-3 duration-500 ${!isStarted && currentSlide === 'welcome' ? 'items-start' : 'items-center'}`}>
+                  <CardTitle className="text-lg md:text-xl font-bold mb-1">
+                    {interview?.name}
+                  </CardTitle>
+                  {(interview?.logo_url || organizationName) && (
+                    <div className="flex items-center gap-2 mt-2">
+                      {interview?.logo_url && (
+                        <Image
+                          src={interview.logo_url}
+                          alt="Company logo"
+                          className="h-5 w-auto object-contain"
+                          width={40}
+                          height={10}
+                        />
+                      )}
+                      {organizationName && (
+                        <span className="text-xs text-gray-500">
+                          {organizationName}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
               {!isEnded && (
-                <div className="flex mt-2 flex-row items-center justify-center">
-                  <AlarmClockIcon className="text-primary h-[1rem] w-[1rem] rotate-0 scale-100 dark:-rotate-90 dark:scale-0 mr-2 font-bold" />
-                  <div className="text-sm font-normal space-x-1">
-                    Expected duration:
-                    <span className="font-bold text-primary mr-1">
-                      {interviewTimeDuration} mins
-                    </span>
-                    or less
+                <div className={`flex flex-row items-center mt-1 animate-in fade-in slide-in-from-top-3 duration-500 delay-100 ${!isStarted && currentSlide === 'welcome' ? 'justify-start' : 'justify-center'}`}>
+                  {interview?.created_at && (
+                    <div className="text-xs text-gray-500 mr-3 font-normal">
+                      Posted {formatPostedAgo(interview.created_at)}
+                    </div>
+                  )}
+                  <div className="flex items-center text-gray-500">
+                    <AlarmClockIcon className="text-primary h-[.9rem] w-[.9rem] rotate-0 scale-100 dark:-rotate-90 dark:scale-0 mr-1 font-bold" />
+                    <div className="text-xs font-normal space-x-1">
+                      Expected duration:
+                      <span className="font-bold text-primary mr-1">
+                        {interviewTimeDuration} mins
+                      </span>
+                      or less
+                    </div>
                   </div>
                   {isStarted && (
                     <div className="ml-4 text-xs text-gray-500">
@@ -1307,6 +1385,8 @@ function Call({
                 <WelcomeSlide
                   interview={interview}
                   loading={loading}
+                  guidelinesOpen={guidelinesOpen}
+                  onGuidelinesOpenChange={setGuidelinesOpen}
                   onProceed={() => setCurrentSlide('candidateForm')}
                   onExit={onEndCallClick}
                 />
