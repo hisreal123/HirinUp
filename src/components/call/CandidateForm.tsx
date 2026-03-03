@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useEffect, useRef, useCallback } from 'react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -165,8 +166,12 @@ export const CandidateForm = memo(function CandidateForm({
 
     return () => {
       // Always cancel pending timers so they don't fire on a detached DOM node
-      if (checkInterval) {clearInterval(checkInterval);}
-      if (killTimeout) {clearTimeout(killTimeout);}
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+      if (killTimeout) {
+        clearTimeout(killTimeout);
+      }
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
@@ -191,9 +196,21 @@ export const CandidateForm = memo(function CandidateForm({
     <div className="relative w-[80%] mx-auto mt-2 shadow-lg rounded-md p-2 m-2 bg-slate-50 max-h-[calc(88vh-200px)] overflow-y-auto">
       <div className="p-2">
         <h2 className="text-lg font-semibold mb-4 text-center">
-          Candidate Information
+          Your Information
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-3 gap-x-6 px-4">
+          <div className="space-y-2">
+            <Label htmlFor="fullName">
+              Full Name <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="fullName"
+              type="text"
+              value={fullName}
+              placeholder="Enter your full name"
+              onChange={(e) => setFullName(e.target.value)}
+            />
+          </div>
           {!interview?.is_anonymous && (
             <div className="space-y-2">
               <Label htmlFor="email">
@@ -214,18 +231,6 @@ export const CandidateForm = memo(function CandidateForm({
               )}
             </div>
           )}
-          <div className="space-y-2">
-            <Label htmlFor="fullName">
-              Full Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="fullName"
-              type="text"
-              value={fullName}
-              placeholder="Enter your full name"
-              onChange={(e) => setFullName(e.target.value)}
-            />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="phone">
               Phone Number <span className="text-red-500">*</span>
@@ -283,20 +288,16 @@ export const CandidateForm = memo(function CandidateForm({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="twitter">Twitter (optional)</Label>
+            <Label htmlFor="experience">
+              Years of Experience <span className="text-red-500">*</span>
+            </Label>
             <Input
-              id="twitter"
-              type="url"
-              value={twitter}
-              className={!isValidTwitter ? 'border-red-500' : ''}
-              placeholder="https://twitter.com/yourhandle"
-              onChange={(e) => setTwitter(e.target.value)}
+              id="experience"
+              type="number"
+              value={workExperienceYears}
+              placeholder="e.g. 5"
+              onChange={(e) => setWorkExperienceYears(e.target.value)}
             />
-            {!isValidTwitter && (
-              <p className="text-xs text-red-500">
-                URL must start with https://
-              </p>
-            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="linkedin">
@@ -317,16 +318,20 @@ export const CandidateForm = memo(function CandidateForm({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="experience">
-              Years of Experience <span className="text-red-500">*</span>
-            </Label>
+            <Label htmlFor="twitter">Twitter (optional)</Label>
             <Input
-              id="experience"
-              type="number"
-              value={workExperienceYears}
-              placeholder="e.g. 5"
-              onChange={(e) => setWorkExperienceYears(e.target.value)}
+              id="twitter"
+              type="url"
+              value={twitter}
+              className={!isValidTwitter ? 'border-red-500' : ''}
+              placeholder="https://twitter.com/yourhandle"
+              onChange={(e) => setTwitter(e.target.value)}
             />
+            {!isValidTwitter && (
+              <p className="text-xs text-red-500">
+                URL must start with https://
+              </p>
+            )}
           </div>
         </div>
         {/* Turnstile Widget */}
@@ -336,18 +341,30 @@ export const CandidateForm = memo(function CandidateForm({
       </div>
       <div className="w-[80%] flex flex-row mx-auto justify-center items-center align-middle gap-2 mt-4">
         <Button
-          className="bg-white border border-primary text-black min-w-15 h-10 rounded-lg flex flex-row justify-center mb-8"
+          className="group bg-white border border-primary text-black min-w-15 h-10 rounded-lg flex flex-row justify-center mb-8"
           disabled={loading}
           onClick={onGoBack}
         >
+          <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:mr-2">
+            <ArrowLeft className="h-4 w-4" />
+          </span>
           Go Back
         </Button>
         <Button
-          className="min-w-20 h-10 rounded-xl flex flex-row justify-center mb-8 bg-primary text-white hover:bg-primary/90"
+          className="group min-w-20 h-10 rounded-xl flex flex-row justify-center mb-8 bg-primary text-white hover:bg-primary/90"
           disabled={loading || !isFormValid}
           onClick={onStartInterview}
         >
-          {!loading ? 'Start Interview' : <MiniLoader />}
+          {!loading ? (
+            <>
+              Start Interview
+              <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </>
+          ) : (
+            <MiniLoader />
+          )}
         </Button>
         <AlertDialog>
           <AlertDialogContent>

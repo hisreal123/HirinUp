@@ -11,7 +11,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useInterviews } from '@/contexts/interviews.context';
-import { InterviewService } from '@/services/interviews.service';
 import { useQueryClient } from '@tanstack/react-query';
 import { CardTitle } from '../../ui/card';
 import Image from 'next/image';
@@ -142,7 +141,9 @@ function EditInterview({ interview }: EditInterviewProps) {
   };
 
   const onDeleteInterviewClick = async () => {
-    if (!interview) { return; }
+    if (!interview) {
+      return;
+    }
 
     const res = await fetch('/api/delete-interview', {
       method: 'POST',
@@ -194,7 +195,9 @@ function EditInterview({ interview }: EditInterviewProps) {
             </p>
             <button
               type="button"
-              title={isEditingDescription ? 'Cancel editing' : 'Edit description'}
+              title={
+                isEditingDescription ? 'Cancel editing' : 'Edit description'
+              }
               className="text-gray-400 hover:text-indigo-600 transition-colors"
               onClick={() => setIsEditingDescription((prev) => !prev)}
             >
@@ -210,7 +213,14 @@ function EditInterview({ interview }: EditInterviewProps) {
                 onSave();
               }}
             >
-              {isClicked ? <MiniLoader /> : <><span>Save</span><SaveIcon size={16} className="ml-2" /></>}
+              {isClicked ? (
+                <MiniLoader />
+              ) : (
+                <>
+                  <span>Save</span>
+                  <SaveIcon size={16} className="ml-2" />
+                </>
+              )}
             </Button>
             <Button
               disabled={isClicked}
@@ -239,7 +249,11 @@ function EditInterview({ interview }: EditInterviewProps) {
         ) : (
           <div
             className="ml-2 w-[75%] mt-3 px-3 py-2 text-sm border-2 border-gray-200 rounded-md min-h-[5rem] prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: description || '<span class="text-gray-400">No description set.</span>' }}
+            dangerouslySetInnerHTML={{
+              __html:
+                description ||
+                '<span class="text-gray-400">No description set.</span>',
+            }}
           />
         )}
         <div className="flex items-center gap-2 mt-3 mb-1 ml-2">
@@ -264,7 +278,9 @@ function EditInterview({ interview }: EditInterviewProps) {
           />
         ) : (
           <div className="ml-2 w-[75%] mt-1 px-3 py-2 text-sm border-2 border-gray-200 rounded-md min-h-[5rem] whitespace-pre-wrap">
-            {objective || <span className="text-gray-400">No objective set.</span>}
+            {objective || (
+              <span className="text-gray-400">No objective set.</span>
+            )}
           </div>
         )}
         <div className="flex flex-row gap-3">
@@ -438,9 +454,16 @@ function EditInterview({ interview }: EditInterviewProps) {
         ) : (
           <div className="ml-2 w-[75%] mt-3 mb-4 bg-slate-100 rounded-md text-sm px-3 py-2">
             {questions.map((question, index) => (
-              <div key={question.id} className="py-1.5 border-b border-gray-200 last:border-0">
-                <span className="font-medium text-gray-500 mr-2">{index + 1}.</span>
-                {question.question || <span className="text-gray-400 italic">No question set.</span>}
+              <div
+                key={question.id}
+                className="py-1.5 border-b border-gray-200 last:border-0"
+              >
+                <span className="font-medium text-gray-500 mr-2">
+                  {index + 1}.
+                </span>
+                {question.question || (
+                  <span className="text-gray-400 italic">No question set.</span>
+                )}
               </div>
             ))}
           </div>

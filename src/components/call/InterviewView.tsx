@@ -44,10 +44,10 @@ export const InterviewView = memo(function InterviewView({
                 <span className="text-gray-500 text-xs">No Image</span>
               </div>
             )}
-            <div className="font-semibold mt-1 text-sm">Interviewer</div>
+            <div className="font-semibold mt-1 text-sm">Ai Interviewer</div>
           </div>
           {/* Scrollable response text */}
-          <div className="w-full max-h-[200px] overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed">
+          <div className="w-full max-h-[200px] overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed font-normal">
             {lastInterviewerResponse}
           </div>
         </div>
@@ -70,7 +70,7 @@ export const InterviewView = memo(function InterviewView({
           {/* Scrollable response text */}
           <div
             ref={lastUserResponseRef}
-            className="w-full max-h-[200px] overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed"
+            className="w-full max-h-[200px] overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed font-normal"
           >
             {lastUserResponse}
           </div>
