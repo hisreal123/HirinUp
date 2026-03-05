@@ -193,9 +193,9 @@ export const CandidateForm = memo(function CandidateForm({
     turnstileToken;
 
   return (
-    <div className="relative w-[80%] mx-auto mt-2 rounded-md p-2 m-2 max-h-[calc(88vh-200px)] overflow-y-auto">
+    <div className="relative w-full mt-2 rounded-md p-2 m-2 max-h-[calc(88vh-200px)] overflow-y-auto">
       <div className="p-2">
-        <div className="border-t border-gray-200 mx-1 mb-4" />
+        <div className="border-t border-gray-200 mx-1 mt-2 mb-4" />
         <h2 className="text-lg font-semibold mb-4 mt-4 text-center">
           Your Information
         </h2>
@@ -342,7 +342,7 @@ export const CandidateForm = memo(function CandidateForm({
       </div>
       <div className="w-[80%] flex flex-row mx-auto justify-center items-center align-middle gap-2 mt-4">
         <Button
-          className="group bg-white border border-primary text-black min-w-15 h-10 rounded-lg flex flex-row justify-center mb-8"
+          className="group h-auto bg-white border border-primary text-black px-8 py-3 text-lg leading-none font-normal rounded-lg flex flex-row justify-center mb-8" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
           disabled={loading}
           onClick={onGoBack}
         >
@@ -352,7 +352,7 @@ export const CandidateForm = memo(function CandidateForm({
           Go Back
         </Button>
         <Button
-          className="group min-w-20 h-10 rounded-xl flex flex-row justify-center mb-8 bg-primary text-white hover:bg-primary/90"
+          className="group h-auto border border-transparent px-12 py-3 text-lg leading-none font-normal rounded-xl flex flex-row justify-center mb-8 bg-primary text-white hover:bg-primary/90" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
           disabled={loading || !isFormValid}
           onClick={onStartInterview}
         >
