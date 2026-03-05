@@ -118,15 +118,15 @@ export function AudioDetectionModal({
           <AlertDialogTitle className="text-lg  w-full font-semibold">
             <div className="flex items-center justify-center text-slate-700">
               {currentStep === 1 ? (
-                <span className="font-bold text-sm text-slate-700">
+                <span className="font-bold text-lg text-slate-700">
                   Step 1: Browser & Device Checks
                 </span>
               ) : currentStep === 2 ? (
-                <span className="font-bold text-sm text-slate-700">
+                <span className="font-bold text-lg text-slate-700">
                   Step 2: Advanced Network Diagnostics
                 </span>
               ) : (
-                <span className="font-bold text-sm text-slate-700">
+                <span className="font-bold text-lg text-slate-700">
                   Step 3: OS-Level Checks
                 </span>
               )}
@@ -236,7 +236,7 @@ export function AudioDetectionModal({
                 </span>
 
                 <div className="space-y-1 border shadow-sm border-gray-200 rounded-md p-2">
-                  <h4 className="text-sm font-bold text-gray-900 border-b flex items-center space-x-2">
+                  <h4 className="text-sm font-normal text-gray-900 border-b flex items-center space-x-2">
                     <CircleDot className="mr-2 h-4 w-4 text-slate-500" />
                     Ping Test
                   </h4>
@@ -259,7 +259,7 @@ export function AudioDetectionModal({
                 </div>
 
                 <div className="space-y-1 border shadow-sm border-gray-200 rounded-md p-2">
-                  <h4 className="text-sm font-bold text-gray-900 border-b flex items-center space-x-2">
+                  <h4 className="text-sm font-normal text-gray-900 border-b flex items-center space-x-2">
                     <Router className="h-4 w-4 text-slate-500 mr-2" />
                     DNS Test
                   </h4>

@@ -22,7 +22,7 @@ export const InterviewView = memo(function InterviewView({
     <>
       <div className="flex flex-row p-2 items-stretch h-[480px]">
         {/* Interviewer column */}
-        <div className="w-[50%] flex flex-col py-4 px-3 h-full">
+        <div className="w-[50%] flex flex-col py-2 px-1 h-full">
           {/* Avatar — top-left */}
           <div className="flex flex-col items-start mb-3 flex-shrink-0">
             {interviewerImg ? (
@@ -44,17 +44,17 @@ export const InterviewView = memo(function InterviewView({
                 <span className="text-gray-500 text-xs">No Image</span>
               </div>
             )}
-            <div className="font-semibold mt-1 text-sm">Ai Interviewer</div>
+            <div className="font-semibold mt-1 text-sm">AI Interviewer</div>
           </div>
           {/* Scrollable response text */}
-          <div className="w-full flex-1 overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed font-normal">
+          <div className="w-full flex-1 overflow-y-auto text-base lg:text-lg px-1 text-left leading-relaxed font-normal">
             {lastInterviewerResponse}
           </div>
         </div>
         <div className="w-px bg-gray-200 self-stretch" />
 
         {/* Candidate column */}
-        <div className="w-[50%] flex flex-col py-4 px-3">
+        <div className="w-[50%] flex flex-col py-2 px-1">
           {/* Avatar — top-right */}
           <div className="flex flex-col items-end mb-3 flex-shrink-0">
             <Image
@@ -71,7 +71,7 @@ export const InterviewView = memo(function InterviewView({
           {/* Scrollable response text */}
           <div
             ref={lastUserResponseRef}
-            className="w-full flex-1 overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed font-normal"
+            className="w-full flex-1 overflow-y-auto text-base lg:text-lg px-1 text-left leading-relaxed font-normal"
           >
             {lastUserResponse}
           </div>
