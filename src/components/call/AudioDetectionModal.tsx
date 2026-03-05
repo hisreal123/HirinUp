@@ -25,6 +25,7 @@ import {
   Check,
   ArrowUp,
   ArrowLeft,
+  ArrowRight,
   CircleDot,
   Router,
   Copy,
@@ -115,36 +116,30 @@ export function AudioDetectionModal({
       <AlertDialogContent className="max-w-2xl">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg  w-full font-semibold">
-            <div className="flex items-center  justify-center gap-3 text-blue-800">
-              <span className="italic">AI Interview</span>
-              <span className="mr-2 ml-2">-</span>
-              <span>
-                {currentStep === 1 ? (
-                  <span className="font-bold text-sm  text-blue-800">
-                    <span className="mr-1">Step 1:</span> Browser & Device
-                    Checks
-                  </span>
-                ) : currentStep === 2 ? (
-                  <span className="font-bold text-sm flex text-blue-800">
-                    <span className="mr-1">Step 2:</span> Advanced Network
-                    Diagnostics
-                  </span>
-                ) : (
-                  <span className="font-bold text-md flex text-blue-800">
-                    <span>Step 3:</span> OS-Level Checks
-                  </span>
-                )}
-              </span>
+            <div className="flex items-center justify-center text-slate-700">
+              {currentStep === 1 ? (
+                <span className="font-bold text-sm text-slate-700">
+                  Step 1: Browser & Device Checks
+                </span>
+              ) : currentStep === 2 ? (
+                <span className="font-bold text-sm text-slate-700">
+                  Step 2: Advanced Network Diagnostics
+                </span>
+              ) : (
+                <span className="font-bold text-sm text-slate-700">
+                  Step 3: OS-Level Checks
+                </span>
+              )}
             </div>
           </AlertDialogTitle>
-          <div className="border-b-4 border-blue-800 pb-2" />
+          <div className="border-b-2 border-slate-700 pb-2" />
         </AlertDialogHeader>
 
         <div className="px-4">
           {currentStep === 1 ? (
             <div className="space-y-4 py-4 border border-gray-200 rounded-md p-4 shadow-sm">
               <div className="text-sm text-gray-500">
-                <p className="font-medium text-blue-800 italic mt-4 text-sm">
+                <p className="font-medium text-slate-700 italic mt-4 text-sm">
                   <Megaphone className="mr-1 text-sm text-gray-600 inline-block" />
                   Please check that the correct microphone is selected and not
                   muted. <br /> You should see the audio bar moving when you
@@ -225,7 +220,7 @@ export function AudioDetectionModal({
           ) : currentStep === 2 ? (
             <div className="space-y-4 py-4 border border-gray-200 rounded-md p-4 shadow-sm">
               <div className="text-sm text-gray-500">
-                <p className="font-medium text-blue-800 italic mt-4 text-sm">
+                <p className="font-medium text-slate-700 italic mt-4 text-sm">
                   <Megaphone className="mr-1 text-sm text-gray-600 inline-block" />
                   "if you&lsquo;d like, we can run a couple of optional
                   connectivity checks. <br /> These do not change your system."
@@ -242,7 +237,7 @@ export function AudioDetectionModal({
 
                 <div className="space-y-1 border shadow-sm border-gray-200 rounded-md p-2">
                   <h4 className="text-sm font-bold text-gray-900 border-b flex items-center space-x-2">
-                    <CircleDot className="mr-2 h-4 w-4 text-blue-500" />
+                    <CircleDot className="mr-2 h-4 w-4 text-slate-500" />
                     Ping Test
                   </h4>
                   <div className="text-gray-600 h-fit  mt-2 bg-[#1b1f230d] overflow-x-auto pt-2 relative rounded">
@@ -265,7 +260,7 @@ export function AudioDetectionModal({
 
                 <div className="space-y-1 border shadow-sm border-gray-200 rounded-md p-2">
                   <h4 className="text-sm font-bold text-gray-900 border-b flex items-center space-x-2">
-                    <Router className="h-4 w-4 text-blue-500 mr-2" />
+                    <Router className="h-4 w-4 text-slate-500 mr-2" />
                     DNS Test
                   </h4>
                   <div className="text-gray-600 h-fit mt-2 bg-[#1b1f230d] overflow-x-auto pt-3 relative rounded">
@@ -292,7 +287,7 @@ export function AudioDetectionModal({
           ) : (
             <div className="space-y-4 py-4 border border-gray-200 rounded-md p-4 shadow-sm">
               <div className="text-sm text-gray-500">
-                <p className="font-medium text-blue-800 italic mt-4 text-sm">
+                <p className="font-medium text-slate-700 italic mt-4 text-sm">
                   <Megaphone className="mr-1 text-sm text-gray-600 inline-block" />
                   "Your browser settings look fine, This is often caused by a
                   network <br /> issue or another application using the
@@ -319,15 +314,18 @@ export function AudioDetectionModal({
             {currentStep < 3 ? (
               <Button
                 variant="outline"
-                className="w-fit hover:border-primary/90 hover:text-primary/90 text-blue-800 border-blue-800 border px-4 transition-all duration-300"
+                className="group w-fit hover:border-primary/90 hover:text-primary/90 text-slate-700 border-slate-700 border px-4 transition-all duration-300 flex items-center"
                 onClick={() => setCurrentStep((currentStep + 1) as 1 | 2 | 3)}
               >
                 Next
+                <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
               </Button>
             ) : (
               <Button
                 variant="outline"
-                className="w-fit hover:border-primary/90 hover:text-primary/90 text-blue-800 border-blue-800 border px-4 transition-all duration-300"
+                className="group w-fit hover:border-primary/90 hover:text-primary/90 text-slate-700 border-slate-700 border px-4 transition-all duration-300 flex items-center"
                 onClick={() => {
                   explicitCloseRef.current = true;
                   setCurrentStep(1);
@@ -335,6 +333,9 @@ export function AudioDetectionModal({
                 }}
               >
                 Resume
+                <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
               </Button>
             )}
           </div>

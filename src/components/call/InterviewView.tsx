@@ -20,24 +20,24 @@ export const InterviewView = memo(function InterviewView({
 }: InterviewViewProps) {
   return (
     <>
-      <div className="flex flex-row p-2">
+      <div className="flex flex-row p-2 items-stretch h-[480px]">
         {/* Interviewer column */}
-        <div className="border-x-2 border-grey w-[50%] flex flex-col py-4 px-3">
+        <div className="w-[50%] flex flex-col py-4 px-3 h-full">
           {/* Avatar — top-left */}
           <div className="flex flex-col items-start mb-3 flex-shrink-0">
             {interviewerImg ? (
               <Image
                 src={interviewerImg}
                 alt="Image of the interviewer"
-                width={70}
-                height={70}
+                width={100}
+                height={100}
                 className={`object-cover object-center rounded-full ${
                   activeTurn === 'agent' ? 'border-4 border-primary' : ''
                 }`}
               />
             ) : (
               <div
-                className={`w-[70px] h-[70px] rounded-full bg-gray-200 flex items-center justify-center ${
+                className={`w-[100px] h-[100px] rounded-full bg-gray-200 flex items-center justify-center ${
                   activeTurn === 'agent' ? 'border-4 border-primary' : ''
                 }`}
               >
@@ -47,10 +47,11 @@ export const InterviewView = memo(function InterviewView({
             <div className="font-semibold mt-1 text-sm">Ai Interviewer</div>
           </div>
           {/* Scrollable response text */}
-          <div className="w-full max-h-[200px] overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed font-normal">
+          <div className="w-full flex-1 overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed font-normal">
             {lastInterviewerResponse}
           </div>
         </div>
+        <div className="w-px bg-gray-200 self-stretch" />
 
         {/* Candidate column */}
         <div className="w-[50%] flex flex-col py-4 px-3">
@@ -59,8 +60,8 @@ export const InterviewView = memo(function InterviewView({
             <Image
               src={`/user-icon.png`}
               alt="Picture of the user"
-              width={70}
-              height={70}
+              width={100}
+              height={100}
               className={`object-cover object-center rounded-full ${
                 activeTurn === 'user' ? 'border-4 border-primary' : ''
               }`}
@@ -70,7 +71,7 @@ export const InterviewView = memo(function InterviewView({
           {/* Scrollable response text */}
           <div
             ref={lastUserResponseRef}
-            className="w-full max-h-[200px] overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed font-normal"
+            className="w-full flex-1 overflow-y-auto text-base lg:text-lg px-2 text-left leading-relaxed font-normal"
           >
             {lastUserResponse}
           </div>

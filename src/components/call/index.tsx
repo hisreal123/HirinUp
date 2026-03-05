@@ -1210,7 +1210,7 @@ function Call({
   return (
     <div className="flex justify-center items-center min-h-screen h-fit">
       {isStarted && <TabSwitchWarning />}
-      <div className="bg-floralwhite rounded-md md:w-[80%] w-[90%]">
+      <div className={`bg-floralwhite rounded-md mx-auto ${isStarted ? 'w-[70%]' : 'w-[50%]'}`}>
         <Card className="h-fit min-h-[88vh] rounded-lg text-xl font-bold transition-all md:block dark:border-white border-0 shadow-none">
           <div>
             {isStarted && (
@@ -1293,9 +1293,9 @@ function Call({
                 </div>
               </div>
             )}
-            <CardHeader className={`px-1 py-4 ${!isStarted && currentSlide === 'welcome' ? 'items-start' : 'items-center'}`}>
+            <CardHeader className="px-1 py-4 item-center">
               {!isEnded && (
-                <div className={`flex flex-col mb-2 animate-in fade-in slide-in-from-top-3 duration-500 ${!isStarted && currentSlide === 'welcome' ? 'items-start' : 'items-center'}`}>
+                <div className="flex flex-col mb-2 animate-in fade-in slide-in-from-top-3 duration-500 items-center ">
                   <CardTitle className="text-lg md:text-xl font-bold mb-1">
                     {interview?.name}
                   </CardTitle>
@@ -1320,12 +1320,7 @@ function Call({
                 </div>
               )}
               {!isEnded && (
-                <div className={`flex flex-row items-center mt-1 animate-in fade-in slide-in-from-top-3 duration-500 delay-100 ${!isStarted && currentSlide === 'welcome' ? 'justify-start' : 'justify-center'}`}>
-                  {interview?.created_at && (
-                    <div className="text-xs text-gray-500 mr-3 font-normal">
-                      Posted {formatPostedAgo(interview.created_at)}
-                    </div>
-                  )}
+                <div className="flex flex-row items-center mt-1 animate-in fade-in slide-in-from-top-3 duration-500 delay-100 justify-center">
                   <div className="flex items-center text-gray-500">
                     <AlarmClockIcon className="text-primary h-[.9rem] w-[.9rem] rotate-0 scale-100 dark:-rotate-90 dark:scale-0 mr-1 font-bold" />
                     <div className="text-xs font-normal space-x-1">
@@ -1475,19 +1470,7 @@ function Call({
             )}
           </div>
         </Card>
-        <a
-          className="flex flex-row justify-center align-middle mt-3"
-          href="https://hirin-up.vercel.app/"
-          target="_blank"
-        >
-          <div className="text-center text-md font-normal shadow-none mr-2">
-            Powered by{' '}
-            <span className="font-bold">
-              Hirin<span className="text-indigo-600">Up</span>
-            </span>
-          </div>
-          <ArrowUpRightSquareIcon className="h-[1.5rem] w-[1.5rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-indigo-500" />
-        </a>
+
       </div>
     </div>
   );

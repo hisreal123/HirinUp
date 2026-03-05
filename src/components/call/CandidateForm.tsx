@@ -193,9 +193,10 @@ export const CandidateForm = memo(function CandidateForm({
     turnstileToken;
 
   return (
-    <div className="relative w-[80%] mx-auto mt-2 shadow-lg rounded-md p-2 m-2 bg-slate-50 max-h-[calc(88vh-200px)] overflow-y-auto">
+    <div className="relative w-[80%] mx-auto mt-2 rounded-md p-2 m-2 max-h-[calc(88vh-200px)] overflow-y-auto">
       <div className="p-2">
-        <h2 className="text-lg font-semibold mb-4 text-center">
+        <div className="border-t border-gray-200 mx-1 mb-4" />
+        <h2 className="text-lg font-semibold mb-4 mt-4 text-center">
           Your Information
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-3 gap-x-6 px-4">
