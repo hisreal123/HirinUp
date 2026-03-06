@@ -55,8 +55,7 @@ export function WelcomeSlide({
               <span>
                 Please do not refresh or close this page during the interview.
                 <span className="block font-normal mt-1 text-gray-500">
-                  Exiting the session may permanently terminate your assessment
-                  and require rescheduling.
+                  Exiting the session may permanently terminate your assessment and require the interview to be rescheduled.
                 </span>
               </span>
             </li>
@@ -65,41 +64,44 @@ export function WelcomeSlide({
               <span>
                 Ensure your audio settings are properly configured.
                 <span className="block font-normal mt-1 text-gray-500">
-                  Confirm your volume is turned on and grant microphone access
-                  when prompted. We recommend completing the interview in a quiet,
-                  distraction-free environment.
+                  Please confirm that your volume is enabled and grant microphone access when prompted. We recommend completing the interview in a quiet, distraction-free environment.
                 </span>
               </span>
             </li>
             <li className="flex items-start gap-2 font-medium text-gray-700">
               <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
               <span>
-                Session activity is monitored for integrity purposes.
+                Session activity may be monitored for integrity purposes.
                 <span className="block font-normal mt-1 text-gray-500">
-                  Tab switching and page navigation may be recorded to ensure
-                  assessment compliance.
+                  Actions such as tab switching or navigating away from the page may be recorded to ensure compliance with the assessment guidelines.
                 </span>
               </span>
             </li>
-            <li className="flex items-start gap-2">
+            <li className="flex items-start gap-2 font-medium text-gray-700">
               <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
               <span>
-                <span className="font-medium text-gray-700 mr-1">Don&apos;t use AI assistants</span>
-                (ChatGPT, Claude, Gemini, Copilot, etc).
+                The use of AI assistants is strictly prohibited.
+                <span className="block font-normal mt-1 text-gray-500">
+                  This includes tools such as ChatGPT, Claude, Gemini, Copilot, or any similar AI-based services.
+                </span>
               </span>
             </li>
-            <li className="flex items-start gap-2">
+            <li className="flex items-start gap-2 font-medium text-gray-700">
               <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
               <span>
-                <span className="font-medium text-gray-700 mr-1">Don&apos;t use other websites,</span>
-                notes, or help from others
+                External resources are not permitted during the interview.
+                <span className="block font-normal mt-1 text-gray-500">
+                  Please do not use other websites, personal notes, or seek assistance from others while completing the assessment.
+                </span>
               </span>
             </li>
-            <li className="flex items-start gap-2">
+            <li className="flex items-start gap-2 font-medium text-gray-700">
               <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
               <span>
-                <span className="font-medium text-gray-700 mr-1">Don&apos;t use automation</span>
-                tools, scripts, or extensions to assist answers.
+                Automation tools are not allowed.
+                <span className="block font-normal mt-1 text-gray-500">
+                  The use of scripts, browser extensions, or other automated tools to assist with answering questions is strictly prohibited.
+                </span>
               </span>
             </li>
           </ul>
@@ -113,7 +115,7 @@ export function WelcomeSlide({
               className="mt-0.5 h-4 w-4 cursor-pointer accent-primary"
             />
             <label htmlFor="agree-checkbox" className="text-sm font-normal text-gray-800 cursor-pointer leading-snug">
-              I understand the rules and agree to proceed without external assistance
+              I acknowledge and understand the interview guidelines and confirm that I will proceed without the use of external assistance.
             </label>
           </div>
           <AlertDialogFooter>
@@ -123,39 +125,38 @@ export function WelcomeSlide({
               onClick={() => { if (agreed) onGuidelinesOpenChange(false); }}
             >
               Continue
-              <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
+              {/* <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
                 <ArrowRight className="h-4 w-4" />
-              </span>
+              </span> */}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Welcome slide */}
-      <div className="border-t border-gray-200 mx-1 my-6" />
-      <div className="relative w-full mt-4 h-fit px-8 pb-2 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-        <div className="font-normal overflow-hidden relative h-fit text-sm w-full mb-4 min-h-[120px]">
+      <div className="border-t border-gray-200 mx-2 my-2" />
+      <div className="relative w-full mt-4 h-fit px-16 pb-2 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+        <div className="font-normal overflow-hidden relative h-fit text-sm w-full min-h-[120px]">
           <div
-            className="mb-5 prose prose-sm max-w-none animate-in fade-in duration-300"
+            className="mb-2 prose prose-sm max-w-none animate-in fade-in duration-300"
             dangerouslySetInnerHTML={{
               __html: normalizeDescriptionToHtml(interview?.description || ''),
             }}
           />
         </div>
-        <div className="border-t border-gray-200 mx-1 my-6" />
-
-        <div className="flex flex-row justify-center items-center gap-2">
-          <Button
-            className="group h-auto w-[140px] justify-center border border-transparent transition-all duration-300 flex items-center text-sm font-medium rounded-md bg-primary text-white hover:bg-primary/85"
-            disabled={loading}
-            onClick={onProceed}
-          >
-            Next
-            <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          </Button>
-        </div>
+      </div>
+      <div className="border-t border-gray-200 mx-2 mb-6" />
+      <div className="flex flex-row justify-center items-center gap-2">
+        <Button
+          className="group h-auto w-[150px] justify-center border border-transparent transition-all duration-300 flex items-center text-sm font-medium rounded-md bg-primary text-white hover:bg-primary/85"
+          disabled={loading}
+          onClick={onProceed}
+        >
+          Next
+          {/* <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
+            <ArrowRight className="h-4 w-4" />
+          </span> */}
+        </Button>
       </div>
     </>
   );

@@ -269,7 +269,7 @@ function DetailsPopup({
           <textarea
             className="border-2 border-gray-500 rounded-md mt-2 w-full px-3 py-2 text-sm focus:outline-none resize-none"
             rows={4}
-            placeholder="e.g. Find best candidates based on their technical skills and previous projects."
+            placeholder="e.g. Find the best candidates based on their soft skills and past experiences."
             value={objective}
             onChange={(e) => setObjective(e.target.value)}
             onBlur={(e) => setObjective(e.target.value.trim())}
