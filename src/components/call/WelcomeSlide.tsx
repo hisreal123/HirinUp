@@ -146,7 +146,7 @@ export function WelcomeSlide({
 
         <div className="flex flex-row justify-center items-center gap-2">
           <Button
-            className="group h-auto w-[150px] justify-center border border-transparent transition-all duration-300 flex items-center text-sm font-medium rounded-md bg-primary text-white hover:bg-primary/85"
+            className="group h-auto w-[140px] justify-center border border-transparent transition-all duration-300 flex items-center text-sm font-medium rounded-md bg-primary text-white hover:bg-primary/85"
             disabled={loading}
             onClick={onProceed}
           >
