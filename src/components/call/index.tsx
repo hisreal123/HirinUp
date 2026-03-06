@@ -1222,7 +1222,7 @@ function Call({
                       Time Used
                     </div>
                     <div
-                      className={`text-sm font-bold ${isTimerPaused ? 'text-amber-500' : 'text-gray-900'}`}
+                      className={`text-sm font-bold ${isTimerPaused ? 'text-amber-500' : 'text-gray-700'}`}
                     >
                       {formatTime(timeUsedSeconds)}
                     </div>
@@ -1247,7 +1247,7 @@ function Call({
                       Time Left
                     </div>
                     <div
-                      className={`text-sm font-bold ${isTimeUp ? 'text-red-500' : timeLeftSeconds < 60 ? 'text-red-500' : 'text-gray-900'}`}
+                      className={`text-sm font-bold ${isTimeUp ? 'text-red-500' : timeLeftSeconds < 60 ? 'text-red-500' : 'text-gray-700'}`}
                     >
                       {isTimeUp ? '00:00' : formatTime(timeLeftSeconds)}
                     </div>

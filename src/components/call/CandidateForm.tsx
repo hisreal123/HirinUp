@@ -342,23 +342,23 @@ export const CandidateForm = memo(function CandidateForm({
       </div>
       <div className="w-[80%] flex flex-row mx-auto justify-center items-center align-middle gap-2 mt-4">
         <Button
-          className="group h-auto bg-white border border-primary text-black px-6 py-2 text-base leading-none font-normal rounded-lg flex flex-row justify-center mb-8" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
+          className="group h-auto w-fit hover:border-primary/90 hover:text-primary/90 text-slate-700 border-slate-700 border px-6 transition-all duration-300 flex items-center bg-transparent hover:bg-transparent text-sm font-medium rounded-md"
           disabled={loading}
           onClick={onGoBack}
         >
           <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:mr-1">
             <ArrowLeft className="h-4 w-4" />
           </span>
-          Go Back
+          Back
         </Button>
         <Button
-          className="group h-auto border border-transparent px-5 py-2 text-base leading-none font-normal rounded-xl flex flex-row justify-center mb-8 bg-primary text-white hover:bg-primary/90" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
+          className="group h-auto w-fit border border-transparent px-4 transition-all duration-300 flex items-center text-sm font-medium rounded-md bg-primary text-white hover:bg-primary/90"
           disabled={loading || !isFormValid}
           onClick={onStartInterview}
         >
           {!loading ? (
             <>
-              Start Interview
+              Join Interview
               <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
                 <ArrowRight className="h-4 w-4" />
               </span>

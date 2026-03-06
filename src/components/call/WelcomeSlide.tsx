@@ -146,7 +146,7 @@ export function WelcomeSlide({
 
         <div className="flex flex-row justify-center items-center gap-2">
           <Button
-            className="group h-auto rounded-lg flex flex-row justify-center mb-8 px-10 py-2 text-base leading-none font-normal text-white hover:bg-primary/85" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
+            className="group h-auto w-[150px] justify-center border border-transparent transition-all duration-300 flex items-center text-sm font-medium rounded-md bg-primary text-white hover:bg-primary/85"
             disabled={loading}
             onClick={onProceed}
           >
