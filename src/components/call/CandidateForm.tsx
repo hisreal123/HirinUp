@@ -193,9 +193,9 @@ export const CandidateForm = memo(function CandidateForm({
     turnstileToken;
 
   return (
-    <div className="relative w-full mt-2 rounded-md p-2 m-2 max-h-[calc(88vh-200px)] overflow-y-auto">
+    <div className="relative w-full mt-2 rounded-md px-2 max-h-[calc(88vh-200px)] overflow-y-auto">
+      <div className="border-t border-gray-200 mx-2 mb-4" />
       <div className="p-2">
-        <div className="border-t border-gray-200 mx-1 mt-2 mb-4" />
         <h2 className="text-lg font-semibold mb-4 mt-4 text-center">
           Your Information
         </h2>
@@ -336,7 +336,7 @@ export const CandidateForm = memo(function CandidateForm({
           </div>
         </div>
         {/* Turnstile Widget */}
-        <div className="col-span-2 flex justify-center mt-4">
+        <div className="col-span-2 flex justify-center mt-6">
           <div ref={turnstileRef} />
         </div>
       </div>
@@ -346,25 +346,26 @@ export const CandidateForm = memo(function CandidateForm({
           disabled={loading}
           onClick={onGoBack}
         >
-          <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:mr-1">
+          {/* <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:mr-1">
             <ArrowLeft className="h-4 w-4" />
-          </span>
+          </span> */}
           Back
         </Button>
         <Button
-          className="group h-auto w-fit border border-transparent px-4 transition-all duration-300 flex items-center text-sm font-medium rounded-md bg-primary text-white hover:bg-primary/90"
+          className="group relative h-auto w-fit border border-transparent px-4 transition-all duration-300 flex items-center justify-center text-sm font-medium rounded-md bg-primary text-white hover:bg-primary/90"
           disabled={loading || !isFormValid}
           onClick={onStartInterview}
         >
-          {!loading ? (
-            <>
-              Join Interview
-              <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
-                <ArrowRight className="h-4 w-4" />
-              </span>
-            </>
-          ) : (
-            <MiniLoader />
+          {/* Text (keeps width reserved) */}
+          <span className={`${loading ? "opacity-0" : "opacity-100"} flex items-center`}>
+            Start Interview
+          </span>
+
+          {/* Loader */}
+          {loading && (
+            <span className="absolute inset-0 flex items-center justify-center">
+              <MiniLoader />
+            </span>
           )}
         </Button>
         <AlertDialog>

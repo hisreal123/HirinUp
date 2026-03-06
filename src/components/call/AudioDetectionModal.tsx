@@ -318,9 +318,9 @@ export function AudioDetectionModal({
                 onClick={() => setCurrentStep((currentStep + 1) as 1 | 2 | 3)}
               >
                 Next
-                <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
+                {/* <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
                   <ArrowRight className="h-4 w-4" />
-                </span>
+                </span> */}
               </Button>
             ) : (
               <Button
@@ -333,9 +333,9 @@ export function AudioDetectionModal({
                 }}
               >
                 Resume
-                <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
+                {/* <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
                   <ArrowRight className="h-4 w-4" />
-                </span>
+                </span> */}
               </Button>
             )}
           </div>
