@@ -70,9 +70,8 @@ export const InterviewView = memo(function InterviewView({
               <div className="font-semibold mt-1 text-sm">You</div>
             </div>
           </div>
-          {/* Scrollable response text */}
           <div
-            ref={lastUserResponseRef}
+            ref={lastUserResponseRef} 
             className="w-full flex-1 overflow-y-auto text-base lg:text-lg text-left leading-relaxed font-normal"
           >
             {lastUserResponse}
