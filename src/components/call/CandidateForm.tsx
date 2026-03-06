@@ -342,24 +342,24 @@ export const CandidateForm = memo(function CandidateForm({
       </div>
       <div className="w-[80%] flex flex-row mx-auto justify-center items-center align-middle gap-2 mt-4">
         <Button
-          className="group h-auto bg-white border border-primary text-black px-8 py-3 text-lg leading-none font-normal rounded-lg flex flex-row justify-center mb-8" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
+          className="group h-auto bg-white border border-primary text-black px-6 py-2 text-base leading-none font-normal rounded-lg flex flex-row justify-center mb-8" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
           disabled={loading}
           onClick={onGoBack}
         >
-          <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:mr-2">
+          <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:mr-1">
             <ArrowLeft className="h-4 w-4" />
           </span>
           Go Back
         </Button>
         <Button
-          className="group h-auto border border-transparent px-12 py-3 text-lg leading-none font-normal rounded-xl flex flex-row justify-center mb-8 bg-primary text-white hover:bg-primary/90" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
+          className="group h-auto border border-transparent px-5 py-2 text-base leading-none font-normal rounded-xl flex flex-row justify-center mb-8 bg-primary text-white hover:bg-primary/90" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
           disabled={loading || !isFormValid}
           onClick={onStartInterview}
         >
           {!loading ? (
             <>
               Start Interview
-              <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
+              <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
                 <ArrowRight className="h-4 w-4" />
               </span>
             </>

@@ -1333,7 +1333,7 @@ function Call({
                   </div>
                   {isStarted && (
                     <div className="ml-4 text-xs text-gray-500">
-                      ({formatTime(timeUsedSeconds)} /{' '}
+                      ({formatTime(timeUsedSeconds)} /
                       {formatTime(totalTimeSeconds)})
                     </div>
                   )}

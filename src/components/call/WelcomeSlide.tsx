@@ -112,7 +112,7 @@ export function WelcomeSlide({
               onChange={(e) => setAgreed(e.target.checked)}
               className="mt-0.5 h-4 w-4 cursor-pointer accent-primary"
             />
-            <label htmlFor="agree-checkbox" className="text-sm font-bold text-gray-800 cursor-pointer leading-snug">
+            <label htmlFor="agree-checkbox" className="text-sm font-normal text-gray-800 cursor-pointer leading-snug">
               I understand the rules and agree to proceed without external assistance
             </label>
           </div>
@@ -123,7 +123,7 @@ export function WelcomeSlide({
               onClick={() => { if (agreed) onGuidelinesOpenChange(false); }}
             >
               Continue
-              <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
+              <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
                 <ArrowRight className="h-4 w-4" />
               </span>
             </AlertDialogAction>
@@ -146,12 +146,12 @@ export function WelcomeSlide({
 
         <div className="flex flex-row justify-center items-center gap-2">
           <Button
-            className="group h-auto rounded-lg flex flex-row justify-center mb-8 px-16 py-3 text-lg leading-none font-normal text-white hover:bg-primary/85" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
+            className="group h-auto rounded-lg flex flex-row justify-center mb-8 px-10 py-2 text-base leading-none font-normal text-white hover:bg-primary/85" style={{ fontFamily: 'Montreal, sans-serif', fontWeight: 400 }}
             disabled={loading}
             onClick={onProceed}
           >
             Next
-            <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-5 group-hover:ml-2">
+            <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
               <ArrowRight className="h-4 w-4" />
             </span>
           </Button>

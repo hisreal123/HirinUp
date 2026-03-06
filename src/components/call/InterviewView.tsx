@@ -22,7 +22,7 @@ export const InterviewView = memo(function InterviewView({
     <>
       <div className="flex flex-row p-2 items-stretch h-[480px]">
         {/* Interviewer column */}
-        <div className="w-[50%] flex flex-col py-2 px-1 h-full">
+        <div className="w-[50%] flex flex-col py-4 px-3 h-full">
           {/* Avatar — top-left */}
           <div className="flex flex-col items-start mb-3 flex-shrink-0">
             {interviewerImg ? (
@@ -47,31 +47,32 @@ export const InterviewView = memo(function InterviewView({
             <div className="font-semibold mt-1 text-sm">AI Interviewer</div>
           </div>
           {/* Scrollable response text */}
-          <div className="w-full flex-1 overflow-y-auto text-base lg:text-lg px-1 text-left leading-relaxed font-normal">
+          <div className="w-full flex-1 overflow-y-auto text-base lg:text-lg text-left leading-relaxed font-normal">
             {lastInterviewerResponse}
           </div>
         </div>
         <div className="w-px bg-gray-200 self-stretch" />
 
         {/* Candidate column */}
-        <div className="w-[50%] flex flex-col py-2 px-1">
+        <div className="w-[50%] flex flex-col py-4 px-3">
           {/* Avatar — top-right */}
-          <div className="flex flex-col items-end mb-3 flex-shrink-0">
-            <Image
-              src={`/user-icon.png`}
-              alt="Picture of the user"
-              width={100}
-              height={100}
-              className={`object-cover object-center rounded-full ${
-                activeTurn === 'user' ? 'border-4 border-primary' : ''
-              }`}
-            />
-            <div className="font-semibold mt-1 text-sm">You</div>
+          <div className="flex justify-end mb-3 flex-shrink-0">
+            <div className="flex flex-col items-center">
+              <Image
+                src={`/user-icon.png`}
+                alt="Picture of the user"
+                width={100}
+                height={100}
+                className={`object-cover object-center rounded-full ${
+                  activeTurn === 'user' ? 'border-4 border-primary' : ''
+                }`}
+              />
+              <div className="font-semibold mt-1 text-sm">You</div>
+            </div>
           </div>
-          {/* Scrollable response text */}
           <div
-            ref={lastUserResponseRef}
-            className="w-full flex-1 overflow-y-auto text-base lg:text-lg px-1 text-left leading-relaxed font-normal"
+            ref={lastUserResponseRef} 
+            className="w-full flex-1 overflow-y-auto text-base lg:text-lg text-left leading-relaxed font-normal"
           >
             {lastUserResponse}
           </div>
