@@ -13,6 +13,8 @@ interface InterviewStageProps {
   interviewerImg: string;
   lastUserResponseRef: React.RefObject<HTMLDivElement>;
   isEnded: boolean;
+  interviewTitle?: string;
+  organizationName?: string;
   onAudioNotDetectedChange: (detected: boolean) => void;
   onTimerPausedChange: (paused: boolean) => void;
   onPerformAudioChecks: (fn: () => Promise<void>) => void;
@@ -28,6 +30,8 @@ export function InterviewStage({
   interviewerImg,
   lastUserResponseRef,
   isEnded,
+  interviewTitle,
+  organizationName,
   onAudioNotDetectedChange,
   onTimerPausedChange,
   onPerformAudioChecks,
@@ -106,6 +110,8 @@ export function InterviewStage({
         availableDevices={availableDevices}
         selectedDeviceId={selectedDeviceId}
         isTestingMic={isTestingMic}
+        interviewTitle={interviewTitle}
+        organizationName={organizationName}
         onCheckAgain={performAudioChecks}
         onOpenChange={(open) => {
           setShowAudioModal(open);
