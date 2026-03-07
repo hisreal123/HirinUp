@@ -1431,6 +1431,8 @@ function Call({
                 interviewerImg={interviewerImg}
                 lastUserResponseRef={lastUserResponseRef}
                 isEnded={isEnded}
+                interviewTitle={interview?.name}
+                organizationName={organizationName}
                 setLastInterviewerResponse={setLastInterviewerResponse}
                 onAudioNotDetectedChange={handleAudioNotDetectedChange}
                 onTimerPausedChange={handleTimerPausedChange}
