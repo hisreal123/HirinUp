@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { MOBILE_UA_PATTERN } from '@/lib/utils';
 
-const MOBILE_BREAKPOINT = 1024; // Desktop/large devices only (1024px and above)
 
 export default function MobileRestriction({
   children,
@@ -14,8 +14,8 @@ export default function MobileRestriction({
 
   useEffect(() => {
     const checkDevice = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < MOBILE_BREAKPOINT);
+      const isMobileUA = MOBILE_UA_PATTERN.test(navigator.userAgent);
+      setIsMobile(isMobileUA);
     };
 
     // Check on mount
