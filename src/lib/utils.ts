@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+export const MOBILE_UA_PATTERN = /Android|iPhone|iPad|iPod/i;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
