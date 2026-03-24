@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Interview } from '@/types/interview';
 import { ArrowRight, Info, Check } from 'lucide-react';
-import { normalizeDescriptionToHtml } from '@/lib/utils';
+import { DescriptionDisplay } from '@/components/ui/DescriptionDisplay';
 
 interface WelcomeSlideProps {
   interview: Interview;
@@ -137,11 +137,9 @@ export function WelcomeSlide({
       <div className="border-t border-gray-200 mx-2 my-2" />
       <div className="relative w-full mt-4 h-fit px-16 pb-2 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
         <div className="font-normal overflow-hidden relative h-fit text-sm w-full min-h-[120px]">
-          <div
-            className="mb-2 prose prose-sm max-w-none animate-in fade-in duration-300"
-            dangerouslySetInnerHTML={{
-              __html: normalizeDescriptionToHtml(interview?.description || ''),
-            }}
+          <DescriptionDisplay
+            description={interview?.description || ''}
+            className="mb-2 animate-in fade-in duration-300"
           />
         </div>
       </div>

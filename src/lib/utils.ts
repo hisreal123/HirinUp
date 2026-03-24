@@ -80,7 +80,18 @@ export function normalizeDescriptionToHtml(description: string): string {
   const hasMarkdown = /^[ \t]*[*\-] |^#+[ \t]|^>[ \t]|^\d+\.[ \t]|^(-{3,}|\*{3,}|_{3,})$/m.test(
     description
   );
-  if (!hasMarkdown && /<ul|<ol|<li/i.test(description)) {return description;}
+  if (!hasMarkdown && /<p>|<ul|<ol|<li/i.test(description)) {
+    // For display: convert TipTap's block <p> tags to inline <br> so spacing
+    // exactly matches what was typed: 1 enter = line break, 2 enters = blank line.
+    const html = description
+      .replace(/<li><p>/gi, '<li>')
+      .replace(/<\/p><\/li>/gi, '</li>')
+      .replace(/<p><\/p>/gi, '<br>')
+      .replace(/<p>([\s\S]*?)<\/p>/gi, '$1<br>')
+      .replace(/(<br\s*\/?>)+$/i, '');
+
+    return html;
+  }
 
   // Strip HTML tags to plain text so we can re-parse as Markdown.
   // Preserve newlines from block-level closing tags.
@@ -101,7 +112,7 @@ export function normalizeDescriptionToHtml(description: string): string {
     if (bulletItems.length === 0) {return;}
     parts.push(
       '<ul>' +
-        bulletItems.map((item) => `<li><p>${item}</p></li>`).join('') +
+        bulletItems.map((item) => `<li>${item}</li>`).join('') +
         '</ul>'
     );
     bulletItems = [];
@@ -111,7 +122,7 @@ export function normalizeDescriptionToHtml(description: string): string {
     if (orderedItems.length === 0) {return;}
     parts.push(
       '<ol>' +
-        orderedItems.map((item) => `<li><p>${item}</p></li>`).join('') +
+        orderedItems.map((item) => `<li>${item}</li>`).join('') +
         '</ol>'
     );
     orderedItems = [];
@@ -194,4 +205,18 @@ export function normalizeDescriptionToHtml(description: string): string {
   flushOrdered();
 
   return parts.join('');
+}
+
+// For initializing TipTap editor — keeps <p> block structure intact.
+// Use normalizeDescriptionToHtml (above) only for display/rendering.
+export function normalizeDescriptionForEditor(description: string): string {
+  if (!description) {return '';}
+  const hasMarkdown = /^[ \t]*[*\-] |^#+[ \t]|^>[ \t]|^\d+\.[ \t]|^(-{3,}|\*{3,}|_{3,})$/m.test(description);
+  if (!hasMarkdown && /<p>|<ul|<ol|<li/i.test(description)) {
+    return description;
+  }
+  // Plain text or markdown — run through the full conversion (which outputs <p> format)
+  
+  return normalizeDescriptionToHtml(description);
+  
 }

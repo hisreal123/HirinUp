@@ -17,7 +17,8 @@ import Image from 'next/image';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
-import { normalizeDescriptionToHtml } from '@/lib/utils';
+import { DescriptionDisplay } from '@/components/ui/DescriptionDisplay';
+import { normalizeDescriptionForEditor } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
 import DeleteInterviewModal from '@/components/dashboard/interview/deleteInterviewModal';
 
@@ -31,7 +32,7 @@ function EditInterview({ interview }: EditInterviewProps) {
   const queryClient = useQueryClient();
 
   const [description, setDescription] = useState<string>(
-    normalizeDescriptionToHtml(interview?.description || '')
+    normalizeDescriptionForEditor(interview?.description || '')
   );
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditingObjective, setIsEditingObjective] = useState(false);
@@ -247,13 +248,9 @@ function EditInterview({ interview }: EditInterviewProps) {
             />
           </div>
         ) : (
-          <div
-            className="ml-2 w-[75%] mt-3 px-3 py-2 text-sm border-2 border-gray-200 rounded-md min-h-[5rem] prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{
-              __html:
-                description ||
-                '<span class="text-gray-400">No description set.</span>',
-            }}
+          <DescriptionDisplay
+            description={description}
+            className="ml-2 w-[75%] mt-3 px-3 py-2 text-sm border-2 border-gray-200 rounded-md min-h-[5rem]"
           />
         )}
         <div className="flex items-center gap-2 mt-3 mb-1 ml-2">
