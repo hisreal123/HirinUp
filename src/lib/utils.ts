@@ -35,8 +35,8 @@ export function formatTimestampToDateHHMM(timestamp: string): string {
 
 export function formatDateReadable(timestamp: string): string {
   const date = new Date(timestamp);
-  
-return date.toLocaleDateString('en-US', {
+
+  return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -73,13 +73,16 @@ export function isLightColor(color: string) {
 // If the description is pure TipTap HTML (no Markdown patterns), it is
 // returned unchanged.
 export function normalizeDescriptionToHtml(description: string): string {
-  if (!description) {return '';}
+  if (!description) {
+    return '';
+  }
 
   // Detect Markdown patterns (multiline). If none are present and the content
   // already has list/structural HTML, it's TipTap output — return as-is.
-  const hasMarkdown = /^[ \t]*[*\-] |^#+[ \t]|^>[ \t]|^\d+\.[ \t]|^(-{3,}|\*{3,}|_{3,})$/m.test(
-    description
-  );
+  const hasMarkdown =
+    /^[ \t]*[*\-] |^#+[ \t]|^>[ \t]|^\d+\.[ \t]|^(-{3,}|\*{3,}|_{3,})$/m.test(
+      description
+    );
   if (!hasMarkdown && /<p>|<ul|<ol|<li/i.test(description)) {
     // For display: convert TipTap's block <p> tags to inline <br> so spacing
     // exactly matches what was typed: 1 enter = line break, 2 enters = blank line.
@@ -109,21 +112,21 @@ export function normalizeDescriptionToHtml(description: string): string {
   let orderedItems: string[] = [];
 
   const flushBullets = () => {
-    if (bulletItems.length === 0) {return;}
+    if (bulletItems.length === 0) {
+      return;
+    }
     parts.push(
-      '<ul>' +
-        bulletItems.map((item) => `<li>${item}</li>`).join('') +
-        '</ul>'
+      '<ul>' + bulletItems.map((item) => `<li>${item}</li>`).join('') + '</ul>'
     );
     bulletItems = [];
   };
 
   const flushOrdered = () => {
-    if (orderedItems.length === 0) {return;}
+    if (orderedItems.length === 0) {
+      return;
+    }
     parts.push(
-      '<ol>' +
-        orderedItems.map((item) => `<li>${item}</li>`).join('') +
-        '</ol>'
+      '<ol>' + orderedItems.map((item) => `<li>${item}</li>`).join('') + '</ol>'
     );
     orderedItems = [];
   };
@@ -210,13 +213,17 @@ export function normalizeDescriptionToHtml(description: string): string {
 // For initializing TipTap editor — keeps <p> block structure intact.
 // Use normalizeDescriptionToHtml (above) only for display/rendering.
 export function normalizeDescriptionForEditor(description: string): string {
-  if (!description) {return '';}
-  const hasMarkdown = /^[ \t]*[*\-] |^#+[ \t]|^>[ \t]|^\d+\.[ \t]|^(-{3,}|\*{3,}|_{3,})$/m.test(description);
+  if (!description) {
+    return '';
+  }
+  const hasMarkdown =
+    /^[ \t]*[*\-] |^#+[ \t]|^>[ \t]|^\d+\.[ \t]|^(-{3,}|\*{3,}|_{3,})$/m.test(
+      description
+    );
   if (!hasMarkdown && /<p>|<ul|<ol|<li/i.test(description)) {
     return description;
   }
   // Plain text or markdown — run through the full conversion (which outputs <p> format)
-  
+
   return normalizeDescriptionToHtml(description);
-  
 }

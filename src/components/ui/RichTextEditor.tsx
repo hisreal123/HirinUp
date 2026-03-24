@@ -55,7 +55,9 @@ async function extractPdfText(file: File): Promise<string> {
   let bulletItems: string[] = [];
 
   const flushBullets = () => {
-    if (bulletItems.length === 0) {return;}
+    if (bulletItems.length === 0) {
+      return;
+    }
     parts.push(
       '<ul>' +
         bulletItems.map((item) => `<li><p>${item}</p></li>`).join('') +
@@ -78,7 +80,9 @@ async function extractPdfText(file: File): Promise<string> {
     const rawItems = (content.items as any[]).filter(
       (item) => 'str' in item && item.str
     );
-    if (rawItems.length === 0) {continue;}
+    if (rawItems.length === 0) {
+      continue;
+    }
 
     // Median font size baseline — text larger than 1.2× is treated as bold/heading
     const sizes = rawItems
@@ -94,12 +98,13 @@ async function extractPdfText(file: File): Promise<string> {
     const fontMetaMap = new Map<string, { bold: boolean; italic: boolean }>();
     for (const item of rawItems) {
       const fn: string = item.fontName ?? '';
-      if (fontMetaMap.has(fn)) {continue;}
+      if (fontMetaMap.has(fn)) {
+        continue;
+      }
       try {
-        const fontObj: any =
-          (page.objs as any).has(fn)
-            ? (page.objs as any).get(fn)
-            : (page.commonObjs as any).get(fn);
+        const fontObj: any = (page.objs as any).has(fn)
+          ? (page.objs as any).get(fn)
+          : (page.commonObjs as any).get(fn);
         const realName: string =
           fontObj?.name ?? fontObj?.fontName ?? fontObj?.loadedName ?? fn;
         fontMetaMap.set(fn, {
@@ -116,7 +121,9 @@ async function extractPdfText(file: File): Promise<string> {
 
     rawItems.sort((a, b) => {
       const dy = b.transform[5] - a.transform[5];
-      if (Math.abs(dy) > 1) {return dy > 0 ? 1 : -1;}
+      if (Math.abs(dy) > 1) {
+        return dy > 0 ? 1 : -1;
+      }
 
       return a.transform[4] - b.transform[4];
     });
@@ -144,7 +151,9 @@ async function extractPdfText(file: File): Promise<string> {
         const prevY = lineGroups[li - 1][0].transform[5];
         const currY = group[0].transform[5];
         const lineH = group[0].height || Math.abs(group[0].transform[3]) || 10;
-        if (prevY - currY > lineH * 1.5) {addBreak();}
+        if (prevY - currY > lineH * 1.5) {
+          addBreak();
+        }
       }
 
       const spans: Span[] = [];
@@ -152,12 +161,9 @@ async function extractPdfText(file: File): Promise<string> {
         const fn: string = item.fontName ?? '';
         const fontSize = Math.abs(item.transform[3]) || 10;
         const meta = fontMetaMap.get(fn);
-        const bold =
-          (meta?.bold ?? false) ||
-          fontSize > medianSize * 1.2;
+        const bold = (meta?.bold ?? false) || fontSize > medianSize * 1.2;
         const italic =
-          (meta?.italic ?? false) ||
-          Math.abs(item.transform[2]) > 0.1;
+          (meta?.italic ?? false) || Math.abs(item.transform[2]) > 0.1;
         const last = spans[spans.length - 1];
         if (last && last.bold === bold && last.italic === italic) {
           last.text += item.str;
@@ -166,21 +172,36 @@ async function extractPdfText(file: File): Promise<string> {
         }
       }
 
-      const lineText = spans.map((s) => s.text).join('').trim();
-      if (!lineText) {continue;}
+      const lineText = spans
+        .map((s) => s.text)
+        .join('')
+        .trim();
+      if (!lineText) {
+        continue;
+      }
 
       if (/^[•●◦▪▸►\-*]\s*/.test(lineText)) {
-        bulletItems.push(escape(lineText.replace(/^[•●◦▪▸►\-*]\s*/, '').trim()));
+        bulletItems.push(
+          escape(lineText.replace(/^[•●◦▪▸►\-*]\s*/, '').trim())
+        );
       } else {
         flushBullets();
 
         // If every span on the line is larger than median, treat as a heading
         const lineFontSize =
-          group.reduce((sum, item) => sum + (Math.abs(item.transform[3]) || 10), 0) /
-          group.length;
+          group.reduce(
+            (sum, item) => sum + (Math.abs(item.transform[3]) || 10),
+            0
+          ) / group.length;
         const sizeRatio = lineFontSize / medianSize;
         const headingTag =
-          sizeRatio >= 1.5 ? 'h1' : sizeRatio >= 1.3 ? 'h2' : sizeRatio >= 1.1 ? 'h3' : null;
+          sizeRatio >= 1.5
+            ? 'h1'
+            : sizeRatio >= 1.3
+              ? 'h2'
+              : sizeRatio >= 1.1
+                ? 'h3'
+                : null;
         const isWholeLine = spans.every((s) => s.bold);
 
         if (headingTag && isWholeLine) {
@@ -189,9 +210,15 @@ async function extractPdfText(file: File): Promise<string> {
           const lineHtml = spans
             .map(({ text, bold, italic }) => {
               let t = escape(text);
-              if (bold && italic) {return `<em><strong>${t}</strong></em>`;}
-              if (bold) {return `<strong>${t}</strong>`;}
-              if (italic) {return `<em>${t}</em>`;}
+              if (bold && italic) {
+                return `<em><strong>${t}</strong></em>`;
+              }
+              if (bold) {
+                return `<strong>${t}</strong>`;
+              }
+              if (italic) {
+                return `<em>${t}</em>`;
+              }
 
               return t;
             })
@@ -203,7 +230,9 @@ async function extractPdfText(file: File): Promise<string> {
     }
 
     flushBullets();
-    if (i < pdf.numPages) {addBreak();}
+    if (i < pdf.numPages) {
+      addBreak();
+    }
   }
 
   flushBullets();
@@ -235,7 +264,9 @@ async function extractDocxHtml(file: File): Promise<string> {
 }
 
 async function extractFileHtml(file: File): Promise<string> {
-  if (file.type === 'application/pdf') {return extractPdfText(file);}
+  if (file.type === 'application/pdf') {
+    return extractPdfText(file);
+  }
   if (
     file.type ===
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
@@ -277,7 +308,9 @@ export function RichTextEditor({
       charCountRef.current = chars;
       setCharCount(chars);
       onChange(editor.getHTML());
-      if (onTextChange) {onTextChange(text);}
+      if (onTextChange) {
+        onTextChange(text);
+      }
     },
     editorProps: {
       attributes: {
@@ -328,7 +361,9 @@ export function RichTextEditor({
                   editorRef.current
                     ?.chain()
                     .focus()
-                    .insertContent(html, { parseOptions: { preserveWhitespace: 'full' } })
+                    .insertContent(html, {
+                      parseOptions: { preserveWhitespace: 'full' },
+                    })
                     .run();
                 }
               })
@@ -346,9 +381,12 @@ export function RichTextEditor({
         // (PDF viewers wrap plain text in <html><body> with no markup).
         const rawHtml = event.clipboardData?.getData('text/html') ?? '';
         if (rawHtml) {
-          const match = rawHtml.match(/<!--StartFragment-->([\s\S]*?)<!--EndFragment-->/);
+          const match = rawHtml.match(
+            /<!--StartFragment-->([\s\S]*?)<!--EndFragment-->/
+          );
           const fragment = match ? match[1].trim() : rawHtml;
-          const hasFormatting = /<(strong|em|b|i|u|ul|ol|li|h[1-6]|blockquote)/i.test(fragment);
+          const hasFormatting =
+            /<(strong|em|b|i|u|ul|ol|li|h[1-6]|blockquote)/i.test(fragment);
           if (hasFormatting) {
             editorRef.current?.chain().focus().insertContent(fragment).run();
 
@@ -374,10 +412,14 @@ export function RichTextEditor({
   // Keep ref in sync so handlePaste (a ProseMirror closure) can reach the editor
   editorRef.current = editor;
 
-  if (!editor) {return null;}
+  if (!editor) {
+    return null;
+  }
 
   async function insertFile(file: File) {
-    if (!editor) {return;}
+    if (!editor) {
+      return;
+    }
     setIsPdfLoading(true);
     try {
       const html = await extractFileHtml(file);
@@ -401,7 +443,9 @@ export function RichTextEditor({
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
         f.name.endsWith('.docx')
     );
-    if (supported) {insertFile(supported);}
+    if (supported) {
+      insertFile(supported);
+    }
   }
 
   const remaining = MAX_CHARS - charCount;
@@ -421,87 +465,159 @@ export function RichTextEditor({
     title?: string;
     children: React.ReactNode;
   }) {
-  return <button
-      type="button"
-      title={title}
-      className={`p-1 rounded transition-colors ${
-        active
-          ? 'bg-indigo-100 text-indigo-700'
-          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-      }`}
-      onMouseDown={onMouseDown}
-    >
-      {children}
-    </button>
-}
+    return (
+      <button
+        type="button"
+        title={title}
+        className={`p-1 rounded transition-colors ${
+          active
+            ? 'bg-indigo-100 text-indigo-700'
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+        }`}
+        onMouseDown={onMouseDown}
+      >
+        {children}
+      </button>
+    );
+  }
 
   function Divider() {
-  return <div className="w-px h-4 bg-gray-200 mx-1" />
-}
+    return <div className="w-px h-4 bg-gray-200 mx-1" />;
+  }
 
   return (
     <div
       className={`border-2 ${isAtLimit ? 'border-red-400' : isWarning ? 'border-orange-400' : isDragOver ? 'border-indigo-400 bg-indigo-50' : 'border-gray-500'} rounded-md mt-2 w-full ${className ?? ''}`}
       onDrop={handleDrop}
-      onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+      }}
       onDragLeave={() => setIsDragOver(false)}
     >
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-0.5 px-2 py-1 border-b border-gray-200">
-
         {/* Text style */}
-        <Btn active={editor.isActive('bold')} title="Bold"
-          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}>
+        <Btn
+          active={editor.isActive('bold')}
+          title="Bold"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().toggleBold().run();
+          }}
+        >
           <Bold size={13} />
         </Btn>
-        <Btn active={editor.isActive('italic')} title="Italic"
-          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }}>
+        <Btn
+          active={editor.isActive('italic')}
+          title="Italic"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().toggleItalic().run();
+          }}
+        >
           <Italic size={13} />
         </Btn>
-        <Btn active={editor.isActive('underline')} title="Underline"
-          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleUnderline().run(); }}>
+        <Btn
+          active={editor.isActive('underline')}
+          title="Underline"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().toggleUnderline().run();
+          }}
+        >
           <UnderlineIcon size={13} />
         </Btn>
-        <Btn active={editor.isActive('strike')} title="Strikethrough"
-          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleStrike().run(); }}>
+        <Btn
+          active={editor.isActive('strike')}
+          title="Strikethrough"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().toggleStrike().run();
+          }}
+        >
           <Strikethrough size={13} />
         </Btn>
 
         <Divider />
 
         {/* Alignment */}
-        <Btn active={editor.isActive({ textAlign: 'left' })} title="Align left"
-          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('left').run(); }}>
+        <Btn
+          active={editor.isActive({ textAlign: 'left' })}
+          title="Align left"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().setTextAlign('left').run();
+          }}
+        >
           <AlignLeft size={13} />
         </Btn>
-        <Btn active={editor.isActive({ textAlign: 'center' })} title="Align center"
-          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('center').run(); }}>
+        <Btn
+          active={editor.isActive({ textAlign: 'center' })}
+          title="Align center"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().setTextAlign('center').run();
+          }}
+        >
           <AlignCenter size={13} />
         </Btn>
-        <Btn active={editor.isActive({ textAlign: 'right' })} title="Align right"
-          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('right').run(); }}>
+        <Btn
+          active={editor.isActive({ textAlign: 'right' })}
+          title="Align right"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().setTextAlign('right').run();
+          }}
+        >
           <AlignRight size={13} />
         </Btn>
 
         <Divider />
 
         {/* Lists */}
-        <Btn active={editor.isActive('bulletList')} title="Bullet list"
-          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBulletList().run(); }}>
+        <Btn
+          active={editor.isActive('bulletList')}
+          title="Bullet list"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().toggleBulletList().run();
+          }}
+        >
           <List size={13} />
         </Btn>
-        <Btn active={editor.isActive('orderedList')} title="Ordered list"
-          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleOrderedList().run(); }}>
+        <Btn
+          active={editor.isActive('orderedList')}
+          title="Ordered list"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().toggleOrderedList().run();
+          }}
+        >
           <ListOrdered size={13} />
         </Btn>
 
         <Divider />
 
         {/* PDF upload */}
-        <Btn active={false} title="Upload PDF or Word document"
-          onMouseDown={(e) => { e.preventDefault(); fileInputRef.current?.click(); }}>
+        <Btn
+          active={false}
+          title="Upload PDF or Word document"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }}
+        >
           {isPdfLoading ? (
-            <svg className="animate-spin" width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="animate-spin"
+              width={13}
+              height={13}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
             </svg>
           ) : (
@@ -515,11 +631,12 @@ export function RichTextEditor({
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) {insertFile(file);}
+            if (file) {
+              insertFile(file);
+            }
             e.target.value = '';
           }}
         />
-
       </div>
 
       {/* Scrollable editor area */}
@@ -552,10 +669,14 @@ export function RichTextEditor({
             stroke={strokeColor}
             strokeWidth={STROKE_WIDTH}
             strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={CIRCUMFERENCE * (1 - Math.min(charCount / MAX_CHARS, 1))}
+            strokeDashoffset={
+              CIRCUMFERENCE * (1 - Math.min(charCount / MAX_CHARS, 1))
+            }
             strokeLinecap="round"
             transform={`rotate(-90 ${CIRCLE_SIZE / 2} ${CIRCLE_SIZE / 2})`}
-            style={{ transition: 'stroke-dashoffset 0.15s ease, stroke 0.15s ease' }}
+            style={{
+              transition: 'stroke-dashoffset 0.15s ease, stroke 0.15s ease',
+            }}
           />
           {/* Remaining count — shown only when ≤ 20 left */}
           {(isWarning || isAtLimit) && (

@@ -46,65 +46,74 @@ export function WelcomeSlide({
               />
               Interview Rules
             </AlertDialogTitle>
-          <div className="border-b-2 border-slate-700 pb-2" />
+            <div className="border-b-2 border-slate-700 pb-2" />
           </AlertDialogHeader>
           <div className="px-4">
-          <ul className="space-y-3 text-sm text-gray-600">
-            <li className="flex items-start gap-2 font-medium text-gray-700">
-              <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
-              <span>
-                Please do not refresh or close this page during the interview.
-                <span className="block font-normal mt-1 text-gray-500">
-                  Exiting the session may permanently terminate your assessment and require the interview to be rescheduled.
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li className="flex items-start gap-2 font-medium text-gray-700">
+                <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
+                <span>
+                  Please do not refresh or close this page during the interview.
+                  <span className="block font-normal mt-1 text-gray-500">
+                    Exiting the session may permanently terminate your
+                    assessment and require the interview to be rescheduled.
+                  </span>
                 </span>
-              </span>
-            </li>
-            <li className="flex items-start gap-2 font-medium text-gray-700">
-              <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
-              <span>
-                Ensure your audio settings are properly configured.
-                <span className="block font-normal mt-1 text-gray-500">
-                  Please confirm that your volume is enabled and grant microphone access when prompted. We recommend completing the interview in a quiet, distraction-free environment.
+              </li>
+              <li className="flex items-start gap-2 font-medium text-gray-700">
+                <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
+                <span>
+                  Ensure your audio settings are properly configured.
+                  <span className="block font-normal mt-1 text-gray-500">
+                    Please confirm that your volume is enabled and grant
+                    microphone access when prompted. We recommend completing the
+                    interview in a quiet, distraction-free environment.
+                  </span>
                 </span>
-              </span>
-            </li>
-            <li className="flex items-start gap-2 font-medium text-gray-700">
-              <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
-              <span>
-                Session activity may be monitored for integrity purposes.
-                <span className="block font-normal mt-1 text-gray-500">
-                  Actions such as tab switching or navigating away from the page may be recorded to ensure compliance with the assessment guidelines.
+              </li>
+              <li className="flex items-start gap-2 font-medium text-gray-700">
+                <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
+                <span>
+                  Session activity may be monitored for integrity purposes.
+                  <span className="block font-normal mt-1 text-gray-500">
+                    Actions such as tab switching or navigating away from the
+                    page may be recorded to ensure compliance with the
+                    assessment guidelines.
+                  </span>
                 </span>
-              </span>
-            </li>
-            <li className="flex items-start gap-2 font-medium text-gray-700">
-              <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
-              <span>
-                The use of AI assistants is strictly prohibited.
-                <span className="block font-normal mt-1 text-gray-500">
-                  This includes tools such as ChatGPT, Claude, Gemini, Copilot, or any similar AI-based services.
+              </li>
+              <li className="flex items-start gap-2 font-medium text-gray-700">
+                <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
+                <span>
+                  The use of AI assistants is strictly prohibited.
+                  <span className="block font-normal mt-1 text-gray-500">
+                    This includes tools such as ChatGPT, Claude, Gemini,
+                    Copilot, or any similar AI-based services.
+                  </span>
                 </span>
-              </span>
-            </li>
-            <li className="flex items-start gap-2 font-medium text-gray-700">
-              <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
-              <span>
-                External resources are not permitted during the interview.
-                <span className="block font-normal mt-1 text-gray-500">
-                  Please do not use other websites, personal notes, or seek assistance from others while completing the assessment.
+              </li>
+              <li className="flex items-start gap-2 font-medium text-gray-700">
+                <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
+                <span>
+                  External resources are not permitted during the interview.
+                  <span className="block font-normal mt-1 text-gray-500">
+                    Please do not use other websites, personal notes, or seek
+                    assistance from others while completing the assessment.
+                  </span>
                 </span>
-              </span>
-            </li>
-            <li className="flex items-start gap-2 font-medium text-gray-700">
-              <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
-              <span>
-                Automation tools are not allowed.
-                <span className="block font-normal mt-1 text-gray-500">
-                  The use of scripts, browser extensions, or other automated tools to assist with answering questions is strictly prohibited.
+              </li>
+              <li className="flex items-start gap-2 font-medium text-gray-700">
+                <Check className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-900" />
+                <span>
+                  Automation tools are not allowed.
+                  <span className="block font-normal mt-1 text-gray-500">
+                    The use of scripts, browser extensions, or other automated
+                    tools to assist with answering questions is strictly
+                    prohibited.
+                  </span>
                 </span>
-              </span>
-            </li>
-          </ul>
+              </li>
+            </ul>
           </div>
           <div className="px-4 flex items-start gap-3 mt-2">
             <input
@@ -114,15 +123,21 @@ export function WelcomeSlide({
               onChange={(e) => setAgreed(e.target.checked)}
               className="mt-0.5 h-4 w-4 cursor-pointer accent-primary"
             />
-            <label htmlFor="agree-checkbox" className="text-sm font-normal text-gray-800 cursor-pointer leading-snug">
-              I acknowledge and understand the interview guidelines and confirm that I will proceed without the use of external assistance.
+            <label
+              htmlFor="agree-checkbox"
+              className="text-sm font-normal text-gray-800 cursor-pointer leading-snug"
+            >
+              I acknowledge and understand the interview guidelines and confirm
+              that I will proceed without the use of external assistance.
             </label>
           </div>
           <AlertDialogFooter>
             <AlertDialogAction
               className="group w-fit hover:border-primary/90 hover:text-primary/90 text-slate-700 border-slate-700 border px-4 transition-all duration-300 flex items-center bg-transparent hover:bg-transparent text-sm font-medium rounded-md"
               disabled={!agreed}
-              onClick={() => { if (agreed) onGuidelinesOpenChange(false); }}
+              onClick={() => {
+                if (agreed) onGuidelinesOpenChange(false);
+              }}
             >
               Continue
               {/* <span className="w-0 overflow-hidden transition-all duration-300 group-hover:w-4 group-hover:ml-1">
