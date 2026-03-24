@@ -74,8 +74,8 @@ function InterviewLanding() {
   useEffect(() => {
     if (!interviewId) {
       setInterviewNotFound(true);
-      
-return;
+
+      return;
     }
 
     const fetchinterview = async () => {
@@ -102,7 +102,9 @@ return;
 
   // Generate response_id and redirect when interview is loaded
   useEffect(() => {
-    if (!interview || !isActive || isGenerating) {return;}
+    if (!interview || !isActive || isGenerating) {
+      return;
+    }
 
     const generateResponseAndRedirect = async () => {
       setIsGenerating(true);

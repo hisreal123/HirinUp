@@ -11,7 +11,7 @@ import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { Plus } from 'lucide-react';
 import { ChevronLeft } from 'lucide-react';
 import MiniLoader from '@/components/loaders/mini-loader/miniLoader';
-import { normalizeDescriptionToHtml } from '@/lib/utils';
+import { normalizeDescriptionForEditor } from '@/lib/utils';
 
 interface Props {
   interviewData: InterviewBase;
@@ -28,7 +28,7 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
     interviewData.questions
   );
   const [description, setDescription] = useState<string>(
-    normalizeDescriptionToHtml(interviewData.description.trim())
+    normalizeDescriptionForEditor(interviewData.description.trim())
   );
   const { fetchInterviews } = useInterviews();
 
