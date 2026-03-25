@@ -44,14 +44,14 @@ export function InterviewProvider({ children }: InterviewProviderProps) {
   const fetchInterviews = useCallback(async () => {
     try {
       setInterviewsLoading(true);
-      const response = await encryptedApiCall<Interview[]>(
-        '/api/get-interviews',
-        {
-          userId: user?.id,
-          organizationId: organization?.id,
-        }
-      );
-      setInterviews(response || []);
+      const response = await encryptedApiCall<{
+        data: Interview[];
+        nextCursor: string | null;
+      }>('/api/get-interviews', {
+        userId: user?.id,
+        organizationId: organization?.id,
+      });
+      setInterviews(response?.data || []);
     } catch (error) {
       console.error(error);
     }

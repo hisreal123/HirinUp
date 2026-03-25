@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   logger.info('generate-insights request received');
   const body = await req.json();
 
-  const responses = await ResponseService.getAllResponses(body.interviewId);
+  const { data: responses } = await ResponseService.getAllResponses(body.interviewId);
   const interview = await InterviewService.getInterviewById(body.interviewId);
 
   let callSummaries = '';

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import CreateInterviewModal from '@/components/dashboard/interview/createInterviewModal';
@@ -8,17 +8,22 @@ import Modal from '@/components/dashboard/Modal';
 
 interface CreateInterviewCardProps {
   viewMode?: 'grid' | 'list';
+  disabled?: boolean;
 }
 
-function CreateInterviewCard({ viewMode = 'grid' }: CreateInterviewCardProps) {
+function CreateInterviewCard({ viewMode = 'grid', disabled = false }: CreateInterviewCardProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <Card
-        className="flex items-center border-dashed border-gray-100 border-2 cursor-pointer hover:scale-105 ease-in-out duration-300 h-48 w-full mt-4 rounded-xl overflow-hidden shadow-sm hover:bg-gray-50"
+        className={`flex items-center border-dashed border-2 h-48 w-full mt-4 rounded-xl overflow-hidden shadow-sm ${
+          disabled
+            ? 'border-gray-200 opacity-50 cursor-not-allowed'
+            : 'border-gray-100 cursor-pointer hover:scale-105 ease-in-out duration-300 hover:bg-gray-50'
+        }`}
         onClick={() => {
-          setOpen(true);
+          if (!disabled) { setOpen(true); }
         }}
       >
         <CardContent

@@ -137,28 +137,95 @@ return verifyResponse ? [verifyResponse] : [];
   return data;
 };
 
-const getAllResponses = async (interviewId: string) => {
+// const getAllResponses = async (interviewId: string) => {
+//   try {
+//     const { data, error } = await supabase
+//       .from('response')
+//       .select(`*`)
+//       .eq('interview_id', interviewId)
+//       .order('created_at', { ascending: false });
+
+//     if (error) {
+//       console.error('Error fetching responses:', error);
+      
+// return [];
+//     }
+
+//     // Return all responses (both completed and incomplete)
+//     return data || [];
+//   } catch (error) {
+//     console.error('Error in getAllResponses:', error);
+    
+// return [];
+//   }
+// };
+
+const getAllResponses = async (
+  interviewId: string,
+  options: {
+    search?: string;
+    cursor?: string; // created_at of the last item on current page
+    limit?: number;
+    status?: string; // candidate_status exact match
+  } = {}
+) => {
   try {
-    const { data, error } = await supabase
+    const { search, cursor, limit = 20, status } = options;
+
+    let query = supabase
       .from('response')
-      .select(`*`)
+      .select('*')
       .eq('interview_id', interviewId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(limit + 1); // fetch one extra to know if there's a next page
+
+    // Cursor — give me rows BEFORE this timestamp (older than last seen)
+    if (cursor) {
+      query = query.lt('created_at', cursor);
+    }
+
+    // Status — exact match on candidate_status
+    if (status && status !== 'ALL') {
+      query = query.eq('candidate_status', status);
+    }
+
+    // Search — id is exact, name/email is partial text
+    if (search) {
+      const numericId = Number(search);
+      if (!isNaN(numericId) && search.trim() !== '') {
+        query = query.eq('id', numericId);
+      } else {
+        query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`);
+      }
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching responses:', error);
-      
-return [];
+
+      return { data: [], nextCursor: null };
     }
 
-    // Return all responses (both completed and incomplete)
-    return data || [];
+    const rows = data || [];
+    const hasNextPage = rows.length > limit;
+    if (hasNextPage) { 
+      rows.pop(); // remove the extra row
+    }
+
+    // next cursor = created_at of the last row in this page
+    const nextCursor = hasNextPage
+      ? (rows[rows.length - 1]?.created_at ?? null)
+      : null;
+
+    return { data: rows, nextCursor };
   } catch (error) {
     console.error('Error in getAllResponses:', error);
-    
-return [];
+
+    return { data: [], nextCursor: null };
   }
 };
+
 
 const getResponseCountByOrganizationId = async (
   organizationId: string

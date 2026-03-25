@@ -12,8 +12,8 @@ export const useGetAllResponses = (
     queryKey: ['responses', interviewId],
     queryFn: async (): Promise<Response[]> => {
       if (!interviewId) {throw new Error('Interview ID is required');}
-      
-return await ResponseService.getAllResponses(interviewId);
+      const result = await ResponseService.getAllResponses(interviewId);
+      return result.data;
     },
     enabled: enabled && !!interviewId,
     staleTime: 2 * 60 * 1000, // 2 minutes (increased to prevent rapid refetches)
