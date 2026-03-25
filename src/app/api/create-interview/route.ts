@@ -57,6 +57,21 @@ export async function POST(req: Request) {
       }
     }
 
+    // Enforce 1000 interview limit per organization / user
+    const countQuery = supabase
+      .from('interview')
+      .select('id', { count: 'exact', head: true });
+    const { count } = organizationId
+      ? await countQuery.eq('organization_id', organizationId)
+      : await countQuery.eq('user_id', payload?.user_id);
+
+    if ((count ?? 0) >= 1000) {
+      return NextResponse.json(
+        { error: 'Interview limit reached. Maximum 1000 interviews allowed per organization.' },
+        { status: 403 }
+      );
+    }
+
     const error = await InterviewService.createInterview({
       ...payload,
       url: url,

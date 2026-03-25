@@ -21,30 +21,35 @@ function InterviewResponses() {
   const params = useParams();
   const router = useRouter();
   const interviewId = params?.interviewId as string;
-  const [responses, setResponses] = useState<Response[]>([]);
+
+  // Stats + Links tab: initial full load (high limit)
+  const [allResponses, setAllResponses] = useState<Response[]>([]);
   const [loading, setLoading] = useState(true);
   const [organizationNameSlug, setOrganizationNameSlug] = useState<string>('');
   const { getInterviewById } = useInterviews();
 
-  const fetchResponses = useCallback(async () => {
-    if (!interviewId) {return;}
-    const responsesData = await ResponseService.getAllResponses(interviewId);
-    setResponses(responsesData || []);
-  }, [interviewId]);
+  // Responses tab: paginated
+  const [tableData, setTableData] = useState<Response[]>([]);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [cursorHistory, setCursorHistory] = useState<string[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
 
+  // Initial load for stats + links tab
   useEffect(() => {
     if (!interviewId) {return;}
 
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [responsesData, interview] = await Promise.all([
-          ResponseService.getAllResponses(interviewId),
+        const [{ data: responsesData }, interview] = await Promise.all([
+          ResponseService.getAllResponses(interviewId, { limit: 1000 }),
           getInterviewById(interviewId),
         ]);
-        setResponses(responsesData || []);
+        setAllResponses(responsesData || []);
 
-        // Fetch organization slug
         if (interview?.organization_id) {
           const orgData = await encryptedApiCall('/api/get-organization', {
             id: interview.organization_id,
@@ -68,19 +73,79 @@ function InterviewResponses() {
     fetchData();
   }, [interviewId, getInterviewById]);
 
-  // Calculate statistics
-  const totalResponses = responses.filter((r) => r.call_id && r.details).length;
-  const totalLinks = responses.length;
-  const totalAnsweredLinks = responses.filter(
+  // Paginated fetch for Responses table
+  const fetchTableData = useCallback(async () => {
+    if (!interviewId) {return;}
+    setTableLoading(true);
+    try {
+      const { data, nextCursor: nc } = await ResponseService.getAllResponses(
+        interviewId,
+        {
+          search: search || undefined,
+          cursor: cursor || undefined,
+          status: statusFilter !== 'ALL' ? statusFilter : undefined,
+        }
+      );
+      setTableData(data);
+      setNextCursor(nc);
+    } catch (error) {
+      console.error('Error fetching table data:', error);
+    } finally {
+      setTableLoading(false);
+    }
+  }, [interviewId, search, cursor, statusFilter]);
+
+  useEffect(() => {
+    fetchTableData();
+  }, [fetchTableData]);
+
+  const handleSearchChange = useCallback((val: string) => {
+    setSearch(val);
+    setCursor(null);
+    setCursorHistory([]);
+    setNextCursor(null);
+  }, []);
+
+  const handleStatusChange = useCallback((val: string) => {
+    setStatusFilter(val);
+    setCursor(null);
+    setCursorHistory([]);
+    setNextCursor(null);
+  }, []);
+
+  const handleNextPage = useCallback(() => {
+    if (!nextCursor) {return;}
+    setCursorHistory((prev) => [...prev, cursor ?? '']);
+    setCursor(nextCursor);
+  }, [nextCursor, cursor]);
+
+  const handlePrevPage = useCallback(() => {
+    setCursorHistory((prev) => {
+      const newHistory = [...prev];
+      const prevCursor = newHistory.pop() ?? null;
+      setCursor(prevCursor);
+      return newHistory;
+    });
+  }, []);
+
+  const fetchAllResponses = useCallback(async () => {
+    if (!interviewId) {return;}
+    const { data } = await ResponseService.getAllResponses(interviewId, {
+      limit: 1000,
+    });
+    setAllResponses(data || []);
+    fetchTableData();
+  }, [interviewId, fetchTableData]);
+
+  // Calculate statistics from full load
+  const totalResponses = allResponses.filter((r) => r.call_id && r.details).length;
+  const totalLinks = allResponses.length;
+  const totalAnsweredLinks = allResponses.filter(
     (r) => r.is_ended === true
   ).length;
-  const unusedLinks = responses.filter((r) => !r.call_id || !r.details).length;
-
-  // Filter responses with details (for table)
-  const responsesWithDetails = responses.filter((r) => r.call_id && r.details);
-
-  // All links (for links tab)
-  const allLinks = responses;
+  const unusedLinks = allResponses.filter(
+    (r) => !r.call_id || !r.details
+  ).length;
 
   return (
     <main className="p-8 pt-0 ml-12 mr-auto rounded-md">
@@ -175,16 +240,25 @@ function InterviewResponses() {
               </TabsList>
               <TabsContent value="responses" className="mt-4">
                 <ResponsesTable
-                  data={responsesWithDetails}
+                  data={tableData}
                   interviewId={interviewId}
+                  isLoading={tableLoading}
+                  search={search}
+                  onSearchChange={handleSearchChange}
+                  statusFilter={statusFilter}
+                  onStatusChange={handleStatusChange}
+                  nextCursor={nextCursor}
+                  onNextPage={handleNextPage}
+                  onPrevPage={handlePrevPage}
+                  canGoPrev={cursorHistory.length > 0}
                 />
               </TabsContent>
               <TabsContent value="links" className="mt-4">
                 <LinksTable
-                  data={allLinks}
+                  data={allResponses}
                   interviewId={interviewId}
                   organizationNameSlug={organizationNameSlug}
-                  onDelete={fetchResponses}
+                  onDelete={fetchAllResponses}
                 />
               </TabsContent>
             </Tabs>

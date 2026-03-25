@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -14,8 +14,6 @@ import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
@@ -34,8 +32,18 @@ import { formatDateReadable } from '@/lib/utils';
 import { Response } from '@/types/response';
 
 interface ResponsesTableProps {
-  data: Response[];
   interviewId: string;
+  data: Response[];
+  isLoading?: boolean;
+    // Backend-driven search/pagination (dedicated responses page)
+  search?: string;
+  onSearchChange?: (val: string) => void;
+  statusFilter?: string;
+  onStatusChange?: (status: string) => void;
+  nextCursor?: string | null;
+  onNextPage?: () => void;
+  onPrevPage?: () => void;
+  canGoPrev?: boolean;
 }
 
 // Pure helpers — defined outside component to avoid recreation on every render
@@ -55,16 +63,69 @@ const STATUS_LABELS: Record<string, string> = {
   NOT_SELECTED: 'Not Selected',
 };
 
-function ResponsesTable({ data, interviewId }: ResponsesTableProps) {
+function ResponsesTable({
+  data,
+  interviewId,
+  isLoading = false,
+  search = '',
+  onSearchChange,
+  statusFilter,
+  onStatusChange,
+  nextCursor = null,
+  onNextPage,
+  onPrevPage,
+  canGoPrev = false,
+}: ResponsesTableProps) {
   const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [inputValue, setInputValue] = useState(search);
+  // Local status state — used when parent doesn't handle it (client-side mode)
+  const [localStatus, setLocalStatus] = useState('ALL');
 
-  // Memoized filter — only recomputes when data changes
-  const completedResponses = useMemo(
-    () => data.filter((response) => response.call_id && response.details),
-    [data]
-  );
+  const effectiveStatus = onStatusChange ? (statusFilter ?? 'ALL') : localStatus;
+
+  // Debounce — fires onSearchChange 300ms after user stops typing (backend search)
+  useEffect(() => {
+    if (!onSearchChange) {return;}
+    const timer = setTimeout(() => onSearchChange(inputValue), 300);
+
+    return () => clearTimeout(timer);
+  }, [inputValue, onSearchChange]);
+
+  const handleStatusSelect = (val: string) => {
+    if (onStatusChange) {
+      onStatusChange(val);
+    } else {
+      setLocalStatus(val);
+    }
+  };
+
+  // displayData:
+  // - backend mode (onSearchChange provided): data is already filtered by backend; only apply local status if needed
+  // - client-side mode: filter by name/email/id text AND status
+  const displayData = useMemo(() => {
+    let filtered = data;
+
+    // Text filter (client-side only — backend mode skips this)
+    if (!onSearchChange && inputValue.trim()) {
+      const lower = inputValue.toLowerCase();
+      filtered = filtered.filter(
+        (r) =>
+          r.name?.toLowerCase().includes(lower) ||
+          r.email?.toLowerCase().includes(lower) ||
+          String(r.id).includes(lower)
+      );
+    }
+
+    // Status filter — always client-side (backend handles it via onStatusChange if provided)
+    if (!onStatusChange && effectiveStatus !== 'ALL') {
+      filtered = filtered.filter(
+        (r) => r.candidate_status === effectiveStatus
+      );
+    }
+
+    return filtered;
+  }, [data, inputValue, onSearchChange, onStatusChange, effectiveStatus]);
 
   const columns = useMemo<ColumnDef<Response>[]>(
     () => [
@@ -86,8 +147,8 @@ function ResponsesTable({ data, interviewId }: ResponsesTableProps) {
         },
         cell: ({ row }) => {
           const name = row.getValue('name') as string | null;
-          
-return (
+
+          return (
             <div className="font-medium">
               {name ? `${name}'s Response` : 'Anonymous'}
             </div>
@@ -112,19 +173,19 @@ return (
         },
         cell: ({ row }) => {
           const email = row.getValue('email') as string | null;
-          
-return <div className="text-sm">{email || '-'}</div>;
+
+          return <div className="text-sm">{email || '-'}</div>;
         },
       },
       {
         accessorKey: 'candidate_status',
-        header: 'Status',
+        header: 'Candidate Status',
         cell: ({ row }) => {
           const status = row.getValue('candidate_status') as string;
           const color = STATUS_COLORS[status] || 'bg-gray-400';
           const label = STATUS_LABELS[status] || 'No Status';
-          
-return (
+
+          return (
             <div className="flex items-center gap-2">
               <div className={`w-3 h-3 rounded-full ${color}`} />
               <span className="text-sm">{label}</span>
@@ -151,8 +212,8 @@ return (
         cell: ({ row }) => {
           const analytics = row.original.analytics;
           const score = analytics?.overallScore;
-          
-return (
+
+          return (
             <div className="text-sm font-semibold">
               {score !== undefined ? score : '-'}
             </div>
@@ -161,14 +222,13 @@ return (
       },
       {
         accessorKey: 'is_ended',
-        header: 'Status',
+        header: 'Interview Status',
         cell: ({ row }) => {
           const response = row.original;
           const isEnded = row.getValue('is_ended') as boolean;
           const hasCallId = !!response.call_id;
           const hasDetails = !!response.details;
 
-          // If response has details but no call_id, show special status
           if (hasDetails && !hasCallId) {
             return (
               <div className="text-sm">
@@ -179,7 +239,6 @@ return (
             );
           }
 
-          // If no details at all, show not started
           if (!hasDetails) {
             return (
               <div className="text-sm">
@@ -188,7 +247,6 @@ return (
             );
           }
 
-          // Normal status for responses with call_id and details
           return (
             <div className="text-sm">
               {isEnded ? (
@@ -218,8 +276,8 @@ return (
         },
         cell: ({ row }) => {
           const date = row.getValue('created_at') as Date;
-          
-return <div className="text-sm">{formatDate(date)}</div>;
+
+          return <div className="text-sm">{formatDate(date)}</div>;
         },
       },
       {
@@ -238,7 +296,6 @@ return <div className="text-sm">{formatDate(date)}</div>;
             return <span className="text-sm text-gray-400">-</span>;
           }
 
-          // Only show View button if call_id exists
           return (
             <Button
               variant="ghost"
@@ -259,63 +316,55 @@ return <div className="text-sm">{formatDate(date)}</div>;
   );
 
   const table = useReactTable({
-    data: completedResponses,
+    data: displayData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
-      const search = filterValue.toLowerCase();
-      const response = row.original;
-      const name = (response.name || '').toLowerCase();
-      const email = (response.email || '').toLowerCase();
-      const status = (response.candidate_status || '').toLowerCase();
-      const score = (response.analytics?.overallScore || '').toString();
-      const isEnded = response.is_ended ? 'completed' : 'in progress';
-
-      return (
-        name.includes(search) ||
-        email.includes(search) ||
-        status.includes(search) ||
-        score.includes(search) ||
-        isEnded.includes(search)
-      );
-    },
-    state: {
-      sorting,
-      globalFilter,
-    },
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
+    state: { sorting },
+    manualPagination: true,
   });
 
-  if (completedResponses.length === 0) {
+  const searchAndFilterBar = (
+    <div className="flex items-center gap-3 flex-wrap">
+      <div className="relative max-w-sm flex-1">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <Input
+          type="text"
+          placeholder="Search by name, email or ID..."
+          value={inputValue}
+          className="pl-10"
+          onChange={(e) => setInputValue(e.target.value)}
+        />
+      </div>
+      <Select value={effectiveStatus} onValueChange={handleStatusSelect}>
+        <SelectTrigger className="w-[160px]">
+          <SelectValue placeholder="Filter by status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">All Statuses</SelectItem>
+          <SelectItem value="SELECTED">Selected</SelectItem>
+          <SelectItem value="POTENTIAL">Potential</SelectItem>
+          <SelectItem value="NOT_SELECTED">Not Selected</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
+  if (!isLoading && displayData.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        No completed responses to display
+      <div className="space-y-4">
+        {searchAndFilterBar}
+        <div className="text-center py-8 text-gray-500">
+          No responses found.
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {/* Search Bar */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-        <Input
-          type="text"
-          placeholder="Search by name, email, status, score..."
-          value={globalFilter}
-          className="pl-10"
-          onChange={(e) => setGlobalFilter(e.target.value)}
-        />
-      </div>
+      {searchAndFilterBar}
 
       <div className="rounded-md border">
         <Table>
@@ -365,63 +414,24 @@ return <div className="text-sm">{formatDate(date)}</div>;
 
       {/* Pagination */}
       <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">Show:</span>
-            <Select
-              value={table.getState().pagination.pageSize.toString()}
-              onValueChange={(value) => {
-                table.setPageSize(Number(value));
-              }}
-            >
-              <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="15">15</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="25">25</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-              </SelectContent>
-            </Select>
-            <span className="text-sm text-gray-700">per page</span>
-          </div>
-          <div className="text-sm text-gray-700">
-            Showing{' '}
-            {table.getState().pagination.pageIndex *
-              table.getState().pagination.pageSize +
-              1}{' '}
-            to{' '}
-            {Math.min(
-              (table.getState().pagination.pageIndex + 1) *
-                table.getState().pagination.pageSize,
-              table.getFilteredRowModel().rows.length
-            )}{' '}
-            of {table.getFilteredRowModel().rows.length} responses
-          </div>
+        <div className="text-sm text-gray-700">
+          {displayData.length} response{displayData.length !== 1 ? 's' : ''} on
+          this page
         </div>
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
-            disabled={!table.getCanPreviousPage()}
-            onClick={() => table.previousPage()}
+            disabled={!canGoPrev || isLoading || !onPrevPage}
+            onClick={onPrevPage}
           >
             Previous
           </Button>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">
-              Page {table.getState().pagination.pageIndex + 1} of{' '}
-              {table.getPageCount()}
-            </span>
-          </div>
           <Button
             variant="outline"
             size="sm"
-            disabled={!table.getCanNextPage()}
-            onClick={() => table.nextPage()}
+            disabled={!nextCursor || isLoading || !onNextPage}
+            onClick={onNextPage}
           >
             Next
           </Button>

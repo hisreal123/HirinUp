@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       body = raw;
     }
 
-    const { userId, organizationId } = body;
+    const { userId, organizationId, search, cursor, limit = 1000, dateFrom, dateTo } = body;
 
     if (!userId && !organizationId) {
       return NextResponse.json(
@@ -28,38 +28,64 @@ export async function POST(req: Request) {
       );
     }
 
-    // When in an org, show only that org's interviews. When personal, show only by user_id.
-    const query = supabase
+    let query = supabase
       .from('interview')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(limit + 1);
 
-    const { data, error } = organizationId
-      ? await query.eq('organization_id', organizationId)
-      : await query.eq('user_id', userId);
+    if (organizationId) {
+      query = query.eq('organization_id', organizationId);
+    } else {
+      query = query.eq('user_id', userId);
+    }
+
+    if (cursor) {
+      query = query.lt('created_at', cursor);
+    }
+
+    if (search) {
+      query = query.or(`id.ilike.%${search}%,name.ilike.%${search}%`);
+    }
+
+    if (dateFrom) {
+      query = query.gte('created_at', dateFrom);
+    }
+
+    if (dateTo) {
+      query = query.lte('created_at', dateTo);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       logger.warn('[get-interviews] Query error:', { error });
-      
-return NextResponse.json(
+
+      return NextResponse.json(
         { error: 'Failed to fetch interviews' },
         { status: 500 }
       );
     }
 
-    const result = data || [];
+    const rows = data || [];
+    const hasNextPage = rows.length > limit;
+    if (hasNextPage) { rows.pop(); }
+    const nextCursor =
+      hasNextPage ? (rows[rows.length - 1]?.created_at ?? null) : null;
+
+    const result = { data: rows, nextCursor };
 
     if (raw.cpk) {
       const encrypted = await serverEncryptResponse(result, raw.cpk);
-      
-return NextResponse.json(encrypted, { status: 200 });
+
+      return NextResponse.json(encrypted, { status: 200 });
     }
 
     return NextResponse.json(result, { status: 200 });
   } catch (err: any) {
     logger.error('[get-interviews] Error:', err.message);
-    
-return NextResponse.json(
+
+    return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
