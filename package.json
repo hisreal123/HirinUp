@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
+    "@clerk/backend": "^3.2.4",
     "@clerk/clerk-js": "^4.65.5",
     "@clerk/nextjs": "^6.36.10",
     "@emotion/react": "^11.11.4",

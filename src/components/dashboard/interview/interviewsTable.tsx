@@ -1,6 +1,6 @@
 'use client';
-
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Table,
   TableBody,
@@ -46,7 +46,9 @@ interface InterviewsTableProps {
 }
 
 function capitalize(str: string) {
-  if (!str) { return str; }
+  if (!str) {
+    return str;
+  }
 
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -73,38 +75,59 @@ export default function InterviewsTable({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [inputValue, setInputValue] = useState(search);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [deleteInterview, setDeleteInterview] = useState<Interview | null>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(
+    null
+  );
+  const [deleteInterview, setDeleteInterview] = useState<Interview | null>(
+    null
+  );
   const menuRef = useRef<HTMLDivElement>(null);
   const { mutateAsync: deleteInterviewMutation } = useDeleteInterview();
 
-  // Close menu on outside click
+  // Close menu on outside click or scroll
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const close = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpenMenuId(null);
+        setMenuPos(null);
       }
     };
-    document.addEventListener('mousedown', handler);
+    const onScroll = () => { setOpenMenuId(null); setMenuPos(null); };
+    document.addEventListener('mousedown', close);
+    window.addEventListener('scroll', onScroll, true);
 
-    return () => document.removeEventListener('mousedown', handler);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      window.removeEventListener('scroll', onScroll, true);
+    };
   }, []);
 
   const handleDelete = async () => {
-    if (!deleteInterview) { return; }
+    if (!deleteInterview) {
+      return;
+    }
     try {
       await deleteInterviewMutation(deleteInterview.id);
-      toast.success('Interview deleted.', { position: 'bottom-right', duration: 3000 });
+      toast.success('Interview deleted.', {
+        position: 'bottom-right',
+        duration: 3000,
+      });
       setDeleteInterview(null);
       onDeleteSuccess?.();
     } catch {
-      toast.error('Failed to delete the interview.', { position: 'bottom-right', duration: 3000 });
+      toast.error('Failed to delete the interview.', {
+        position: 'bottom-right',
+        duration: 3000,
+      });
       throw new Error('Failed to delete interview');
     }
   };
 
   // Debounce search
   useEffect(() => {
-    if (!onSearchChange) { return; }
+    if (!onSearchChange) {
+      return;
+    }
     const timer = setTimeout(() => onSearchChange(inputValue), 300);
 
     return () => clearTimeout(timer);
@@ -112,7 +135,9 @@ export default function InterviewsTable({
 
   // Client-side filter when no backend handler
   const displayData = useMemo(() => {
-    if (onSearchChange || !inputValue.trim()) { return data; }
+    if (onSearchChange || !inputValue.trim()) {
+      return data;
+    }
     const lower = inputValue.toLowerCase();
 
     return data.filter(
@@ -149,7 +174,9 @@ export default function InterviewsTable({
           const interviewer = interviewerMap.get(
             String(row.getValue('interviewer_id'))
           );
-          if (!interviewer) { return <span className="text-xs text-gray-400">—</span>; }
+          if (!interviewer) {
+            return <span className="text-xs text-gray-400">—</span>;
+          }
 
           return (
             <div className="flex items-center gap-2">
@@ -180,7 +207,9 @@ export default function InterviewsTable({
           return (
             <span
               className={`text-xs px-2 py-1 rounded-full font-medium ${
-                active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                active
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-500'
               }`}
             >
               {active ? 'Active' : 'Inactive'}
@@ -214,52 +243,25 @@ export default function InterviewsTable({
           const isOpen = openMenuId === interview?.id;
 
           return (
-            <div className="relative" ref={isOpen ? menuRef : undefined}>
+            <div>
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setOpenMenuId(isOpen ? null : interview.id);
+                  if (isOpen) {
+                    setOpenMenuId(null);
+                    setMenuPos(null);
+                  } else {
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    setMenuPos({ top: rect.bottom + window.scrollY + 4, right: window.innerWidth - rect.right });
+                    setOpenMenuId(interview.id);
+                  }
                 }}
               >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
-              <AnimatePresence>
-                {isOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                    transition={{ duration: 0.12, ease: 'easeOut' }}
-                    className="absolute right-0 top-full z-20 mt-1 bg-white border rounded-md shadow-md py-1 min-w-[140px] origin-top-right"
-                  >
-                    <button
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 text-left"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenMenuId(null);
-                        router.push(`/interviews/${interview.id}`);
-                      }}
-                    >
-                      <Eye className="h-4 w-4 text-gray-500" />
-                      View
-                    </button>
-                    <button
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-red-50 text-red-600 text-left"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenMenuId(null);
-                        setDeleteInterview(interview);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
           );
         },
@@ -316,14 +318,21 @@ export default function InterviewsTable({
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="text-center h-24 text-gray-400">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  {columns.map((_, j) => (
+                    <TableCell key={j}>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : table.getRowModel().rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center h-24 text-gray-400">
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center h-24 text-gray-400"
+                >
                   No interviews found.
                 </TableCell>
               </TableRow>
@@ -336,7 +345,10 @@ export default function InterviewsTable({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -346,11 +358,63 @@ export default function InterviewsTable({
         </Table>
       </div>
 
+      {openMenuId && menuPos && typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          <motion.div
+            ref={menuRef}
+            key={openMenuId}
+            initial={{ opacity: 0, scale: 0.95, y: -4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -4 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
+            style={{ position: 'absolute', top: menuPos.top, right: menuPos.right, zIndex: 9999 }}
+            className="bg-white border rounded-md shadow-md py-1 min-w-[140px] origin-top-right"
+          >
+            <button
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 text-left"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenMenuId(null);
+                setMenuPos(null);
+                router.push(`/interviews/${openMenuId}`);
+              }}
+            >
+              <Eye className="h-4 w-4 text-gray-500" />
+              View
+            </button>
+            <button
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-red-50 text-red-600 text-left"
+              onClick={(e) => {
+                e.stopPropagation();
+                const interview = data.find((i) => i.id === openMenuId) ?? null;
+                setOpenMenuId(null);
+                setMenuPos(null);
+                setDeleteInterview(interview);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </button>
+          </motion.div>
+        </AnimatePresence>,
+        document.body
+      )}
+
       <div className="flex items-center justify-end gap-2">
-        <Button variant="outline" size="sm" disabled={!canGoPrev} onClick={onPrevPage}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!canGoPrev}
+          onClick={onPrevPage}
+        >
           Previous
         </Button>
-        <Button variant="outline" size="sm" disabled={!nextCursor} onClick={onNextPage}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!nextCursor}
+          onClick={onNextPage}
+        >
           Next
         </Button>
       </div>

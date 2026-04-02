@@ -27,7 +27,9 @@ const BLOCKED_BOTS = [
 const ALLOWED_BOTS = ['googlebot', 'bingbot', 'slurp', 'duckduckbot'];
 
 function isMaliciousBot(userAgent: string): boolean {
-  if (!userAgent) {return true;}
+  if (!userAgent) {
+    return true;
+  }
   const ua = userAgent.toLowerCase();
 
   // Allow good bots
@@ -107,9 +109,13 @@ const SECURITY_HEADERS = {
 };
 
 // ============ ROUTE MATCHERS ============
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/home(.*)',
+
+// Routes that belong to this app (interviews.foloup.ai)
+// Everything else redirects to NEXT_PUBLIC_MAIN_DOMAIN (foloup.com)
+const isAppRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/interviews(.*)',
+  '/join(.*)',
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/signin(.*)',
@@ -118,17 +124,27 @@ const isPublicRoute = createRouteMatcher([
   '/register(.*)',
   '/forgot-password(.*)',
   '/verification-page(.*)',
+  '/verification-response(.*)',
+  '/admin(.*)',
+  '/not-allowed(.*)',
+  '/api(.*)',
+]);
+
+const isPublicRoute = createRouteMatcher([
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/signin(.*)',
+  '/signup(.*)',
+  '/login(.*)',
+  '/register(.*)',
+  '/forgot-password(.*)',
+  '/verification-page(.*)',
+  '/verification-response(.*)',
   '/admin/signin(.*)',
   '/admin/signup(.*)',
   '/interview(.*)',
   '/join(.*)',
-  '/pricing(.*)',
-  '/book-a-demo(.*)',
-  '/job-tryouts(.*)',
-  '/ai-candidate-screening(.*)',
-  '/ethical-ai(.*)',
-  '/terms-condition(.*)',
-  '/privacy-policy(.*)',
+  '/not-allowed(.*)',
   '/api/register-call(.*)',
   '/api/get-call(.*)',
   '/api/generate-interview-questions(.*)',
@@ -137,7 +153,6 @@ const isPublicRoute = createRouteMatcher([
   '/api/analyze-communication(.*)',
   '/api/response-webhook(.*)',
   '/api/check-allowlist(.*)',
-  '/not-allowed(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
@@ -194,15 +209,10 @@ export default function proxy(req: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 });
   }
 
-  // 5. Redirect root to /home
-  if (pathname === '/') {
-    const response = NextResponse.redirect(new URL('/home', req.url));
-    // Add security headers
-    Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
-      response.headers.set(key, value);
-    });
-
-    return response;
+  // 5. Redirect non-app routes to main domain (foloup.com)
+  if (!isAppRoute(req)) {
+    const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || 'foloup.com';
+    return NextResponse.redirect(`https://${mainDomain}`);
   }
 
   // 6. Let Clerk handle authentication
@@ -220,6 +230,6 @@ export default function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|txt)$|join/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|txt)$).*)',
   ],
 };
