@@ -1,0 +1,26 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "foloup.ai"
+        }
+      ],
+      "destination": "https://foloup.com/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.foloup.ai"
+        }
+      ],
+      "destination": "https://foloup.com/:path*",
+      "permanent": false
+    }
+  ]
+}
