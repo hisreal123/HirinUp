@@ -38,8 +38,14 @@ function toBase64(buf: ArrayBuffer): string {
   );
 }
 
-function fromBase64(str: string): Uint8Array {
-  return Uint8Array.from(atob(str), (c) => c.charCodeAt(0));
+function fromBase64(str: string): Uint8Array<ArrayBuffer> {
+  const decoded = atob(str);
+  const buffer = new ArrayBuffer(decoded.length);
+  const view = new Uint8Array(buffer);
+  for (let i = 0; i < decoded.length; i++) {
+    view[i] = decoded.charCodeAt(i);
+  }
+  return view;
 }
 
 // ─── Browser (client) ─────────────────────────────────────────────────────────

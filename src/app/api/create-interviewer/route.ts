@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
       try {
         logger.info('Creating Retell LLM model for Lisa...');
         const newModel = await retellClient.llm.create({
-          model: 'gpt-4o',
+          model: 'gpt-4.1',
           general_prompt: RETELL_AGENT_GENERAL_PROMPT,
           general_tools: [],
         });
@@ -146,7 +146,7 @@ export async function GET(req: NextRequest) {
       try {
         logger.info('Creating Retell LLM model for Bob...');
         const newModel = await retellClient.llm.create({
-          model: 'gpt-4o',
+          model: 'gpt-4.1',
           general_prompt: RETELL_AGENT_GENERAL_PROMPT,
           general_tools: [],
         });
