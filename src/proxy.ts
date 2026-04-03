@@ -115,7 +115,7 @@ const SECURITY_HEADERS = {
 const isAppRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/interviews(.*)',
-  '/join/.+',
+  '/join/:path+',
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/signin(.*)',
@@ -143,7 +143,7 @@ const isPublicRoute = createRouteMatcher([
   '/admin/signin(.*)',
   '/admin/signup(.*)',
   '/interview(.*)',
-  '/join/.+',
+  '/join/:path+',
   '/not-allowed(.*)',
   '/api/register-call(.*)',
   '/api/get-call(.*)',
