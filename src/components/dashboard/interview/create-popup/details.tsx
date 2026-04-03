@@ -44,7 +44,8 @@ function DetailsPopup({
   const [selectedInterviewer, setSelectedInterviewer] = useState(
     interviewData.interviewer_id
   );
-  const [objective, setObjective] = useState(interviewData.objective);
+  const DEFAULT_OBJECTIVE = 'Find the best candidates based on their soft skills and past experiences.';
+  const [objective, setObjective] = useState(interviewData.objective || DEFAULT_OBJECTIVE);
   const [isAnonymous, setIsAnonymous] = useState<boolean>(
     interviewData.is_anonymous
   );
@@ -175,7 +176,7 @@ function DetailsPopup({
     if (!open) {
       setName('');
       setSelectedInterviewer(BigInt(0));
-      setObjective('');
+      setObjective(DEFAULT_OBJECTIVE);
       setIsAnonymous(false);
       setNumQuestions('');
       setDuration('');

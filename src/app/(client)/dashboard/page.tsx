@@ -274,7 +274,7 @@ function Interviews() {
             ) : (
               <CreateInterviewCard
                 viewMode="grid"
-                disabled={isAtInterviewLimit}
+                disabled={isAtInterviewLimit || tableLoading || loading}
               />
             )}
             {interviewsLoading || loading ? (
@@ -302,7 +302,7 @@ function Interviews() {
               <div className="mb-4">
                 <CreateInterviewCard
                   viewMode="list"
-                  disabled={isAtInterviewLimit}
+                  disabled={isAtInterviewLimit || tableLoading || loading}
                 />
               </div>
             )}
