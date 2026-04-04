@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       const { data: matchingResponses } = await supabase
         .from('response')
         .select('interview_id')
-        .or(`token.ilike.%${search}%,id.ilike.%${search}%`)
+        .ilike('token', `%${search}%`)
         .limit(50);
 
       const responseInterviewIds = (matchingResponses || [])
