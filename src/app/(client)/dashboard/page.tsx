@@ -12,6 +12,7 @@ import { ResponseService } from '@/services/responses.service';
 import { InterviewService } from '@/services/interviews.service';
 import { useInterviews } from '@/contexts/interviews.context';
 import Modal from '@/components/dashboard/Modal';
+import CreateInterviewModal from '@/components/dashboard/interview/createInterviewModal';
 import { Gem, Plus, Grid3x3, Table2, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ import { DateRange } from '@/components/ui/DateRangePicker';
 const PAGE_SIZE = 20;
 
 function Interviews() {
-  const { interviews, interviewsLoading } = useInterviews();
+  const { interviews, interviewsLoading, fetchInterviews } = useInterviews();
   const { organization } = useOrganization();
   const { user } = useClerk();
   const [loading, setLoading] = useState<boolean>(false);
@@ -30,6 +31,7 @@ function Interviews() {
     useState<number>(10);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [createOpen, setCreateOpen] = useState(false);
   const isAtInterviewLimit = interviews.length >= 1000;
 
   // Table state
@@ -294,18 +296,6 @@ function Interviews() {
           </div>
         ) : (
           <div className="mt-4">
-            {currentPlan === 'free_trial_over' ? (
-              <p className="text-sm text-gray-500 mb-3">
-                You cannot create any more interviews unless you upgrade.
-              </p>
-            ) : (
-              <div className="mb-4">
-                <CreateInterviewCard
-                  viewMode="list"
-                  disabled={isAtInterviewLimit || tableLoading || loading}
-                />
-              </div>
-            )}
             <InterviewsTable
               data={tableData}
               isLoading={tableLoading || loading}
@@ -317,8 +307,17 @@ function Interviews() {
               onDateRangeChange={handleDateRangeChange}
               onNextPage={handleNextPage}
               onPrevPage={handlePrevPage}
-              onDeleteSuccess={fetchTableData}
+              onDeleteSuccess={() => { fetchTableData(); fetchInterviews(); }}
+              onCreateInterview={currentPlan !== 'free_trial_over' ? () => setCreateOpen(true) : undefined}
+              createDisabled={isAtInterviewLimit || tableLoading || loading}
             />
+            <Modal
+              open={createOpen}
+              closeOnOutsideClick={false}
+              onClose={() => setCreateOpen(false)}
+            >
+              <CreateInterviewModal open={createOpen} setOpen={setCreateOpen} onSuccess={fetchTableData} />
+            </Modal>
           </div>
         )}
       </div>

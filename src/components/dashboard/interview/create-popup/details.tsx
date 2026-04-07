@@ -13,6 +13,7 @@ import Modal from '@/components/dashboard/Modal';
 import InterviewerDetailsModal from '@/components/dashboard/interviewer/interviewerDetailsModal';
 import { Interviewer } from '@/types/interviewer';
 import { toast } from 'sonner';
+import { MAX_QUESTIONS, MAX_DURATION } from '@/lib/utils';
 
 interface Props {
   open: boolean;
@@ -44,8 +45,11 @@ function DetailsPopup({
   const [selectedInterviewer, setSelectedInterviewer] = useState(
     interviewData.interviewer_id
   );
-  const DEFAULT_OBJECTIVE = 'Find the best candidates based on their soft skills and past experiences.';
-  const [objective, setObjective] = useState(interviewData.objective || DEFAULT_OBJECTIVE);
+  const DEFAULT_OBJECTIVE =
+    'Find the best candidates based on their soft skills and past experiences.';
+  const [objective, setObjective] = useState(
+    interviewData.objective || DEFAULT_OBJECTIVE
+  );
   const [isAnonymous, setIsAnonymous] = useState<boolean>(
     interviewData.is_anonymous
   );
@@ -312,7 +316,7 @@ function DetailsPopup({
               <input
                 type="number"
                 step="1"
-                max="20"
+                max={MAX_QUESTIONS}
                 min="1"
                 className="border-b-2 text-center focus:outline-none  border-gray-500 w-14 px-2 py-0.5 ml-3"
                 value={numQuestions}
@@ -322,8 +326,8 @@ function DetailsPopup({
                     value === '' ||
                     (Number.isInteger(Number(value)) && Number(value) > 0)
                   ) {
-                    if (Number(value) > 20) {
-                      value = '20';
+                    if (Number(value) > MAX_QUESTIONS) {
+                      value = String(MAX_QUESTIONS);
                     }
                     setNumQuestions(value);
                   }
@@ -335,7 +339,7 @@ function DetailsPopup({
               <input
                 type="number"
                 step="1"
-                max="10"
+                max={MAX_DURATION}
                 min="1"
                 className="border-b-2 text-center focus:outline-none  border-gray-500 w-14 px-2 py-0.5 ml-3"
                 value={duration}
@@ -345,8 +349,8 @@ function DetailsPopup({
                     value === '' ||
                     (Number.isInteger(Number(value)) && Number(value) > 0)
                   ) {
-                    if (Number(value) > 10) {
-                      value = '10';
+                    if (Number(value) > MAX_DURATION) {
+                      value = String(MAX_DURATION);
                     }
                     setDuration(value);
                   }

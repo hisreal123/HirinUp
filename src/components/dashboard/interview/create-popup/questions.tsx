@@ -17,9 +17,10 @@ interface Props {
   interviewData: InterviewBase;
   setProceed: (proceed: boolean) => void;
   setOpen: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
+function QuestionsPopup({ interviewData, setProceed, setOpen, onSuccess }: Props) {
   const { user } = useClerk();
   const { organization } = useOrganization();
   const [isClicked, setIsClicked] = useState(false);
@@ -96,6 +97,7 @@ function QuestionsPopup({ interviewData, setProceed, setOpen }: Props) {
       }
 
       fetchInterviews();
+      onSuccess?.();
       setOpen(false);
     } catch (error) {
       console.error('Error creating interview:', error);

@@ -7,6 +7,7 @@ import { InterviewBase } from '@/types/interview';
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const CreateEmptyInterviewData = (): InterviewBase => ({
@@ -23,7 +24,7 @@ const CreateEmptyInterviewData = (): InterviewBase => ({
   response_count: BigInt(0),
 });
 
-function CreateInterviewModal({ open, setOpen }: Props) {
+function CreateInterviewModal({ open, setOpen, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [proceed, setProceed] = useState(false);
   const [interviewData, setInterviewData] = useState<InterviewBase>(
@@ -77,6 +78,7 @@ function CreateInterviewModal({ open, setOpen }: Props) {
           interviewData={interviewData}
           setProceed={setProceed}
           setOpen={setOpen}
+          onSuccess={onSuccess}
         />
       )}
     </>

@@ -20,7 +20,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowUpDown, Eye, MoreHorizontal, Search, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Eye, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { formatDateReadable } from '@/lib/utils';
@@ -43,6 +43,8 @@ interface InterviewsTableProps {
   onPrevPage?: () => void;
   canGoPrev?: boolean;
   onDeleteSuccess?: () => void;
+  onCreateInterview?: () => void;
+  createDisabled?: boolean;
 }
 
 function capitalize(str: string) {
@@ -65,6 +67,8 @@ export default function InterviewsTable({
   onPrevPage,
   canGoPrev,
   onDeleteSuccess,
+  onCreateInterview,
+  createDisabled,
 }: InterviewsTableProps) {
   const router = useRouter();
   const { interviewers } = useInterviewers();
@@ -286,7 +290,7 @@ export default function InterviewsTable({
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search by name or ID..."
+            placeholder="Search by name, ID or response ID..."
             value={inputValue}
             className="pl-10"
             onChange={(e) => setInputValue(e.target.value)}
@@ -298,6 +302,17 @@ export default function InterviewsTable({
             placeholder="Filter by date"
             onChange={onDateRangeChange}
           />
+        )}
+        {onCreateInterview && (
+          <Button
+            size="sm"
+            disabled={createDisabled}
+            className="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1"
+            onClick={onCreateInterview}
+          >
+            <Plus className="h-4 w-4" />
+            New Interview
+          </Button>
         )}
       </div>
 

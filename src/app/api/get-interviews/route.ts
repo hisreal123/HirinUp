@@ -45,7 +45,24 @@ export async function POST(req: Request) {
     }
 
     if (search) {
-      query = query.or(`id.ilike.%${search}%,name.ilike.%${search}%`);
+      // Also find interviews that have a matching response token/id
+      const { data: matchingResponses } = await supabase
+        .from('response')
+        .select('interview_id')
+        .ilike('token', `%${search}%`)
+        .limit(50);
+
+      const responseInterviewIds = (matchingResponses || [])
+        .map((r: any) => r.interview_id)
+        .filter(Boolean);
+
+      if (responseInterviewIds.length > 0) {
+        query = query.or(
+          `id.ilike.%${search}%,name.ilike.%${search}%,id.in.(${responseInterviewIds.join(',')})`
+        );
+      } else {
+        query = query.or(`id.ilike.%${search}%,name.ilike.%${search}%`);
+      }
     }
 
     if (dateFrom) {

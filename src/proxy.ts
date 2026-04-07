@@ -115,7 +115,7 @@ const SECURITY_HEADERS = {
 const isAppRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/interviews(.*)',
-  '/join/.+',
+  '/join/:path+',
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/signin(.*)',
@@ -143,7 +143,7 @@ const isPublicRoute = createRouteMatcher([
   '/admin/signin(.*)',
   '/admin/signup(.*)',
   '/interview(.*)',
-  '/join/.+',
+  '/join/:path+',
   '/not-allowed(.*)',
   '/api/register-call(.*)',
   '/api/get-call(.*)',
@@ -209,10 +209,14 @@ export default function proxy(req: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 });
   }
 
-  // 5. Redirect non-app routes to main domain (foloup.com)
+  // 5. Redirect non-app routes to landing page
   if (!isAppRoute(req)) {
+    const host = req.headers.get('host') || '';
     const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || 'foloup.com';
-    return NextResponse.redirect(`https://${mainDomain}`);
+    const testLandingDomain = process.env.NEXT_PUBLIC_TEST_LANDING_DOMAIN || 'foloup-landing-page.vercel.app';
+    const isTestEnv = host.includes('vercel.app');
+    const landingUrl = isTestEnv ? `https://${testLandingDomain}` : `https://${mainDomain}`;
+    return NextResponse.redirect(landingUrl);
   }
 
   // 6. Let Clerk handle authentication
