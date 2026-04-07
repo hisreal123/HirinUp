@@ -18,9 +18,10 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { DescriptionDisplay } from '@/components/ui/DescriptionDisplay';
-import { normalizeDescriptionForEditor } from '@/lib/utils';
+import { normalizeDescriptionForEditor, MAX_QUESTIONS, MAX_DURATION } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
 import DeleteInterviewModal from '@/components/dashboard/interview/deleteInterviewModal';
+
 
 type EditInterviewProps = {
   interview: Interview | undefined;
@@ -207,7 +208,13 @@ function EditInterview({ interview }: EditInterviewProps) {
           </div>
           <div className="flex flex-row gap-3">
             <Button
-              disabled={isClicked}
+              disabled={
+                isClicked ||
+                questions.length === 0 ||
+                questions.some((q) => q.question.trim() === '') ||
+                description.replace(/<[^>]*>/g, '').trim() === '' ||
+                objective.trim() === ''
+              }
               className="bg-indigo-600 hover:bg-indigo-800 mt-2 min-w-[90px]"
               onClick={() => {
                 setIsClicked(true);
@@ -355,7 +362,7 @@ function EditInterview({ interview }: EditInterviewProps) {
             <input
               type="number"
               step="1"
-              max="20"
+              max={MAX_QUESTIONS}
               min="1"
               className="border-2 text-center focus:outline-none  bg-slate-100 rounded-md border-gray-500 w-14 px-2 py-0.5 ml-3"
               value={numQuestions}
@@ -365,8 +372,8 @@ function EditInterview({ interview }: EditInterviewProps) {
                   value === '' ||
                   (Number.isInteger(Number(value)) && Number(value) > 0)
                 ) {
-                  if (Number(value) > 20) {
-                    value = '20';
+                  if (Number(value) > MAX_QUESTIONS) {
+                    value = String(MAX_QUESTIONS);
                   }
                   const newCount = Number(value);
                   setNumQuestions(newCount);
@@ -391,7 +398,7 @@ function EditInterview({ interview }: EditInterviewProps) {
             <input
               type="number"
               step="1"
-              max="10"
+              max={MAX_DURATION}
               min="1"
               className="border-2 text-center focus:outline-none bg-slate-100 rounded-md border-gray-500 w-14 px-2 py-0.5 ml-3"
               value={Number(duration)}
@@ -401,8 +408,8 @@ function EditInterview({ interview }: EditInterviewProps) {
                   value === '' ||
                   (Number.isInteger(Number(value)) && Number(value) > 0)
                 ) {
-                  if (Number(value) > 10) {
-                    value = '10';
+                  if (Number(value) > MAX_DURATION) {
+                    value = String(MAX_DURATION);
                   }
                   setDuration(Number(value));
                 }

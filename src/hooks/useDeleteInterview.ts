@@ -1,12 +1,20 @@
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
 
 export const useDeleteInterview = () => {
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await axios.post('/api/delete-interview', { id });
+      const res = await fetch('/api/delete-interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
 
-      return response.data;
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Failed to delete interview');
+      }
+
+      return res.json();
     },
   });
 };

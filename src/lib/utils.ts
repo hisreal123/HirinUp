@@ -3,6 +3,13 @@ import { twMerge } from 'tailwind-merge';
 
 export const MOBILE_UA_PATTERN = /Android|iPhone|iPad|iPod/i;
 
+export const MAX_QUESTIONS = parseInt(
+  process.env.NEXT_PUBLIC_INTERVIEW_MIN_QUESTION as string
+);
+export const MAX_DURATION = parseInt(
+  process.env.NEXT_PUBLIC_INTERVIEW_MAX_DURATION as string
+);
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

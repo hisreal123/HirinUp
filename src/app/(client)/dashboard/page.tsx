@@ -22,7 +22,7 @@ import { DateRange } from '@/components/ui/DateRangePicker';
 const PAGE_SIZE = 20;
 
 function Interviews() {
-  const { interviews, interviewsLoading } = useInterviews();
+  const { interviews, interviewsLoading, fetchInterviews } = useInterviews();
   const { organization } = useOrganization();
   const { user } = useClerk();
   const [loading, setLoading] = useState<boolean>(false);
@@ -307,7 +307,7 @@ function Interviews() {
               onDateRangeChange={handleDateRangeChange}
               onNextPage={handleNextPage}
               onPrevPage={handlePrevPage}
-              onDeleteSuccess={fetchTableData}
+              onDeleteSuccess={() => { fetchTableData(); fetchInterviews(); }}
               onCreateInterview={currentPlan !== 'free_trial_over' ? () => setCreateOpen(true) : undefined}
               createDisabled={isAtInterviewLimit || tableLoading || loading}
             />
@@ -316,7 +316,7 @@ function Interviews() {
               closeOnOutsideClick={false}
               onClose={() => setCreateOpen(false)}
             >
-              <CreateInterviewModal open={createOpen} setOpen={setCreateOpen} />
+              <CreateInterviewModal open={createOpen} setOpen={setCreateOpen} onSuccess={fetchTableData} />
             </Modal>
           </div>
         )}

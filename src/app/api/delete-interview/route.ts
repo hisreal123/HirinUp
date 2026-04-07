@@ -25,6 +25,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: responsesError.message }, { status: 500 });
     }
 
+    const { error: feedbackError } = await supabase
+      .from('feedback')
+      .delete()
+      .eq('interview_id', id);
+
+    if (feedbackError) {
+      logger.error('[delete-interview] Failed to delete feedback:', feedbackError.message);
+      return NextResponse.json({ error: feedbackError.message }, { status: 500 });
+    }
+
     const { error } = await supabase.from('interview').delete().eq('id', id);
 
     if (error) {
