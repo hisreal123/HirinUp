@@ -60,7 +60,8 @@ function SideMenu() {
                 elements: {
                   rootBox: 'overflow-hidden rounded-md w-full',
                   organizationSwitcherTrigger: 'max-w-full w-full',
-                  organizationPreviewMainIdentifier: 'truncate max-w-[130px] block',
+                  organizationPreviewMainIdentifier:
+                    'truncate max-w-[130px] block',
                 },
               }}
             />
@@ -75,7 +76,9 @@ function SideMenu() {
               <div
                 key={item.path}
                 className={`items-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:text-accent-foreground h-9 py-2 flex cursor-pointer ${
-                  isActive ? 'hover:bg-primary/20' : 'hover:bg-secondary/20'
+                  isActive
+                    ? 'bg-primary/15 border-l-2 border-primary ring-1 ring-primary/20 hover:bg-primary/20'
+                    : 'hover:bg-secondary/20'
                 } text-primary ${
                   isCollapsed
                     ? 'justify-center px-2'

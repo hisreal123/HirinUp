@@ -18,10 +18,15 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { DescriptionDisplay } from '@/components/ui/DescriptionDisplay';
-import { normalizeDescriptionForEditor, MAX_QUESTIONS, MAX_DURATION } from '@/lib/utils';
+import {
+  normalizeDescriptionForEditor,
+  MAX_QUESTIONS,
+  MAX_DURATION,
+  MIN_DURATION,
+  MIN_QUESTION,
+} from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
 import DeleteInterviewModal from '@/components/dashboard/interview/deleteInterviewModal';
-
 
 type EditInterviewProps = {
   interview: Interview | undefined;
@@ -363,7 +368,7 @@ function EditInterview({ interview }: EditInterviewProps) {
               type="number"
               step="1"
               max={MAX_QUESTIONS}
-              min="1"
+              min={MIN_QUESTION}
               className="border-2 text-center focus:outline-none  bg-slate-100 rounded-md border-gray-500 w-14 px-2 py-0.5 ml-3"
               value={numQuestions}
               onChange={(e) => {
@@ -399,7 +404,7 @@ function EditInterview({ interview }: EditInterviewProps) {
               type="number"
               step="1"
               max={MAX_DURATION}
-              min="1"
+              min={MIN_DURATION}
               className="border-2 text-center focus:outline-none bg-slate-100 rounded-md border-gray-500 w-14 px-2 py-0.5 ml-3"
               value={Number(duration)}
               onChange={(e) => {

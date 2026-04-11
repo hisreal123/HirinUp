@@ -216,6 +216,7 @@ export default function proxy(req: NextRequest) {
     const testLandingDomain = process.env.NEXT_PUBLIC_TEST_LANDING_DOMAIN || 'foloup-landing-page.vercel.app';
     const isTestEnv = host.includes('vercel.app');
     const landingUrl = isTestEnv ? `https://${testLandingDomain}` : `https://${mainDomain}`;
+    
     return NextResponse.redirect(landingUrl);
   }
 

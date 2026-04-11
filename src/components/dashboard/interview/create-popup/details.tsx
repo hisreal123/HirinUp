@@ -13,7 +13,7 @@ import Modal from '@/components/dashboard/Modal';
 import InterviewerDetailsModal from '@/components/dashboard/interviewer/interviewerDetailsModal';
 import { Interviewer } from '@/types/interviewer';
 import { toast } from 'sonner';
-import { MAX_QUESTIONS, MAX_DURATION } from '@/lib/utils';
+import { MAX_QUESTIONS, MAX_DURATION, MIN_QUESTION } from '@/lib/utils';
 
 interface Props {
   open: boolean;
@@ -317,7 +317,7 @@ function DetailsPopup({
                 type="number"
                 step="1"
                 max={MAX_QUESTIONS}
-                min="1"
+                min={MIN_QUESTION}
                 className="border-b-2 text-center focus:outline-none  border-gray-500 w-14 px-2 py-0.5 ml-3"
                 value={numQuestions}
                 onChange={(e) => {
@@ -340,7 +340,7 @@ function DetailsPopup({
                 type="number"
                 step="1"
                 max={MAX_DURATION}
-                min="1"
+                min={MIN_QUESTION}
                 className="border-b-2 text-center focus:outline-none  border-gray-500 w-14 px-2 py-0.5 ml-3"
                 value={duration}
                 onChange={(e) => {

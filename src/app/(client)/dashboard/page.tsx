@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Interview } from '@/types/interview';
 import { DateRange } from '@/components/ui/DateRangePicker';
+import { ALLOWED_RESPONSE_COUNT, ALLOWED_INTERVIEW_COUNT } from '@/lib/utils';
 
 const PAGE_SIZE = 20;
 
@@ -27,12 +28,13 @@ function Interviews() {
   const { user } = useClerk();
   const [loading, setLoading] = useState<boolean>(false);
   const [currentPlan, setCurrentPlan] = useState<string>('');
-  const [allowedResponsesCount, setAllowedResponsesCount] =
-    useState<number>(10);
+  const [allowedResponsesCount, setAllowedResponsesCount] = useState<number>(
+    ALLOWED_RESPONSE_COUNT
+  );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [createOpen, setCreateOpen] = useState(false);
-  const isAtInterviewLimit = interviews.length >= 1000;
+  const isAtInterviewLimit = interviews.length >= ALLOWED_INTERVIEW_COUNT;
 
   // Table state
   const [tableData, setTableData] = useState<Interview[]>([]);
@@ -121,7 +123,8 @@ function Interviews() {
           id: organization.id,
         });
         const plan: string = data?.plan ?? '';
-        const limit: number = data?.allowed_responses_count ?? 10;
+        const limit: number =
+          data?.allowed_responses_count ?? ALLOWED_RESPONSE_COUNT;
         setCurrentPlan(plan);
         setAllowedResponsesCount(limit);
         if (plan === 'free_trial_over') {
@@ -303,20 +306,31 @@ function Interviews() {
               dateRange={dateRange}
               nextCursor={nextCursor}
               canGoPrev={cursorHistory.length > 0}
+              createDisabled={isAtInterviewLimit || tableLoading || loading}
+              onCreateInterview={
+                currentPlan !== 'free_trial_over'
+                  ? () => setCreateOpen(true)
+                  : undefined
+              }
+              onDeleteSuccess={() => {
+                fetchTableData();
+                fetchInterviews();
+              }}
+              onPrevPage={handlePrevPage}
+              onNextPage={handleNextPage}
               onSearchChange={handleSearchChange}
               onDateRangeChange={handleDateRangeChange}
-              onNextPage={handleNextPage}
-              onPrevPage={handlePrevPage}
-              onDeleteSuccess={() => { fetchTableData(); fetchInterviews(); }}
-              onCreateInterview={currentPlan !== 'free_trial_over' ? () => setCreateOpen(true) : undefined}
-              createDisabled={isAtInterviewLimit || tableLoading || loading}
             />
             <Modal
               open={createOpen}
               closeOnOutsideClick={false}
               onClose={() => setCreateOpen(false)}
             >
-              <CreateInterviewModal open={createOpen} setOpen={setCreateOpen} onSuccess={fetchTableData} />
+              <CreateInterviewModal
+                open={createOpen}
+                setOpen={setCreateOpen}
+                onSuccess={fetchTableData}
+              />
             </Modal>
           </div>
         )}

@@ -45,6 +45,7 @@ function fromBase64(str: string): Uint8Array<ArrayBuffer> {
   for (let i = 0; i < decoded.length; i++) {
     view[i] = decoded.charCodeAt(i);
   }
+  
   return view;
 }
 

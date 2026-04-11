@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { InterviewService } from '@/services/interviews.service';
 import { logger } from '@/lib/logger';
+import { ALLOWED_RESPONSE_COUNT } from '@/lib/utils';
 
 const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
 
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
             id: organizationId,
             name: body.organizationName || organizationId,
             plan: 'free',
-            allowed_responses_count: 10,
+            allowed_responses_count: ALLOWED_RESPONSE_COUNT,
           },
           { onConflict: 'id', ignoreDuplicates: true }
         );
@@ -65,9 +66,12 @@ export async function POST(req: Request) {
       ? await countQuery.eq('organization_id', organizationId)
       : await countQuery.eq('user_id', payload?.user_id);
 
-    if ((count ?? 0) >= 1000) {
+    if ((count ?? 0) >= ALLOWED_RESPONSE_COUNT) {
       return NextResponse.json(
-        { error: 'Interview limit reached. Maximum 1000 interviews allowed per organization.' },
+        {
+          error:
+            'Interview limit reached. Maximum 1000 interviews allowed per organization.',
+        },
         { status: 403 }
       );
     }

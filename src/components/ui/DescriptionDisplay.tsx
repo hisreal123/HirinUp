@@ -19,7 +19,7 @@ export function DescriptionDisplay({
 
   return (
     <div
-      className={`prose prose-sm max-w-none [&_p]:my-0 [&_ul]:my-0 [&_ol]:my-0 [&_li]:my-0 [&_li>p]:my-0 [&_li]:marker:text-gray-800 [&_h1]:my-1 [&_h2]:my-1 [&_h3]:my-0.5 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm ${className ?? ''}`}
+      className={`max-w-none text-sm leading-[1.4] [&_p]:mt-0 [&_p]:mb-3.5 [&_ul]:my-2.5 [&_ol]:my-2.5 [&_li>p]:my-0 [&_li]:marker:text-gray-800 [&_h1]:mt-0 [&_h1]:mb-3.5 [&_h2]:mt-0 [&_h2]:mb-3.5 [&_h3]:mt-0 [&_h3]:mb-3.5 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm ${className ?? ''}`}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
