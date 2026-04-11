@@ -315,13 +315,13 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class: [
-          'min-h-[6rem] px-3 py-2 text-sm focus:outline-none text-left break-words overflow-x-auto [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mt-3 [&_h1]:mb-1 [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-3 [&_h2]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mt-2 [&_h3]:mb-0.5 [&_p]:my-1',
+          'min-h-[6rem] px-3 py-2 text-sm focus:outline-none text-left break-words overflow-x-auto [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mt-3 [&_h1]:mb-1 [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-3 [&_h2]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:mt-2 [&_h3]:mb-0.5 [&_p]:mt-0 [&_p]:mb-0.5 [&_ul]:my-0.5 [&_ol]:my-0.5 [&_li]:my-0',
           // heading styles for imported docx / rich paste
           '[&_h1]:text-xl [&_h1]:font-bold [&_h1]:mt-3 [&_h1]:mb-1',
           '[&_h2]:text-lg [&_h2]:font-bold [&_h2]:mt-2 [&_h2]:mb-1',
           '[&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-2 [&_h3]:mb-0.5',
           // paragraph & list spacing
-          '[&_p]:my-0.5 [&_ul]:my-0.5 [&_ol]:my-0.5 [&_li]:my-0',
+          '[&_p]:mt-0 [&_p]:mb-0.5 [&_ul]:my-0.5 [&_ol]:my-0.5 [&_li]:my-0',
         ].join(' '),
       },
       handleKeyDown(_view, event) {

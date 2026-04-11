@@ -25,28 +25,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
     }
 
-    // Upsert: insert on first call, update name/image on subsequent calls.
-    // onConflict targets the primary key so concurrent requests don't race.
-    const { data: result, error: upsertError } = await supabase
+    const allowedResponseCount = parseInt(
+      process.env.NEXT_PUBLIC_ALLOWED_RESPONSE_COUNT!,
+      10
+    );
+
+    // Insert new org with defaults; skip if already exists (don't overwrite plan/allowed_responses_count)
+    await supabase
       .from('organization')
       .upsert(
-        {
-          id,
-          name,
-          image_url,
-          plan: 'free',
-          allowed_responses_count: 10,
-        },
-        {
-          onConflict: 'id',
-          ignoreDuplicates: false, // update name/image_url if they changed
-        }
-      )
+        { id, name, image_url, plan: 'free', allowed_responses_count: allowedResponseCount },
+        { onConflict: 'id', ignoreDuplicates: true }
+      );
+
+    // Always sync name and image_url from Clerk in case they changed
+    const { data: result, error: upsertError } = await supabase
+      .from('organization')
+      .update({ name, image_url })
+      .eq('id', id)
       .select()
       .single();
 
     if (upsertError) {
-      logger.error('[sync-organization] Upsert error:', upsertError.message);
+      logger.error('[sync-organization] Update error:', upsertError.message);
 
       return NextResponse.json(
         { error: 'Failed to sync organization' },

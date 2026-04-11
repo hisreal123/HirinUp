@@ -3,13 +3,6 @@ import { twMerge } from 'tailwind-merge';
 
 export const MOBILE_UA_PATTERN = /Android|iPhone|iPad|iPod/i;
 
-export const MAX_QUESTIONS = parseInt(
-  process.env.NEXT_PUBLIC_INTERVIEW_MIN_QUESTION as string
-);
-export const MAX_DURATION = parseInt(
-  process.env.NEXT_PUBLIC_INTERVIEW_MAX_DURATION as string
-);
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -91,14 +84,12 @@ export function normalizeDescriptionToHtml(description: string): string {
       description
     );
   if (!hasMarkdown && /<p>|<ul|<ol|<li/i.test(description)) {
-    // For display: convert TipTap's block <p> tags to inline <br> so spacing
-    // exactly matches what was typed: 1 enter = line break, 2 enters = blank line.
+    // For display, keep paragraph blocks intact so CSS can control spacing
+    // consistently without manufacturing extra blank-line blocks.
     const html = description
       .replace(/<li><p>/gi, '<li>')
       .replace(/<\/p><\/li>/gi, '</li>')
-      .replace(/<p><\/p>/gi, '<br>')
-      .replace(/<p>([\s\S]*?)<\/p>/gi, '$1<br>')
-      .replace(/(<br\s*\/?>)+$/i, '');
+      .replace(/<p>\s*(?:&nbsp;|\u00a0)?\s*<\/p>/gi, '');
 
     return html;
   }
@@ -234,3 +225,13 @@ export function normalizeDescriptionForEditor(description: string): string {
 
   return normalizeDescriptionToHtml(description);
 }
+
+// PREDIFINED INTERVIEW VALUES
+export const ALLOWED_RESPONSE_COUNT = 1000;
+export const ALLOWED_INTERVIEW_COUNT = 1000;
+
+export const MAX_DURATION = 30;
+export const MIN_DURATION = 1;
+
+export const MAX_QUESTIONS = 20;
+export const MIN_QUESTION = 1;

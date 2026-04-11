@@ -28,7 +28,10 @@ function Navbar() {
           </button>
         </div>
         <div className="flex items-center">
-          <UserButton afterSignOutUrl="/sign-in" signInUrl="/sign-in" />
+          <UserButton
+            afterSignOutUrl="/admin/signin"
+            signInUrl="/admin/signin"
+          />
         </div>
       </div>
     </div>
