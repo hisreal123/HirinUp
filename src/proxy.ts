@@ -220,10 +220,22 @@ export default function proxy(req: NextRequest) {
     return NextResponse.redirect(landingUrl);
   }
 
-  // 6. Let Clerk handle authentication
+  // 6. Skip Clerk entirely for /join — Clerk's middleware performs a dev-browser
+  //    handshake on first visit even for public routes, causing a redirect loop
+  //    for unauthenticated users landing directly on interview links.
+  if (pathname.startsWith('/join/')) {
+    const res = NextResponse.next();
+    Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+      res.headers.set(key, value);
+    });
+
+    return res;
+  }
+
+  // 7. Let Clerk handle authentication
   const response = clerkHandler(req, {} as any);
 
-  // 7. Add security headers to all responses
+  // 8. Add security headers to all responses
   if (response instanceof NextResponse) {
     Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
       response.headers.set(key, value);

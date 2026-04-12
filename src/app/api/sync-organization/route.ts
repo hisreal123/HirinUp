@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { serverDecryptPayload, serverEncryptResponse } from '@/lib/crypto';
 import { logger } from '@/lib/logger';
+import { ALLOWED_RESPONSE_COUNT } from '@/lib/utils';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,16 +26,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
     }
 
-    const allowedResponseCount = parseInt(
-      process.env.NEXT_PUBLIC_ALLOWED_RESPONSE_COUNT!,
-      10
-    );
-
     // Insert new org with defaults; skip if already exists (don't overwrite plan/allowed_responses_count)
     await supabase
       .from('organization')
       .upsert(
-        { id, name, image_url, plan: 'free', allowed_responses_count: allowedResponseCount },
+        { id, name, image_url, plan: 'free', allowed_responses_count: ALLOWED_RESPONSE_COUNT },
         { onConflict: 'id', ignoreDuplicates: true }
       );
 
