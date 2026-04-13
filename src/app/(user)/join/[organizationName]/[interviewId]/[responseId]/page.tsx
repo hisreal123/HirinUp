@@ -6,7 +6,6 @@ import { useDevToolsDetection } from '@/hooks/useDevToolsDetection';
 import { DevToolsBlocker } from '@/components/call/DevToolsBlocker';
 import Call from '@/components/call';
 import Image from 'next/image';
-import { ArrowUpRightSquareIcon } from 'lucide-react';
 import { Interview } from '@/types/interview';
 import LoaderWithText from '@/components/loaders/loader-with-text/loaderWithText';
 import { ResponseService } from '@/services/responses.service';
@@ -412,7 +411,7 @@ function InterviewInterface() {
               validationError ||
               'The link you\'re trying to access is invalid or has expired. <br className="text-center"/> Kindly Check the URL, Refresh and try again.'
             }
-            image="/invalid-url.png"   
+            image="/invalid-url.png"
           />
         </div>
       </div>
