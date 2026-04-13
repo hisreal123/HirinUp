@@ -1,6 +1,5 @@
 'use client';
 
-// import { useInterviews } from "@/contexts/interviews.context";
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDevToolsDetection } from '@/hooks/useDevToolsDetection';
@@ -355,7 +354,6 @@ function InterviewInterface() {
     isExpired,
   ]);
 
-  // Only fetch interview AFTER expiration check passes
   useEffect(() => {
     if (!interviewId || !expirationChecked || isExpired) {
       return;
@@ -414,7 +412,7 @@ function InterviewInterface() {
               validationError ||
               'The link you\'re trying to access is invalid or has expired. <br className="text-center"/> Kindly Check the URL, Refresh and try again.'
             }
-            image="/invalid-url.png"
+            image="/invalid-url.png"   
           />
         </div>
       </div>
