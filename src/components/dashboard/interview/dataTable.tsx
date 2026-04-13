@@ -98,7 +98,7 @@ function DataTable({ data, interviewId }: DataTableProps) {
                       onClick={(e) => {
                         e.stopPropagation();
                         window.open(
-                          `/interviews/${interviewId}?call=${row.original.call_id}`,
+                          `/dashboard/interviews/${interviewId}?call=${row.original.call_id}`,
                           '_blank'
                         );
                       }}

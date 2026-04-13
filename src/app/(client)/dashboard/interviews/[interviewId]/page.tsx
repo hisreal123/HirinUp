@@ -193,7 +193,7 @@ function InterviewHome() {
     // Refetch responses to get updated list
     refetchResponses();
     if (callId === deletedCallId) {
-      router.push(`/interviews/${interviewId}`);
+      router.push(`/dashboard/interviews/${interviewId}`);
     }
   };
 
@@ -333,7 +333,7 @@ return {
                   <Button
                     className="bg-transparent shadow-none text-xs text-secondary px-0 h-7 hover:scale-110 relative"
                     onClick={(event) => {
-                      router.push(`/interviews/${interviewId}?edit=true`);
+                      router.push(`/dashboard/interviews/${interviewId}?edit=true`);
                     }}
                   >
                     <Pencil size={16} />
@@ -487,7 +487,7 @@ return {
                       onClick={() => {
                         if (response.call_id) {
                           router.push(
-                            `/interviews/${interviewId}?call=${response.call_id}`
+                            `/dashboard/interviews/${interviewId}?call=${response.call_id}`
                           );
                           handleResponseClick(response);
                         }

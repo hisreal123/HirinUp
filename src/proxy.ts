@@ -114,7 +114,6 @@ const SECURITY_HEADERS = {
 // Everything else redirects to NEXT_PUBLIC_MAIN_DOMAIN (foloup.com)
 const isAppRoute = createRouteMatcher([
   '/dashboard(.*)',
-  '/interviews(.*)',
   '/join/:path+',
   '/sign-in(.*)',
   '/sign-up(.*)',
@@ -157,7 +156,6 @@ const isPublicRoute = createRouteMatcher([
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
-  '/interviews(.*)',
 ]);
 
 const isApiRoute = createRouteMatcher(['/api/(.*)']);

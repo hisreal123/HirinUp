@@ -302,7 +302,7 @@ function ResponsesTable({
               size="sm"
               className="h-8 px-2"
               onClick={() => {
-                router.push(`/interviews/${interviewId}?call=${callId}`);
+                router.push(`/dashboard/interviews/${interviewId}?call=${callId}`);
               }}
             >
               <Eye className="h-4 w-4 mr-2" />

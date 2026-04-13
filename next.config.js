@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async redirects() {
-    return [];
+    return [
+      {
+        source: '/interviews/:path*',
+        destination: '/dashboard/interviews/:path*',
+        permanent: true,
+      },
+    ];
   },
   images: {
     remotePatterns: [

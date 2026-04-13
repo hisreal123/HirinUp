@@ -83,7 +83,7 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
 
   return (
     <a
-      href={`/interviews/${id}`}
+      href={`/dashboard/interviews/${id}`}
       style={{
         pointerEvents: isFetching ? 'none' : 'auto',
         cursor: isFetching ? 'default' : 'pointer',

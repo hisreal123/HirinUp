@@ -133,7 +133,7 @@ function CallInfo({
 
         await ResponseService.deleteResponse(call_id);
 
-        router.push(`/interviews/${interview_id}`);
+        router.push(`/dashboard/interviews/${interview_id}`);
 
         onDeleteResponse(call_id);
       }
@@ -172,7 +172,7 @@ function CallInfo({
                   <div
                     className=" inline-flex items-center text-indigo-600 hover:cursor-pointer"
                     onClick={() => {
-                      router.push(`/interviews/${interviewId}`);
+                      router.push(`/dashboard/interviews/${interviewId}`);
                     }}
                   >
                     <ArrowLeft className="mr-2" />

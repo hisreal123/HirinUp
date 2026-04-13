@@ -356,7 +356,7 @@ export default function InterviewsTable({
                 <TableRow
                   key={row.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/interviews/${row.original.id}`)}
+                  onClick={() => router.push(`/dashboard/interviews/${row.original.id}`)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -391,7 +391,7 @@ export default function InterviewsTable({
                 e.stopPropagation();
                 setOpenMenuId(null);
                 setMenuPos(null);
-                router.push(`/interviews/${openMenuId}`);
+                router.push(`/dashboard/interviews/${openMenuId}`);
               }}
             >
               <Eye className="h-4 w-4 text-gray-500" />

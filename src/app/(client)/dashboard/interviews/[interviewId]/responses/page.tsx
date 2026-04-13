@@ -155,7 +155,7 @@ function InterviewResponses() {
             variant="ghost"
             size="sm"
             className="flex items-center gap-2"
-            onClick={() => router.push(`/interviews/${interviewId}`)}
+            onClick={() => router.push(`/dashboard/interviews/${interviewId}`)}
           >
             <ArrowLeft size={16} />
             Back to Interview

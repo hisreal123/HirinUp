@@ -80,7 +80,7 @@ function LinksTable({
     copyToClipboard,
     setDeleteToken,
     onView: (callId) =>
-      router.push(`/interviews/${interviewId}?call=${callId}`),
+      router.push(`/dashboard/interviews/${interviewId}?call=${callId}`),
     onToggleTwoFlow: handleToggleTwoFlow,
   });
 
