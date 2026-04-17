@@ -16,7 +16,7 @@ function InterviewerDetailsModal({ interviewer }: Props) {
       </CardTitle>
       <div className="mt-1 p-2 flex flex-col justify-center items-center">
         <div className="flex flex-row justify-center space-x-10 items-center">
-          <div className=" flex items-center justify-center border-4 overflow-hidden border-gray-500 rounded-xl h-48 w-44">
+          <div className=" flex items-center justify-center border-4 overflow-hidden border-border rounded-xl h-48 w-44">
             {interviewer?.image ? (
               <Image
                 src={interviewer.image}
@@ -26,7 +26,7 @@ function InterviewerDetailsModal({ interviewer }: Props) {
                 className="w-full h-full object-cover object-center"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+              <div className="w-full h-full flex items-center justify-center bg-neutral text-muted-foreground text-sm">
                 No Image
               </div>
             )}

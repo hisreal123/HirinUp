@@ -66,26 +66,17 @@ export function isLightColor(color: string) {
   return brightness > 155;
 }
 
-// Normalizes an interview description to proper HTML.
-// AI-generated descriptions often contain Markdown-style syntax (* bullets,
-// # headings, > blockquotes, etc.) instead of HTML tags. This converts them
-// so dangerouslySetInnerHTML and TipTap both render the content correctly.
-// If the description is pure TipTap HTML (no Markdown patterns), it is
-// returned unchanged.
+
 export function normalizeDescriptionToHtml(description: string): string {
   if (!description) {
     return '';
   }
 
-  // Detect Markdown patterns (multiline). If none are present and the content
-  // already has list/structural HTML, it's TipTap output — return as-is.
   const hasMarkdown =
     /^[ \t]*[*\-] |^#+[ \t]|^>[ \t]|^\d+\.[ \t]|^(-{3,}|\*{3,}|_{3,})$/m.test(
       description
     );
   if (!hasMarkdown && /<p>|<ul|<ol|<li/i.test(description)) {
-    // For display, keep paragraph blocks intact so CSS can control spacing
-    // consistently without manufacturing extra blank-line blocks.
     const html = description
       .replace(/<li><p>/gi, '<li>')
       .replace(/<\/p><\/li>/gi, '</li>')
@@ -94,8 +85,7 @@ export function normalizeDescriptionToHtml(description: string): string {
     return html;
   }
 
-  // Strip HTML tags to plain text so we can re-parse as Markdown.
-  // Preserve newlines from block-level closing tags.
+
   const raw = description
     .replace(/<\/p>/gi, '\n')
     .replace(/<\/li>/gi, '\n')
@@ -235,3 +225,5 @@ export const MIN_DURATION = 1;
 
 export const MAX_QUESTIONS = 20;
 export const MIN_QUESTION = 1;
+
+

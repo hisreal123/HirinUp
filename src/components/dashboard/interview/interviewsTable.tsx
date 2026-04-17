@@ -179,7 +179,7 @@ export default function InterviewsTable({
             String(row.getValue('interviewer_id'))
           );
           if (!interviewer) {
-            return <span className="text-xs text-gray-400">—</span>;
+            return <span className="text-xs text-muted-foreground">—</span>;
           }
 
           return (
@@ -193,7 +193,7 @@ export default function InterviewsTable({
                   className="rounded-full object-cover"
                 />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+                <div className="w-7 h-7 rounded-full bg-neutral flex items-center justify-center text-xs text-muted-foreground">
                   {interviewer.name.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -212,8 +212,8 @@ export default function InterviewsTable({
             <span
               className={`text-xs px-2 py-1 rounded-full font-medium ${
                 active
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-500'
+                  ? 'bg-success-subtle text-success'
+                  : 'bg-muted text-muted-foreground'
               }`}
             >
               {active ? 'Active' : 'Inactive'}
@@ -288,7 +288,7 @@ export default function InterviewsTable({
     <div className="space-y-3">
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             placeholder="Search by name, ID or response ID..."
             value={inputValue}
@@ -307,7 +307,7 @@ export default function InterviewsTable({
           <Button
             size="sm"
             disabled={createDisabled}
-            className="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1"
+            className="ml-auto bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-1"
             onClick={onCreateInterview}
           >
             <Plus className="h-4 w-4" />
@@ -337,7 +337,7 @@ export default function InterviewsTable({
                 <TableRow key={i}>
                   {columns.map((_, j) => (
                     <TableCell key={j}>
-                      <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                      <div className="h-4 bg-neutral rounded animate-pulse" />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -346,7 +346,7 @@ export default function InterviewsTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center h-24 text-gray-400"
+                  className="text-center h-24 text-muted-foreground"
                 >
                   No interviews found.
                 </TableCell>
@@ -383,10 +383,10 @@ export default function InterviewsTable({
             exit={{ opacity: 0, scale: 0.95, y: -4 }}
             transition={{ duration: 0.12, ease: 'easeOut' }}
             style={{ position: 'absolute', top: menuPos.top, right: menuPos.right, zIndex: 9999 }}
-            className="bg-white border rounded-md shadow-md py-1 min-w-[140px] origin-top-right"
+            className="bg-background border rounded-md shadow-md py-1 min-w-[140px] origin-top-right"
           >
             <button
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 text-left"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-surface-subtle text-left"
               onClick={(e) => {
                 e.stopPropagation();
                 setOpenMenuId(null);
@@ -394,11 +394,11 @@ export default function InterviewsTable({
                 router.push(`/dashboard/interviews/${openMenuId}`);
               }}
             >
-              <Eye className="h-4 w-4 text-gray-500" />
+              <Eye className="h-4 w-4 text-muted-foreground" />
               View
             </button>
             <button
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-red-50 text-red-600 text-left"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-destructive/10 text-destructive text-left"
               onClick={(e) => {
                 e.stopPropagation();
                 const interview = data.find((i) => i.id === openMenuId) ?? null;

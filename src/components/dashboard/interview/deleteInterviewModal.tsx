@@ -51,24 +51,24 @@ function DeleteInterviewModal({
           <AlertDialogTitle>Delete Interview?</AlertDialogTitle>
           <AlertDialogDescription>
             This action{' '}
-            <span className="font-semibold text-red-600">cannot be undone</span>
+            <span className="font-semibold text-destructive">cannot be undone</span>
             .
           </AlertDialogDescription>
-          <div className="mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             <span>⚠️</span>
             All responses and feedback for this interview will be permanently deleted.
           </div>
         </AlertDialogHeader>
 
-        <hr className="border-dashed border-gray-300" />
+        <hr className="border-dashed border-border" />
 
         <div className="px-1 py-2">
-          <p className="text-sm text-gray-600 mb-2">Type name to continue:</p>
+          <p className="text-sm text-muted-foreground mb-2">Type name to continue:</p>
           <input
             type="text"
             value={confirmName}
             placeholder="Enter interview name"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+            className="w-full border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-destructive/50"
             disabled={isDeleting}
             onChange={(e) => setConfirmName(e.target.value)}
           />
@@ -79,7 +79,7 @@ function DeleteInterviewModal({
             Cancel
           </Button>
           <Button
-            className="bg-red-500 hover:bg-red-600 text-white min-w-[90px]"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground min-w-[90px]"
             disabled={confirmName !== interviewName || isDeleting}
             onClick={handleDelete}
           >

@@ -63,31 +63,31 @@ function FileUpload({
   });
 
   return (
-    <div className="p-2 bg-white rounded-xl w-full h-24">
+    <div className="p-2 bg-background rounded-xl w-full h-24">
       {!isUploaded ? (
         <div
           {...getRootProps({
             className:
-              'border-dashed border-2 rounded-xl cursor-pointer bg-gray-50 py-4 flex justify-center items-center flex-col',
+              'border-dashed border-2 rounded-xl cursor-pointer bg-surface-subtle py-4 flex justify-center items-center flex-col',
           })}
         >
           <input {...getInputProps()} />
           <>
             <>
-              <Inbox className="w-8 h-8 text-blue-500" />
-              <p className="mt-2 text-sm text-slate-400">Drop PDF Here</p>
+              <Inbox className="w-8 h-8 text-primary" />
+              <p className="mt-2 text-sm text-muted-foreground">Drop PDF Here</p>
             </>
           </>
         </div>
       ) : (
         <div className="text-left">
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             File uploaded successfully. {fileName}
           </p>
-          <p className="mt-2 text-xs text-slate-600">
+          <p className="mt-2 text-xs text-muted-foreground">
             Do you want to{' '}
             <span
-              className="underline text-slate-950 cursor-pointer font-semibold"
+              className="underline text-foreground cursor-pointer font-semibold"
               onClick={() => setIsUploaded(false)}
             >
               Reupload?

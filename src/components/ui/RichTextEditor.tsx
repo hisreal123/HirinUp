@@ -451,7 +451,11 @@ export function RichTextEditor({
   const remaining = MAX_CHARS - charCount;
   const isAtLimit = remaining <= 0;
   const isWarning = remaining <= 20 && !isAtLimit;
-  const strokeColor = isAtLimit ? '#ef4444' : isWarning ? '#f97316' : '#4f46e5';
+  const strokeColor = isAtLimit
+    ? 'hsl(var(--destructive))'
+    : isWarning
+      ? 'hsl(var(--warning))'
+      : 'hsl(var(--primary))';
 
   // Use onMouseDown + preventDefault to keep editor selection alive when clicking toolbar
   function Btn({
@@ -471,8 +475,8 @@ export function RichTextEditor({
         title={title}
         className={`p-1 rounded transition-colors ${
           active
-            ? 'bg-indigo-100 text-indigo-700'
-            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
         onMouseDown={onMouseDown}
       >
@@ -482,12 +486,12 @@ export function RichTextEditor({
   }
 
   function Divider() {
-    return <div className="w-px h-4 bg-gray-200 mx-1" />;
+    return <div className="w-px h-4 bg-border mx-1" />;
   }
 
   return (
     <div
-      className={`border-2 ${isAtLimit ? 'border-red-400' : isWarning ? 'border-orange-400' : isDragOver ? 'border-indigo-400 bg-indigo-50' : 'border-gray-500'} rounded-md mt-2 w-full ${className ?? ''}`}
+      className={`border-2 ${isAtLimit ? 'border-destructive' : isWarning ? 'border-warning' : isDragOver ? 'border-primary bg-primary/5' : 'border-input'} rounded-md mt-2 w-full ${className ?? ''}`}
       onDrop={handleDrop}
       onDragOver={(e) => {
         e.preventDefault();
@@ -496,7 +500,7 @@ export function RichTextEditor({
       onDragLeave={() => setIsDragOver(false)}
     >
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1 border-b border-gray-200">
+      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1 border-b border-border">
         {/* Text style */}
         <Btn
           active={editor.isActive('bold')}
@@ -645,7 +649,7 @@ export function RichTextEditor({
       </div>
 
       {/* Word count circle */}
-      <div className="flex justify-end px-3 py-1 border-t border-gray-100">
+      <div className="flex justify-end px-3 py-1 border-t border-border">
         <svg
           width={CIRCLE_SIZE}
           height={CIRCLE_SIZE}
@@ -657,7 +661,7 @@ export function RichTextEditor({
             cy={CIRCLE_SIZE / 2}
             r={RADIUS}
             fill="transparent"
-            stroke="#e5e7eb"
+            stroke="hsl(var(--border))"
             strokeWidth={STROKE_WIDTH}
           />
           {/* Progress */}
@@ -673,7 +677,7 @@ export function RichTextEditor({
               CIRCUMFERENCE * (1 - Math.min(charCount / MAX_CHARS, 1))
             }
             strokeLinecap="round"
-            transform={`rotate(-90 ${CIRCLE_SIZE / 2} ${CIRCLE_SIZE / 2})`}
+            transform={`rotate(-90 ${CIRCLE_SIZE  / 2} ${CIRCLE_SIZE / 2})`}
             style={{
               transition: 'stroke-dashoffset 0.15s ease, stroke 0.15s ease',
             }}

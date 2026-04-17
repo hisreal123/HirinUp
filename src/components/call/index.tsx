@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  ArrowUpRightSquareIcon,
-  AlarmClockIcon,
-  CheckCircleIcon,
-  AlertTriangle,
-} from 'lucide-react';
+import { AlarmClockIcon, CheckCircleIcon, AlertTriangle } from 'lucide-react';
 import React, {
   useState,
   useEffect,
@@ -17,12 +12,9 @@ import Image from 'next/image';
 import { Card, CardHeader, CardTitle } from '../ui/card';
 import { useResponses } from '@/contexts/responses.context';
 import { RetellWebClient } from 'retell-client-js-sdk';
-// import { useGetAllEmails } from "@/hooks/useGetAllEmails"; // replaced with encrypted API call
 import { encryptedApiCall } from '@/lib/encrypted-api';
 import { useCreateOrUpdateCandidate } from '@/hooks/useCreateOrUpdateCandidate';
-// import { useRegisterCall } from "@/hooks/useRegisterCall";
 import { useUpdateResponseByToken } from '@/hooks/useUpdateResponseByToken';
-// import { useCreateResponse } from "@/hooks/useCreateResponse";
 import { useSaveResponse } from '@/hooks/useSaveResponse';
 import { useEncryptedCreateResponse } from '@/hooks/useEncryptedCreateResponse';
 import { useEncryptedRegisterCall } from '@/hooks/useEncryptedRegisterCall';
@@ -1210,7 +1202,9 @@ function Call({
   return (
     <div className="flex justify-center items-center min-h-screen h-fit">
       {isStarted && <TabSwitchWarning />}
-      <div className={`bg-floralwhite rounded-md mx-auto ${isStarted ? 'w-[70%]' : 'w-[50%]'}`}>
+      <div
+        className={`bg-floralwhite rounded-md mx-auto ${isStarted ? 'w-[70%]' : 'w-[50%]'}`}
+      >
         <Card className="h-fit min-h-[88vh] rounded-lg text-xl font-bold transition-all md:block dark:border-white border-0 shadow-none">
           <div>
             {isStarted && (
@@ -1325,7 +1319,7 @@ function Call({
                     <AlarmClockIcon className="text-primary h-[.9rem] w-[.9rem] rotate-0 scale-100 dark:-rotate-90 dark:scale-0 mr-1 font-bold" />
                     <div className="text-xs font-normal space-x-1">
                       Expected duration:
-                      <span className="font-bold text-primary mr-1">
+                      <span className="font-bold text-primary mr-1 ml-1">
                         {interviewTimeDuration} mins
                       </span>
                       or less
@@ -1472,7 +1466,6 @@ function Call({
             )}
           </div>
         </Card>
-
       </div>
     </div>
   );

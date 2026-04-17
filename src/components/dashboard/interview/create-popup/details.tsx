@@ -197,7 +197,7 @@ function DetailsPopup({
             <h3 className="text-sm font-medium">Interview Name:</h3>
             <input
               type="text"
-              className="border-b-2 focus:outline-none border-gray-500 px-2 w-96 py-0.5 ml-3"
+              className="border-b-2 focus:outline-none border-input px-2 w-96 py-0.5 ml-3"
               placeholder="e.g. Name of the Interview"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -223,12 +223,12 @@ function DetailsPopup({
                       setOpenInterviewerDetails(true);
                     }}
                   >
-                    <Info size={18} color="#4f46e5" strokeWidth={2.2} />
+                    <Info size={18} className="text-primary" strokeWidth={2.2} />
                   </button>
                   <div
                     className={`w-[96px] overflow-hidden rounded-full ${
                       selectedInterviewer === item.id
-                        ? 'border-4 border-indigo-600'
+                        ? 'border-4 border-primary'
                         : ''
                     }`}
                     onClick={() => setSelectedInterviewer(item.id)}
@@ -242,8 +242,8 @@ function DetailsPopup({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-500 text-xs">No Image</span>
+                      <div className="w-full h-full bg-neutral flex items-center justify-center">
+                        <span className="text-muted-foreground text-xs">No Image</span>
                       </div>
                     )}
                   </div>
@@ -272,7 +272,7 @@ function DetailsPopup({
           </div>
           <h3 className="text-sm font-medium">Objective:</h3>
           <textarea
-            className="border-2 border-gray-500 rounded-md mt-2 w-full px-3 py-2 text-sm focus:outline-none resize-none"
+            className="border-2 border-input rounded-md mt-2 w-full px-3 py-2 text-sm focus:outline-none resize-none"
             rows={4}
             placeholder="e.g. Find the best candidates based on their soft skills and past experiences."
             value={objective}
@@ -297,7 +297,7 @@ function DetailsPopup({
               <Switch
                 checked={isAnonymous}
                 className={`ml-4 mt-1 ${
-                  isAnonymous ? 'bg-indigo-600' : 'bg-[#E6E7EB]'
+                  isAnonymous ? 'bg-primary' : 'bg-neutral'
                 }`}
                 onCheckedChange={(checked) => setIsAnonymous(checked)}
               />
@@ -318,7 +318,7 @@ function DetailsPopup({
                 step="1"
                 max={MAX_QUESTIONS}
                 min={MIN_QUESTION}
-                className="border-b-2 text-center focus:outline-none  border-gray-500 w-14 px-2 py-0.5 ml-3"
+                className="border-b-2 text-center focus:outline-none  border-input w-14 px-2 py-0.5 ml-3"
                 value={numQuestions}
                 onChange={(e) => {
                   let value = e.target.value;
@@ -341,7 +341,7 @@ function DetailsPopup({
                 step="1"
                 max={MAX_DURATION}
                 min={MIN_QUESTION}
-                className="border-b-2 text-center focus:outline-none  border-gray-500 w-14 px-2 py-0.5 ml-3"
+                className="border-b-2 text-center focus:outline-none  border-input w-14 px-2 py-0.5 ml-3"
                 value={duration}
                 onChange={(e) => {
                   let value = e.target.value;
@@ -369,7 +369,7 @@ function DetailsPopup({
                   ? false
                   : true) || isClicked
               }
-              className="bg-indigo-600 hover:bg-indigo-800  w-40"
+              className="bg-primary hover:bg-primary/80 w-40"
               onClick={() => {
                 setIsClicked(true);
                 onGenrateQuestions();

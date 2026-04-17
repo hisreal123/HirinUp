@@ -62,7 +62,7 @@ export function ExpireLinkDialog({
           <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
           <Button
             disabled={deleting}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             onClick={handleConfirm}
           >
             {deleting ? 'Expiring...' : 'Expire Link'}

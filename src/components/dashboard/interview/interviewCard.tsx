@@ -92,7 +92,7 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
       <Card className="relative p-0 mt-4 cursor-pointer h-48 w-full rounded-xl overflow-hidden shadow-md">
         <CardContent className={`p-0 ${isFetching ? 'opacity-60' : ''}`}>
           <div className="w-full h-32 overflow-hidden bg-secondary flex items-center text-center">
-            <CardTitle className="w-full mt-3 mx-2 text-white text-lg">
+            <CardTitle className="w-full mt-3 mx-2 text-secondary-foreground text-lg">
               {name}
               {isFetching && (
                 <div className="z-100 mt-[-5px]">
@@ -112,12 +112,12 @@ function InterviewCard({ name, interviewerId, id, readableSlug }: Props) {
                   className="object-cover object-center"
                 />
               ) : (
-                <div className="w-[70px] h-[70px] bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500 text-xs">No Image</span>
+                <div className="w-[70px] h-[70px] bg-neutral flex items-center justify-center">
+                  <span className="text-muted-foreground text-xs">No Image</span>
                 </div>
               )}
             </div>
-            <div className="text-black text-sm font-semibold mt-2 mr-2 whitespace-nowrap">
+            <div className="text-foreground text-sm font-semibold mt-2 mr-2 whitespace-nowrap">
               Responses:{' '}
               <span className="font-normal">
                 {responseCount?.toString() || 0}

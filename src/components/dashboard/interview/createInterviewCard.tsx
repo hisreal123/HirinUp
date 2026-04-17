@@ -19,8 +19,8 @@ function CreateInterviewCard({ viewMode = 'grid', disabled = false }: CreateInte
       <Card
         className={`flex items-center border-dashed border-2 h-48 w-full mt-4 rounded-xl overflow-hidden shadow-sm ${
           disabled
-            ? 'border-gray-200 opacity-50 cursor-not-allowed'
-            : 'border-gray-100 cursor-pointer hover:scale-105 ease-in-out duration-300 hover:bg-gray-50'
+            ? 'border-border opacity-50 cursor-not-allowed'
+            : 'border-border/50 cursor-pointer hover:scale-105 ease-in-out duration-300 hover:bg-surface-subtle'
         }`}
         onClick={() => {
           if (!disabled) { setOpen(true); }
@@ -30,18 +30,18 @@ function CreateInterviewCard({ viewMode = 'grid', disabled = false }: CreateInte
           className={`flex items-center mx-auto ${viewMode === 'grid' ? 'flex-col space-y-5' : 'flex-row gap-4'}`}
         >
           <div
-            className={`wrapper flex items-center justify-center bg-gray-200 rounded-full relative ${
+            className={`wrapper flex items-center justify-center bg-neutral rounded-full relative ${
               viewMode === 'grid' ? 'h-14 w-14' : 'h-12 w-12'
             }`}
           >
             <div
-              className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center bg-purple-500 rounded-full items-center ${
+              className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center bg-primary rounded-full items-center ${
                 viewMode === 'grid' ? 'w-8 h-8' : 'w-6 h-6'
               }`}
             >
               <Plus
                 size={viewMode === 'grid' ? 20 : 16}
-                className="text-purple-900"
+                className="text-primary-foreground"
               />
             </div>
           </div>

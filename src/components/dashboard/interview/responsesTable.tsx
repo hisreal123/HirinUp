@@ -52,9 +52,9 @@ function formatDate(dateString: string | Date): string {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  SELECTED: 'bg-green-500',
-  POTENTIAL: 'bg-yellow-500',
-  NOT_SELECTED: 'bg-red-500',
+  SELECTED: 'bg-success',
+  POTENTIAL: 'bg-warning',
+  NOT_SELECTED: 'bg-destructive',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -182,7 +182,7 @@ function ResponsesTable({
         header: 'Candidate Status',
         cell: ({ row }) => {
           const status = row.getValue('candidate_status') as string;
-          const color = STATUS_COLORS[status] || 'bg-gray-400';
+          const color = STATUS_COLORS[status] || 'bg-neutral-foreground';
           const label = STATUS_LABELS[status] || 'No Status';
 
           return (
@@ -232,7 +232,7 @@ function ResponsesTable({
           if (hasDetails && !hasCallId) {
             return (
               <div className="text-sm">
-                <span className="text-orange-600 font-semibold">
+                <span className="text-warning font-semibold">
                   Missing Call ID
                 </span>
               </div>
@@ -242,7 +242,7 @@ function ResponsesTable({
           if (!hasDetails) {
             return (
               <div className="text-sm">
-                <span className="text-gray-500 font-semibold">Not Started</span>
+                <span className="text-muted-foreground font-semibold">Not Started</span>
               </div>
             );
           }
@@ -250,9 +250,9 @@ function ResponsesTable({
           return (
             <div className="text-sm">
               {isEnded ? (
-                <span className="text-green-600">Completed</span>
+                <span className="text-success">Completed</span>
               ) : (
-                <span className="text-gray-500">In Progress</span>
+                <span className="text-muted-foreground">In Progress</span>
               )}
             </div>
           );
@@ -289,11 +289,11 @@ function ResponsesTable({
           const hasDetails = !!response.details;
 
           if (hasDetails && !callId) {
-            return <span className="text-sm text-orange-500">No Call ID</span>;
+            return <span className="text-sm text-warning">No Call ID</span>;
           }
 
           if (!hasDetails) {
-            return <span className="text-sm text-gray-400">-</span>;
+            return <span className="text-sm text-muted-foreground">-</span>;
           }
 
           return (
@@ -328,7 +328,7 @@ function ResponsesTable({
   const searchAndFilterBar = (
     <div className="flex items-center gap-3 flex-wrap">
       <div className="relative max-w-sm flex-1">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           type="text"
           placeholder="Search by name, email or ID..."
@@ -355,7 +355,7 @@ function ResponsesTable({
     return (
       <div className="space-y-4">
         {searchAndFilterBar}
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           No responses found.
         </div>
       </div>
@@ -414,7 +414,7 @@ function ResponsesTable({
 
       {/* Pagination */}
       <div className="flex items-center justify-between px-2">
-        <div className="text-sm text-gray-700">
+        <div className="text-sm text-foreground">
           {displayData.length} response{displayData.length !== 1 ? 's' : ''} on
           this page
         </div>

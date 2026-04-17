@@ -50,6 +50,26 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "surface-subtle": "hsl(var(--surface-subtle))",
+        neutral: {
+          DEFAULT: "hsl(var(--neutral))",
+          foreground: "hsl(var(--neutral-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+          subtle: "hsl(var(--success-subtle))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+          subtle: "hsl(var(--warning-subtle))",
+        },
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)"],
+        heading: ["var(--font-heading)"],
+        mono: ["var(--font-mono)"],
       },
       borderRadius: {
         lg: "var(--radius)",

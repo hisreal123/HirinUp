@@ -30,8 +30,8 @@ const interviewerCard = ({ interviewer }: Props) => {
                 className="w-full h-full object-cover object-center"
               />
             ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-500 text-sm">No Image</span>
+              <div className="w-full h-full bg-neutral flex items-center justify-center">
+                <span className="text-muted-foreground text-sm">No Image</span>
               </div>
             )}
           </div>

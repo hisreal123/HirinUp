@@ -23,7 +23,7 @@ export default function NavDropdown({
     <li className="relative group cursor-pointer">
       {/* TOP LABEL */}
       <div
-        className="flex items-center gap-2 text-white hover:text-[#6300ff]"
+        className="flex items-center gap-2 text-primary-foreground hover:text-primary"
         onClick={() => {
           if (!hasItems) {setMenu?.(false);}
         }}
@@ -50,12 +50,12 @@ export default function NavDropdown({
                      opacity-0 invisible group-hover:opacity-100 group-hover:visible
                      transition-all duration-200"
         >
-          <div className="rounded-xl overflow-hidden shadow-xl bg-white text-xs text-black">
+          <div className="rounded-xl overflow-hidden shadow-xl bg-background text-xs text-foreground">
             {items.map((item, index) => (
               <Link
                 key={index}
                 href={item.href || '#'}
-                className="block px-4 py-3 hover:bg-[#6300ff] hover:text-white"
+                className="block px-4 py-3 hover:bg-primary hover:text-primary-foreground"
                 onClick={() => setMenu?.(false)}
               >
                 {item.title}

@@ -10,17 +10,17 @@ function Navbar() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <div className="fixed bg-white rounded-lg inset-x-0 top-0 z-[10] h-fit py-4">
+    <div className="fixed bg-background rounded-lg inset-x-0 top-0 z-[10] h-fit py-4">
       <div className="flex items-center justify-between h-full gap-2 px-4 mx-auto">
         <div className="flex flex-row items-center gap-3">
           <Link href={'/dashboard'} className="flex items-center gap-2">
-            <p className="px-2 py-1 text-2xl font-bold text-black">
+            <p className="px-2 py-1 text-2xl font-bold text-foreground">
               Hirin<span className="text-primary">Up</span>{' '}
               <span className="text-[8px]">Beta</span>
             </p>
           </Link>
           <button
-            className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-2 hover:bg-muted rounded-md transition-colors"
             aria-label="Toggle sidebar"
             onClick={toggleSidebar}
           >

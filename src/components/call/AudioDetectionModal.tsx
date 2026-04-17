@@ -59,9 +59,9 @@ interface AudioDetectionModalProps {
 
 function AudioLevelBar({ level }: { level: number }) {
   return (
-    <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+    <div className="w-full h-3 bg-neutral rounded-full overflow-hidden">
       <div
-        className="h-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 transition-all duration-75"
+        className="h-full bg-gradient-to-r from-success via-warning to-destructive transition-all duration-75"
         style={{ width: `${Math.min(100, level)}%` }}
       />
     </div>
@@ -128,7 +128,7 @@ export function AudioDetectionModal({
             {currentStep < 2 ? (
               <Button
                 variant="outline"
-                className="group w-fit hover:border-primary/90 hover:text-primary/90 text-slate-700 border-slate-700 border px-4 transition-all duration-300 flex items-center"
+                className="group w-fit hover:border-primary/90 hover:text-primary/90 text-foreground border-border border px-4 transition-all duration-300 flex items-center"
                 onClick={() => setCurrentStep((currentStep + 1) as 1 | 2)}
               >
                 Next
@@ -137,7 +137,7 @@ export function AudioDetectionModal({
               <Button
                 variant="outline"
                 disabled={!environmentAgreed}
-                className="group w-fit hover:border-primary/90 hover:text-primary/90 text-slate-700 border-slate-700 border px-4 transition-all duration-300 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group w-fit hover:border-primary/90 hover:text-primary/90 text-foreground border-border border px-4 transition-all duration-300 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => {
                   explicitCloseRef.current = true;
                   setCurrentStep(1);

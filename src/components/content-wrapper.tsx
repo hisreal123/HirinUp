@@ -7,8 +7,8 @@ export function ContentWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={`pt-[64px] h-full overflow-y-auto flex-grow transition-all duration-300 ${
-        isCollapsed ? 'ml-[80px]' : 'ml-[250px]'
+      className={`h-screen overflow-y-auto flex-grow transition-all duration-300 ${
+        isCollapsed ? 'ml-[64px]' : 'ml-[265px]'
       }`}
     >
       {children}

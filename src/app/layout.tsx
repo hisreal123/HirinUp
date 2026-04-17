@@ -1,5 +1,6 @@
 import './globals.css';
 import Script from 'next/script';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
 
 import type { Metadata } from 'next';
 
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
           strategy="afterInteractive"

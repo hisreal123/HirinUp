@@ -122,7 +122,7 @@ function QuestionsPopup({ interviewData, setProceed, setOpen, onSuccess }: Props
       >
         <div className="relative flex justify-center w-full">
           <ChevronLeft
-            className="absolute left-0 opacity-50 cursor-pointer hover:opacity-100 text-gray-600 mr-36"
+            className="absolute left-0 opacity-50 cursor-pointer hover:opacity-100 text-muted-foreground mr-36"
             size={30}
             onClick={() => {
               setProceed(false);
@@ -148,13 +148,13 @@ function QuestionsPopup({ interviewData, setProceed, setOpen, onSuccess }: Props
         </ScrollArea>
         {questions.length < interviewData.question_count ? (
           <div
-            className="border-indigo-600 opacity-75 hover:opacity-100 w-fit  rounded-full"
+            className="border-primary opacity-75 hover:opacity-100 w-fit rounded-full"
             onClick={handleAddQuestion}
           >
             <Plus
               size={45}
               strokeWidth={2.2}
-              className="text-indigo-600  cursor-pointer"
+              className="text-primary cursor-pointer"
             />
           </div>
         ) : (
@@ -183,7 +183,7 @@ function QuestionsPopup({ interviewData, setProceed, setOpen, onSuccess }: Props
             description.replace(/<[^>]*>/g, '').trim() === '' ||
             questions.some((question) => question.question.trim() === '')
           }
-          className="bg-indigo-600 hover:bg-indigo-800 mr-5 mt-2 min-w-[80px]"
+          className="bg-primary hover:bg-primary/80 mr-5 mt-2 min-w-[80px]"
           onClick={() => {
             setIsClicked(true);
             onSave();

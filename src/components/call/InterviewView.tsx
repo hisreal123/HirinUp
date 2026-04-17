@@ -37,11 +37,11 @@ export const InterviewView = memo(function InterviewView({
               />
             ) : (
               <div
-                className={`w-[100px] h-[100px] rounded-full bg-gray-200 flex items-center justify-center ${
+                className={`w-[100px] h-[100px] rounded-full bg-neutral flex items-center justify-center ${
                   activeTurn === 'agent' ? 'border-4 border-primary' : ''
                 }`}
               >
-                <span className="text-gray-500 text-xs">No Image</span>
+                <span className="text-muted-foreground text-xs">No Image</span>
               </div>
             )}
             <div className="font-semibold mt-1 text-sm">AI Interviewer</div>
@@ -51,7 +51,7 @@ export const InterviewView = memo(function InterviewView({
             {lastInterviewerResponse}
           </div>
         </div>
-        <div className="w-px bg-gray-200 self-stretch" />
+        <div className="w-px bg-border self-stretch" />
 
         {/* Candidate column */}
         <div className="w-[50%] flex flex-col py-4 px-3">

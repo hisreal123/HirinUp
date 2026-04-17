@@ -34,9 +34,9 @@ const questionCard = ({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className={`text-xs h-7  hover:bg-indigo-800  ${
+                      className={`text-xs h-7  hover:bg-primary/80  ${
                         questionData?.follow_up_count == 1
-                          ? 'bg-indigo-600'
+                          ? 'bg-primary'
                           : 'opacity-50'
                       } `}
                       onClick={() =>
@@ -49,8 +49,8 @@ const questionCard = ({
                       Low
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent className="bg-zinc-200">
-                    <p className="text-zinc-800">Brief follow-up</p>
+                  <TooltipContent className="bg-neutral">
+                    <p className="text-foreground">Brief follow-up</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -59,9 +59,9 @@ const questionCard = ({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className={`text-xs h-7  hover:bg-indigo-800 ${
+                      className={`text-xs h-7  hover:bg-primary/80 ${
                         questionData?.follow_up_count == 2
-                          ? 'bg-indigo-600'
+                          ? 'bg-primary'
                           : 'opacity-50'
                       } `}
                       onClick={() =>
@@ -74,8 +74,8 @@ const questionCard = ({
                       Medium
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent className="bg-zinc-200">
-                    <p className="text-zinc-800">Moderate follow-up</p>
+                  <TooltipContent className="bg-neutral">
+                    <p className="text-foreground">Moderate follow-up</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -84,9 +84,9 @@ const questionCard = ({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className={`text-xs h-7 hover:bg-indigo-800  ${
+                      className={`text-xs h-7 hover:bg-primary/80  ${
                         questionData?.follow_up_count == 3
-                          ? 'bg-indigo-600'
+                          ? 'bg-primary'
                           : 'opacity-50'
                       } `}
                       onClick={() =>
@@ -99,8 +99,8 @@ const questionCard = ({
                       High
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent className="bg-zinc-200">
-                    <p className="text-zinc-800">In-depth follow-up</p>
+                  <TooltipContent className="bg-neutral">
+                    <p className="text-foreground">In-depth follow-up</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -109,7 +109,7 @@ const questionCard = ({
           <div className="flex flex-row items-center">
             <textarea
               value={questionData?.question}
-              className="h-fit mt-3 pt-1 border-2 rounded-md w-full px-2 border-gray-400"
+              className="h-fit mt-3 pt-1 border-2 rounded-md w-full px-2 border-input"
               placeholder="e.g. Can you tell me about a challenging project you’ve worked on?"
               rows={3}
               onChange={(e) =>
@@ -126,8 +126,7 @@ const questionCard = ({
               }
             />
             <Trash2
-              className="cursor-pointer ml-3"
-              color="red"
+              className="text-destructive cursor-pointer ml-3"
               size={24}
               onClick={() => onDelete(questionData.id)}
             />

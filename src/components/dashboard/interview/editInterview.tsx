@@ -180,10 +180,10 @@ function EditInterview({ interview }: EditInterviewProps) {
 
   return (
     <div className=" h-screen z-[10] mx-2">
-      <div className="flex flex-col bg-gray-200 rounded-md min-h-[120px] p-2 pl-4">
+      <div className="flex flex-col bg-neutral rounded-md min-h-[120px] p-2 pl-4">
         <div>
           <div
-            className="mt-2 ml-1 pr-2 inline-flex items-center text-indigo-600 hover:cursor-pointer"
+            className="mt-2 ml-1 pr-2 inline-flex items-center text-primary hover:cursor-pointer"
             onClick={() => {
               router.push(`/dashboard/interviews/${interview?.id}`);
             }}
@@ -205,7 +205,7 @@ function EditInterview({ interview }: EditInterviewProps) {
               title={
                 isEditingDescription ? 'Cancel editing' : 'Edit description'
               }
-              className="text-gray-400 hover:text-indigo-600 transition-colors"
+              className="text-muted-foreground hover:text-primary transition-colors"
               onClick={() => setIsEditingDescription((prev) => !prev)}
             >
               {isEditingDescription ? <X size={15} /> : <Pencil size={15} />}
@@ -220,7 +220,7 @@ function EditInterview({ interview }: EditInterviewProps) {
                 description.replace(/<[^>]*>/g, '').trim() === '' ||
                 objective.trim() === ''
               }
-              className="bg-indigo-600 hover:bg-indigo-800 mt-2 min-w-[90px]"
+              className="bg-primary hover:bg-primary/90 mt-2 min-w-[90px]"
               onClick={() => {
                 setIsClicked(true);
                 onSave();
@@ -237,7 +237,7 @@ function EditInterview({ interview }: EditInterviewProps) {
             </Button>
             <Button
               disabled={isClicked}
-              className="bg-red-500 hover:bg-red-600 mr-5 mt-2 p-2"
+              className="bg-destructive hover:bg-destructive/90 mr-5 mt-2 p-2"
               onClick={() => setDeleteModalOpen(true)}
             >
               <TrashIcon size={16} />
@@ -262,7 +262,7 @@ function EditInterview({ interview }: EditInterviewProps) {
         ) : (
           <DescriptionDisplay
             description={description}
-            className="ml-2 w-[75%] mt-3 px-3 py-2 text-sm border-2 border-gray-200 rounded-md min-h-[5rem]"
+            className="ml-2 w-[75%] mt-3 px-3 py-2 text-sm border-2 border-border rounded-md min-h-[5rem]"
           />
         )}
         <div className="flex items-center gap-2 mt-3 mb-1 ml-2">
@@ -270,7 +270,7 @@ function EditInterview({ interview }: EditInterviewProps) {
           <button
             type="button"
             title={isEditingObjective ? 'Cancel editing' : 'Edit objective'}
-            className="text-gray-400 hover:text-indigo-600 transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors"
             onClick={() => setIsEditingObjective((prev) => !prev)}
           >
             {isEditingObjective ? <X size={15} /> : <Pencil size={15} />}
@@ -279,16 +279,16 @@ function EditInterview({ interview }: EditInterviewProps) {
         {isEditingObjective ? (
           <textarea
             value={objective}
-            className="h-fit mt-1 ml-2 py-2 border-2 rounded-md w-[75%] px-2 border-gray-400"
+            className="h-fit mt-1 ml-2 py-2 border-2 rounded-md w-[75%] px-2 border-input"
             placeholder="Enter your interview objective here."
             rows={3}
             onChange={(e) => setObjective(e.target.value)}
             onBlur={(e) => setObjective(e.target.value.trim())}
           />
         ) : (
-          <div className="ml-2 w-[75%] mt-1 px-3 py-2 text-sm border-2 border-gray-200 rounded-md min-h-[5rem] whitespace-pre-wrap">
+          <div className="ml-2 w-[75%] mt-1 px-3 py-2 text-sm border-2 border-border rounded-md min-h-[5rem] whitespace-pre-wrap">
             {objective || (
-              <span className="text-gray-400">No objective set.</span>
+              <span className="text-muted-foreground">No objective set.</span>
             )}
           </div>
         )}
@@ -308,7 +308,7 @@ function EditInterview({ interview }: EditInterviewProps) {
                     <div
                       className={`w-[96px] overflow-hidden rounded-full ${
                         selectedInterviewer === item.id
-                          ? 'border-4 border-indigo-600'
+                          ? 'border-4 border-primary'
                           : ''
                       }`}
                       onClick={() => {
@@ -324,8 +324,8 @@ function EditInterview({ interview }: EditInterviewProps) {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-500 text-xs">
+                        <div className="w-full h-full bg-neutral flex items-center justify-center">
+                          <span className="text-muted-foreground text-xs">
                             No Image
                           </span>
                         </div>
@@ -347,8 +347,8 @@ function EditInterview({ interview }: EditInterviewProps) {
             </span>
             <Switch
               checked={isAnonymous}
-              className={`ml-4 mt-1 border-2 border-gray-300 ${
-                isAnonymous ? 'bg-indigo-600' : 'bg-white'
+              className={`ml-4 mt-1 border-2 border-border ${
+                isAnonymous ? 'bg-primary' : 'bg-background'
               }`}
               onCheckedChange={(checked) => setIsAnonymous(checked)}
             />
@@ -369,7 +369,7 @@ function EditInterview({ interview }: EditInterviewProps) {
               step="1"
               max={MAX_QUESTIONS}
               min={MIN_QUESTION}
-              className="border-2 text-center focus:outline-none  bg-slate-100 rounded-md border-gray-500 w-14 px-2 py-0.5 ml-3"
+              className="border-2 text-center focus:outline-none bg-muted rounded-md border-input w-14 px-2 py-0.5 ml-3"
               value={numQuestions}
               onChange={(e) => {
                 let value = e.target.value;
@@ -427,14 +427,14 @@ function EditInterview({ interview }: EditInterviewProps) {
           <button
             type="button"
             title={isEditingQuestions ? 'Cancel editing' : 'Edit questions'}
-            className="text-gray-400 hover:text-indigo-600 transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors"
             onClick={() => setIsEditingQuestions((prev) => !prev)}
           >
             {isEditingQuestions ? <X size={15} /> : <Pencil size={15} />}
           </button>
         </div>
         {isEditingQuestions ? (
-          <ScrollArea className="flex ml-2 p-2 pr-4 mb-4 flex-col justify-center items-center w-[75%] max-h-[500px] bg-slate-100 rounded-md text-sm mt-3">
+          <ScrollArea className="flex ml-2 p-2 pr-4 mb-4 flex-col justify-center items-center w-[75%] max-h-[500px] bg-muted rounded-md text-sm mt-3">
             {questions.map((question, index) => (
               <QuestionCard
                 key={question.id}
@@ -447,13 +447,13 @@ function EditInterview({ interview }: EditInterviewProps) {
             <div ref={endOfListRef} />
             {questions.length < numQuestions ? (
               <div
-                className="border-indigo-600 opacity-75 hover:opacity-100 w-fit text-center rounded-full mx-auto"
+                className="border-primary opacity-75 hover:opacity-100 w-fit text-center rounded-full mx-auto"
                 onClick={handleAddQuestion}
               >
                 <Plus
                   size={45}
                   strokeWidth={2.2}
-                  className="text-indigo-600 text-center cursor-pointer"
+                  className="text-primary text-center cursor-pointer"
                 />
               </div>
             ) : (
@@ -461,17 +461,17 @@ function EditInterview({ interview }: EditInterviewProps) {
             )}
           </ScrollArea>
         ) : (
-          <div className="ml-2 w-[75%] mt-3 mb-4 bg-slate-100 rounded-md text-sm px-3 py-2">
+          <div className="ml-2 w-[75%] mt-3 mb-4 bg-muted rounded-md text-sm px-3 py-2">
             {questions.map((question, index) => (
               <div
                 key={question.id}
-                className="py-1.5 border-b border-gray-200 last:border-0"
+                className="py-1.5 border-b border-border last:border-0"
               >
-                <span className="font-medium text-gray-500 mr-2">
+                <span className="font-medium text-muted-foreground mr-2">
                   {index + 1}.
                 </span>
                 {question.question || (
-                  <span className="text-gray-400 italic">No question set.</span>
+                  <span className="text-muted-foreground italic">No question set.</span>
                 )}
               </div>
             ))}

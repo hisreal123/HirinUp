@@ -1,5 +1,7 @@
 'use client';
 
+const foundersemail = process.env.NEXT_PUBLIC_FOUNDERS_EMAIL;
+
 import { useState, useEffect, useCallback } from 'react';
 import { useOrganization, useClerk } from '@clerk/nextjs';
 import InterviewCard from '@/components/dashboard/interview/interviewCard';
@@ -251,9 +253,8 @@ function Interviews() {
                 </div>
               </div>
               <p className="text-l text-center">
-                Contact{' '}
-                <span className="font-semibold">founders@hirin-up.co</span> to
-                upgrade your plan.
+                Contact <span className="font-semibold">{foundersemail}</span>
+                to upgrade your plan.
               </p>
             </div>
           </Modal>
