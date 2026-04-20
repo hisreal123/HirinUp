@@ -3,7 +3,7 @@
 import { Interview } from '@/types/interview';
 import { Interviewer } from '@/types/interviewer';
 import { Response } from '@/types/response';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UserCircleIcon, SmileIcon, Info } from 'lucide-react';
 import { useInterviewers } from '@/contexts/interviewers.context';
 import { PieChart } from '@mui/x-charts/PieChart';
@@ -33,11 +33,11 @@ function InfoTooltip({ content }: { content: string }) {
       <Tooltip>
         <TooltipTrigger>
           <Info
-            className="h-2 w-2 text-[#4F46E5] inline-block ml-0 align-super font-bold"
+            className="h-2 w-2 text-primary inline-block ml-0 align-super font-bold"
             strokeWidth={2.5}
           />
         </TooltipTrigger>
-        <TooltipContent className="bg-gray-500 text-white font-normal">
+        <TooltipContent className="bg-secondary text-secondary-foreground font-normal">
           <p>{content}</p>
         </TooltipContent>
       </Tooltip>
@@ -174,7 +174,7 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
   return (
     <div className="h-screen z-[10] mx-2">
       {responses.length > 0 ? (
-        <div className="bg-slate-200 rounded-2xl min-h-[120px] p-2 ">
+        <div className="bg-muted rounded-2xl min-h-[120px] p-2 ">
           <div className="flex flex-row gap-2 justify-between items-center mx-2">
             <div className="flex flex-row gap-2 items-center">
               <p className="font-semibold my-2">Overall Analysis</p>
@@ -188,30 +188,30 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
             <p className="font-medium mb-1">Interview Description:</p>
             <DescriptionDisplay description={interview?.description || ''} />
           </div>
-          <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-4 rounded-2xl bg-slate-50 shadow-md">
+          <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-4 rounded-2xl bg-card shadow-md">
             <ScrollArea className="h-[250px]">
               <DataTable data={tableData} interviewId={interview?.id || ''} />
             </ScrollArea>
           </div>
           <div className="flex flex-row gap-1 my-2 justify-center">
             <div className="flex flex-col">
-              <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-3 rounded-2xl bg-slate-50 shadow-md max-w-[400px]">
+              <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-3 rounded-2xl bg-card shadow-md max-w-[400px]">
                 <div className="flex flex-row items-center justify-center gap-1 font-semibold mb-1 text-[15px]">
                   Average Duration
                   <InfoTooltip content="Average time users took to complete an interview" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <p className="text-2xl font-semibold text-indigo-600 w-fit p-1 px-2 bg-indigo-100 rounded-md">
+                  <p className="text-2xl font-semibold text-primary w-fit p-1 px-2 bg-primary/10 rounded-md">
                     {convertSecondstoMMSS(totalDuration / responses.length)}
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center gap-1 mx-2 p-3 rounded-2xl bg-slate-50 shadow-md max-w-[360px]">
+              <div className="flex flex-col items-center justify-center gap-1 mx-2 p-3 rounded-2xl bg-card shadow-md max-w-[360px]">
                 <div className="flex flex-row gap-1 font-semibold mb-1 text-[15px] mx-auto text-center">
                   Interview Completion Rate
                   <InfoTooltip content="Percentage of interviews completed successfully" />
                 </div>
-                <p className="w-fit text-2xl font-semibold text-indigo-600  p-1 px-2 bg-indigo-100 rounded-md">
+                <p className="w-fit text-2xl font-semibold text-primary p-1 px-2 bg-primary/10 rounded-md">
                   {Math.round(
                     (completedInterviews / responses.length) * 10000
                   ) / 100}
@@ -219,7 +219,7 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                 </p>
               </div>
             </div>
-            <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-4 rounded-2xl bg-slate-50 shadow-md max-w-[360px]">
+            <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-4 rounded-2xl bg-card shadow-md max-w-[360px]">
               <div className="flex flex-row gap-2 text-[15px] font-bold mb-3 mx-auto">
                 <SmileIcon />
                 Candidate Sentiment
@@ -238,26 +238,26 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                         id: 0,
                         value: sentimentCount.positive,
                         label: `Positive (${sentimentCount.positive})`,
-                        color: '#22c55e',
+                        color: 'hsl(var(--success))',
                       },
                       {
                         id: 1,
                         value: sentimentCount.neutral,
                         label: `Neutral (${sentimentCount.neutral})`,
-                        color: '#eab308',
+                        color: 'hsl(var(--warning))',
                       },
                       {
                         id: 2,
                         value: sentimentCount.negative,
                         label: `Negative (${sentimentCount.negative})`,
-                        color: '#eb4444',
+                        color: 'hsl(var(--destructive))',
                       },
                     ],
                     highlightScope: { faded: 'global', highlighted: 'item' },
                     faded: {
                       innerRadius: 10,
                       additionalRadius: -10,
-                      color: 'gray',
+                      color: 'hsl(var(--muted-foreground))',
                     },
                   },
                 ]}
@@ -265,7 +265,7 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                 height={120}
               />
             </div>
-            <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-4 rounded-2xl bg-slate-50 shadow-md">
+            <div className="flex flex-col gap-1 my-2 mt-4 mx-2 p-4 rounded-2xl bg-card shadow-md">
               <div className="flex flex-row gap-2 text-[15px] font-bold mx-auto mb-1">
                 <UserCircleIcon />
                 Candidate Status
@@ -287,33 +287,33 @@ function SummaryInfo({ responses, interview }: SummaryProps) {
                         id: 0,
                         value: candidateStatusCount[CandidateStatus.SELECTED],
                         label: `Selected (${candidateStatusCount[CandidateStatus.SELECTED]})`,
-                        color: '#22c55e',
+                        color: 'hsl(var(--success))',
                       },
                       {
                         id: 1,
                         value: candidateStatusCount[CandidateStatus.POTENTIAL],
                         label: `Potential (${candidateStatusCount[CandidateStatus.POTENTIAL]})`,
-                        color: '#eab308',
+                        color: 'hsl(var(--warning))',
                       },
                       {
                         id: 2,
                         value:
                           candidateStatusCount[CandidateStatus.NOT_SELECTED],
                         label: `Not Selected (${candidateStatusCount[CandidateStatus.NOT_SELECTED]})`,
-                        color: '#eb4444',
+                        color: 'hsl(var(--destructive))',
                       },
                       {
                         id: 3,
                         value: candidateStatusCount[CandidateStatus.NO_STATUS],
                         label: `No Status (${candidateStatusCount[CandidateStatus.NO_STATUS]})`,
-                        color: '#9ca3af',
+                        color: 'hsl(var(--muted-foreground))',
                       },
                     ],
                     highlightScope: { faded: 'global', highlighted: 'item' },
                     faded: {
                       innerRadius: 10,
                       additionalRadius: -10,
-                      color: 'gray',
+                      color: 'hsl(var(--muted-foreground))',
                     },
                   },
                 ]}

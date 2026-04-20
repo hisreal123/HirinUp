@@ -1,4 +1,74 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap');
+@font-face {
+  font-family: 'Satoshi';
+  font-style: normal;
+  font-weight: 300;
+  src: url('/fonts/satoshi/Satoshi-Light.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/fonts/satoshi/Satoshi-LightItalic.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/satoshi/Satoshi-Regular.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  font-style: italic;
+  font-weight: 400;
+  src: url('/fonts/satoshi/Satoshi-Italic.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/fonts/satoshi/Satoshi-Medium.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  font-style: italic;
+  font-weight: 500;
+  src: url('/fonts/satoshi/Satoshi-MediumItalic.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/satoshi/Satoshi-Bold.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  font-style: italic;
+  font-weight: 700;
+  src: url('/fonts/satoshi/Satoshi-BoldItalic.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  font-style: normal;
+  font-weight: 900;
+  src: url('/fonts/satoshi/Satoshi-Black.woff') format('woff');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  font-style: italic;
+  font-weight: 900;
+  src: url('/fonts/satoshi/Satoshi-BlackItalic.woff') format('woff');
+  font-display: swap;
+}
 
 @font-face {
   font-family: 'Montreal';
@@ -239,6 +309,75 @@ html[data-theme-transitioning] *::after {
     --gradient-main-to: 152 69% 45%;
   }
 
+  /* ─── Theme: Evergreen ───────────────────────────────────────────────────
+     Clean light green theme. Satoshi font. Nature/eco aesthetic. */
+  [data-theme="evergreen"] {
+    --background: 180 16% 96%;
+    --foreground: 235 6% 41%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 235 6% 41%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 218 36% 9%;
+
+    --primary: 141 92% 28%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 139 92% 14%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 185 16% 92%;
+    --muted-foreground: 200 13% 39%;
+
+    --accent: 185 16% 92%;
+    --accent-foreground: 213 16% 26%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 4% 88%;
+    --input: 240 4% 88%;
+    --ring: 141 92% 28%;
+
+    --surface-subtle: 180 16% 96%;
+    --neutral: 185 16% 92%;
+    --neutral-foreground: 200 13% 39%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-subtle: 142 71% 93%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 15%;
+    --warning-subtle: 48 100% 93%;
+
+    --auth-primary: 141 92% 28%;
+    --auth-primary-hover: 141 92% 23%;
+    --auth-primary-light: 141 60% 70%;
+    --auth-overlay: 141 92% 28%;
+    --auth-text-heading: 218 36% 9%;
+    --auth-text-body: 200 13% 39%;
+    --auth-text-label: 200 13% 35%;
+    --auth-text-muted: 200 13% 39%;
+    --auth-link: 141 92% 28%;
+    --auth-link-hover: 141 92% 23%;
+    --auth-success: 142 71% 45%;
+    --auth-success-light: 142 71% 93%;
+
+    --gradient-text-start: 141 92% 10%;
+    --gradient-text-via: 139 92% 18%;
+    --gradient-text-mid: 141 92% 24%;
+    --gradient-text-end: 139 92% 28%;
+    --gradient-bg-from: 141 92% 28%;
+    --gradient-bg-to: 139 92% 14%;
+    --gradient-main-from: 141 92% 28%;
+    --gradient-main-to: 141 92% 45%;
+
+    --font-sans: 'Satoshi', Arial, sans-serif;
+    --font-heading: 'Satoshi', Arial, sans-serif;
+  }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -280,6 +419,21 @@ html[data-theme-transitioning] *::after {
     --warning-foreground: 38 92% 10%;
     --warning-subtle: 38 50% 20%;
   }
+}
+
+/* Global — body text sizing for all themes (headings and bold excluded) */
+p, li {
+  font-size: 14px;
+  color: hsl(var(--foreground));
+}
+
+span {
+  font-size: 12px;
+}
+
+strong, b, strong span, b span {
+  font-size: inherit;
+  font-weight: bold;
 }
 
 .cl-logoImage {

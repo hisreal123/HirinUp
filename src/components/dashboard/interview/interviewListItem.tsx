@@ -76,13 +76,13 @@ function InterviewListItem({ name, interviewerId, id, readableSlug }: Props) {
       }}
     >
       <Card
-        className={`relative p-0 mt-2 cursor-pointer w-full rounded-lg overflow-hidden border border-gray-200 hover:border-primary hover:bg-primary/5 transition-all ${isFetching ? 'opacity-60' : ''}`}
+        className={`relative p-0 mt-2 cursor-pointer w-full rounded-lg overflow-hidden border border-border hover:border-primary hover:bg-primary/5 transition-all ${isFetching ? 'opacity-60' : ''}`}
       >
         <CardContent className="p-4">
           <div className="flex flex-row items-center justify-between">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-4">
-                <h3 className="text-base font-semibold text-gray-900 truncate">
+                <h3 className="text-base font-semibold text-foreground truncate">
                   {name}
                   {isFetching && (
                     <span className="ml-2 inline-block">
@@ -90,7 +90,7 @@ function InterviewListItem({ name, interviewerId, id, readableSlug }: Props) {
                     </span>
                   )}
                 </h3>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-muted-foreground">
                   {responseCount?.toString() || 0}{' '}
                   {responseCount === 1 ? 'Response' : 'Responses'}
                 </span>

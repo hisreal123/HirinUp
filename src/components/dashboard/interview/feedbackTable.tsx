@@ -86,7 +86,7 @@ return <div className="font-medium">{email || 'Anonymous'}</div>;
       cell: ({ row }) => {
         const satisfaction = row.getValue('satisfaction') as number | null;
         if (satisfaction === null) {
-          return <span className="text-gray-400">-</span>;
+          return <span className="text-muted-foreground">-</span>;
         }
         
 return <div className="font-medium">{satisfaction}/5</div>;
@@ -101,9 +101,9 @@ return <div className="font-medium">{satisfaction}/5</div>;
 return (
           <div className="max-w-md">
             {feedback ? (
-              <p className="text-sm text-gray-700 line-clamp-3">{feedback}</p>
+              <p className="text-sm text-foreground line-clamp-3">{feedback}</p>
             ) : (
-              <span className="text-gray-400">-</span>
+              <span className="text-muted-foreground">-</span>
             )}
           </div>
         );
@@ -166,7 +166,7 @@ return <span>{formatDateReadable(date)}</span>;
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         No feedback to display
       </div>
     );
@@ -176,7 +176,7 @@ return <span>{formatDateReadable(date)}</span>;
     <div className="space-y-4">
       {/* Search Bar */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           type="text"
           placeholder="Search by email, feedback, satisfaction..."
@@ -236,7 +236,7 @@ return <span>{formatDateReadable(date)}</span>;
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">Show:</span>
+            <span className="text-sm text-foreground">Show:</span>
             <Select
               value={table.getState().pagination.pageSize.toString()}
               onValueChange={(value) => {
@@ -255,9 +255,9 @@ return <span>{formatDateReadable(date)}</span>;
                 <SelectItem value="100">100</SelectItem>
               </SelectContent>
             </Select>
-            <span className="text-sm text-gray-700">per page</span>
+            <span className="text-sm text-foreground">per page</span>
           </div>
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-foreground">
             Showing{' '}
             {table.getState().pagination.pageIndex *
               table.getState().pagination.pageSize +
@@ -281,7 +281,7 @@ return <span>{formatDateReadable(date)}</span>;
             Previous
           </Button>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-foreground">
               Page {table.getState().pagination.pageIndex + 1} of{' '}
               {table.getPageCount()}
             </span>

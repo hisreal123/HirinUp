@@ -49,18 +49,18 @@ function CallTypeCell({ isTwoFlow, token, isUsed, onToggleTwoFlow }: CallTypeCel
     <>
       <div className="flex items-center gap-2">
         {isTwoFlow ? (
-          <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
             Two Call
           </span>
         ) : (
-          <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
             Single Call
           </span>
         )}
         <Switch
           checked={isTwoFlow}
           disabled={isUsed}
-          className={isTwoFlow ? 'bg-indigo-600' : ''}
+          className={isTwoFlow ? 'bg-primary' : ''}
           onCheckedChange={handleSwitchChange}
         />
       </div>
@@ -127,7 +127,7 @@ export function getLinksColumns({
 return (
           <div className="flex items-center gap-2">
             <div
-              className={`w-3 h-3 rounded-full ${isUnused ? 'bg-gray-300' : 'bg-green-500'}`}
+              className={`w-3 h-3 rounded-full ${isUnused ? 'bg-muted-foreground' : 'bg-success'}`}
             />
             <span className="text-sm font-medium">
               {isUnused ? 'Unused' : 'Used'}
@@ -219,7 +219,7 @@ return (
         const response = row.original;
         const isEnded = row.getValue('is_ended') as boolean;
         if (!isEnded && !response.call_id)
-          {return <span className="text-sm text-gray-500">-</span>;}
+          {return <span className="text-sm text-muted-foreground">-</span>;}
         // Only show "Expired" for manually expired unused links (no call was made)
         if (isEnded && !response.call_id)
           {return <span className="text-sm text-red-500">Expired</span>;}
@@ -303,7 +303,7 @@ return (
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                className="h-8 px-2 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
                 onClick={() => setDeleteToken(token)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />

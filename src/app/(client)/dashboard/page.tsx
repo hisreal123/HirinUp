@@ -159,9 +159,9 @@ function Interviews() {
   function InterviewsLoader() {
     return (
       <>
-        <div className="h-48 w-full mt-4 animate-pulse rounded-xl bg-gray-300" />
-        <div className="h-48 w-full mt-4 animate-pulse rounded-xl bg-gray-300" />
-        <div className="h-48 w-full mt-4 animate-pulse rounded-xl bg-gray-300" />
+        <div className="h-48 w-full mt-4 animate-pulse rounded-xl bg-muted" />
+        <div className="h-48 w-full mt-4 animate-pulse rounded-xl bg-muted" />
+        <div className="h-48 w-full mt-4 animate-pulse rounded-xl bg-muted" />
       </>
     );
   }
@@ -174,7 +174,7 @@ function Interviews() {
             <h2 className="mr-2 text-2xl font-semibold tracking-tight">
               My Interviews
             </h2>
-            <h3 className="text-gray-500 text-sm tracking-tight">
+            <h3 className="text-muted-foreground text-sm tracking-tight">
               {interviews?.length} Interviews created
             </h3>
           </div>
@@ -214,7 +214,7 @@ function Interviews() {
         {isModalOpen && (
           <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
             <div className="flex flex-col space-y-4">
-              <div className="flex justify-center text-indigo-600">
+              <div className="flex justify-center text-primary">
                 <Gem />
               </div>
               <h3 className="text-xl font-semibold text-center">
@@ -269,7 +269,7 @@ function Interviews() {
                     <Plus
                       size={90}
                       strokeWidth={0.5}
-                      className="text-gray-700"
+                      className="text-foreground"
                     />
                   </div>
                   <CardTitle className="p-0 text-md text-center">

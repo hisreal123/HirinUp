@@ -1,0 +1,24 @@
+{
+  "themes": [
+    {
+      "id": "default",
+      "name": "Brand",
+      "swatch": "hsl(270 70% 50%)"
+    },
+    {
+      "id": "corporate-blue",
+      "name": "Corporate",
+      "swatch": "hsl(221 83% 53%)"
+    },
+    {
+      "id": "crypto-dark",
+      "name": "Crypto",
+      "swatch": "hsl(174 72% 38%)"
+    },
+    {
+      "id": "evergreen",
+      "name": "Evergreen",
+      "swatch": "hsl(141 92% 28%)"
+    }
+  ]
+}

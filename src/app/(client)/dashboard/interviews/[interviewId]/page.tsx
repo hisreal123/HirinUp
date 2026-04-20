@@ -289,14 +289,14 @@ return {
   }, [responses, feedbacks]);
 
   return (
-    <div className="flex flex-col w-full h-full m-2 bg-white">
+    <div className="flex flex-col w-full h-full m-2 bg-background">
       {loading ? (
         <div className="flex flex-col items-center justify-center h-[80%] w-full">
           <LoaderWithText />
         </div>
       ) : (
         <>
-          <div className="flex flex-row p-3 pt-4 justify-center gap-6 items-center sticky top-2 bg-white">
+          <div className="flex flex-row p-3 pt-4 justify-center gap-6 items-center sticky top-2 bg-background">
             <div className="font-bold text-md">{interview?.name}</div>
 
             <div className="flex flex-row gap-3 my-auto">
@@ -317,11 +317,11 @@ return {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent
-                  className="bg-zinc-300"
+                  className="bg-secondary"
                   side="bottom"
                   sideOffset={4}
                 >
-                  <span className="text-black flex flex-row gap-4">
+                  <span className="text-secondary-foreground flex flex-row gap-4">
                     Preview
                   </span>
                 </TooltipContent>
@@ -340,11 +340,11 @@ return {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent
-                  className="bg-zinc-300"
+                  className="bg-secondary"
                   side="bottom"
                   sideOffset={4}
                 >
-                  <span className="text-black flex flex-row gap-4">Edit</span>
+                  <span className="text-secondary-foreground flex flex-row gap-4">Edit</span>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -356,7 +356,7 @@ return {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipContent
-                        className="bg-zinc-300"
+                        className="bg-secondary"
                         side="bottom"
                         sideOffset={4}
                       >
@@ -371,7 +371,7 @@ return {
                   <Switch
                     checked={isActive}
                     className={`ms-3 my-auto ${
-                      isActive ? 'bg-secondary' : 'bg-[#E6E7EB]'
+                      isActive ? 'bg-secondary' : 'bg-muted'
                     }`}
                     onCheckedChange={handleToggle}
                   />
@@ -382,7 +382,7 @@ return {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className="bg-secondary text-white hover:bg-secondary/90 px-3 h-7 text-xs"
+                    className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-3 h-7 text-xs"
                     onClick={(event) => {
                       event.stopPropagation();
                       setIsGenerateLinkModalOpen(true);
@@ -393,11 +393,11 @@ return {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent
-                  className="bg-zinc-300"
+                  className="bg-secondary"
                   side="bottom"
                   sideOffset={4}
                 >
-                  <span className="text-black flex flex-row gap-4">
+                  <span className="text-secondary-foreground flex flex-row gap-4">
                     Generate Link
                   </span>
                 </TooltipContent>
@@ -407,7 +407,7 @@ return {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className="bg-secondary text-white hover:bg-secondary/90 px-3 h-7 text-xs"
+                    className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-3 h-7 text-xs"
                     onClick={(event) => {
                       event.stopPropagation();
                       openSharePopup();
@@ -418,55 +418,55 @@ return {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent
-                  className="bg-zinc-300"
+                  className="bg-secondary"
                   side="bottom"
                   sideOffset={4}
                 >
-                  <span className="text-black flex flex-row gap-4">Share</span>
+                  <span className="text-secondary-foreground flex flex-row gap-4">Share</span>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
           <div className="flex flex-row w-full p-2 h-[85%] gap-1 ">
-            <div className="w-[20%] flex flex-col p-2 divide-y-2 rounded-sm border-2 border-slate-100">
+            <div className="w-[20%] flex flex-col p-2 divide-y-2 rounded-sm border-2 border-border">
               <div className="flex w-full justify-center py-2">
                 <Select
                   onValueChange={async (newValue: string) => {
                     setFilterStatus(newValue);
                   }}
                 >
-                  <SelectTrigger className="w-[95%] bg-slate-100 rounded-lg">
-                    <Filter size={18} className=" text-slate-400" />
+                  <SelectTrigger className="w-[95%] bg-muted rounded-lg">
+                    <Filter size={18} className=" text-muted-foreground" />
                     <SelectValue placeholder="Filter By" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={CandidateStatus.NO_STATUS}>
                       <div className="flex items-center">
-                        <div className="w-3 h-3 bg-gray-400 rounded-full mr-2" />
+                        <div className="w-3 h-3 bg-muted-foreground rounded-full mr-2" />
                         No Status
                       </div>
                     </SelectItem>
                     <SelectItem value={CandidateStatus.NOT_SELECTED}>
                       <div className="flex items-center">
-                        <div className="w-3 h-3 bg-red-500 rounded-full mr-2" />
+                        <div className="w-3 h-3 bg-destructive rounded-full mr-2" />
                         Not Selected
                       </div>
                     </SelectItem>
                     <SelectItem value={CandidateStatus.POTENTIAL}>
                       <div className="flex items-center">
-                        <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2" />
+                        <div className="w-3 h-3 bg-warning rounded-full mr-2" />
                         Potential
                       </div>
                     </SelectItem>
                     <SelectItem value={CandidateStatus.SELECTED}>
                       <div className="flex items-center">
-                        <div className="w-3 h-3 bg-green-500 rounded-full mr-2" />
+                        <div className="w-3 h-3 bg-success rounded-full mr-2" />
                         Selected
                       </div>
                     </SelectItem>
                     <SelectItem value="ALL">
                       <div className="flex items-center">
-                        <div className="w-3 h-3 border-2 border-gray-300 rounded-full mr-2" />
+                        <div className="w-3 h-3 border-2 border-border rounded-full mr-2" />
                         All
                       </div>
                     </SelectItem>
@@ -478,10 +478,10 @@ return {
                 {filteredResponses.length > 0 ? (
                   filteredResponses.map((response) => (
                     <div
-                      className={`p-2 rounded-md hover:bg-indigo-100 border-2 my-1 text-left text-xs ${
+                      className={`p-2 rounded-md hover:bg-primary/10 border-2 my-1 text-left text-xs ${
                         callId == response.call_id
-                          ? 'bg-indigo-200'
-                          : 'border-indigo-100'
+                          ? 'bg-primary/20'
+                          : 'border-primary/20'
                       } flex flex-row justify-between cursor-pointer w-full`}
                       key={response?.id}
                       onClick={() => {
@@ -495,13 +495,13 @@ return {
                     >
                       <div className="flex flex-row gap-1 items-center w-full">
                         {response.candidate_status === 'NOT_SELECTED' ? (
-                          <div className="w-[5%] h-full bg-red-500 rounded-sm" />
+                          <div className="w-[5%] h-full bg-destructive rounded-sm" />
                         ) : response.candidate_status === 'POTENTIAL' ? (
-                          <div className="w-[5%] h-full bg-yellow-500 rounded-sm" />
+                          <div className="w-[5%] h-full bg-warning rounded-sm" />
                         ) : response.candidate_status === 'SELECTED' ? (
-                          <div className="w-[5%] h-full bg-green-500 rounded-sm" />
+                          <div className="w-[5%] h-full bg-success rounded-sm" />
                         ) : (
-                          <div className="w-[5%] h-full bg-gray-400 rounded-sm" />
+                          <div className="w-[5%] h-full bg-muted-foreground rounded-sm" />
                         )}
                         <div className="flex items-center justify-between w-full">
                           <div className="flex flex-col my-auto">
@@ -519,7 +519,7 @@ return {
                           <div className="flex flex-col items-center justify-center ml-auto flex-shrink-0">
                             {!response.is_viewed && (
                               <div className="w-4 h-4 flex items-center justify-center mb-1">
-                                <div className="text-indigo-500 text-xl leading-none">
+                                <div className="text-primary text-xl leading-none">
                                   ●
                                 </div>
                               </div>
@@ -535,18 +535,18 @@ return {
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <div className="w-6 h-6 rounded-full bg-white border-2 border-indigo-500 flex items-center justify-center">
-                                          <span className="text-indigo-500 text-xs font-semibold">
+                                        <div className="w-6 h-6 rounded-full bg-background border-2 border-primary flex items-center justify-center">
+                                          <span className="text-primary text-xs font-semibold">
                                             {response?.analytics?.overallScore}
                                           </span>
                                         </div>
                                       </TooltipTrigger>
                                       <TooltipContent
-                                        className="bg-gray-500"
+                                        className="bg-secondary"
                                         side="bottom"
                                         sideOffset={4}
                                       >
-                                        <span className="text-white font-normal flex flex-row gap-4">
+                                        <span className="text-secondary-foreground font-normal flex flex-row gap-4">
                                           Overall Score
                                         </span>
                                       </TooltipContent>
@@ -560,7 +560,7 @@ return {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-gray-500">
+                  <p className="text-center text-muted-foreground">
                     No responses to display
                   </p>
                 )}
@@ -581,7 +581,7 @@ return {
                     <div className="grid grid-cols-5 gap-4 mb-6">
                       <Card>
                         <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-medium text-gray-600">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
                             Total Responses
                           </CardTitle>
                         </CardHeader>
@@ -593,7 +593,7 @@ return {
                       </Card>
                       <Card>
                         <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-medium text-gray-600">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
                             Empty Responses
                           </CardTitle>
                         </CardHeader>
@@ -605,7 +605,7 @@ return {
                       </Card>
                       <Card>
                         <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-medium text-gray-600">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
                             Total Feedbacks
                           </CardTitle>
                         </CardHeader>
@@ -617,7 +617,7 @@ return {
                       </Card>
                       <Card>
                         <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-medium text-gray-600">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
                             Total Links
                           </CardTitle>
                         </CardHeader>
@@ -629,7 +629,7 @@ return {
                       </Card>
                       <Card>
                         <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-medium text-gray-600">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
                             Total Answered Links
                           </CardTitle>
                         </CardHeader>

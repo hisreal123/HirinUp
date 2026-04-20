@@ -4,12 +4,9 @@ import { useTheme } from 'next-themes';
 import { Palette, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useSidebar } from '@/contexts/sidebar.context';
+import themesConfig from '@/config/themes.json';
 
-const THEMES = [
-  { id: 'default',        name: 'Brand',     swatch: 'hsl(270 70% 50%)' },
-  { id: 'corporate-blue', name: 'Corporate', swatch: 'hsl(221 83% 53%)' },
-  { id: 'crypto-dark',    name: 'Crypto',    swatch: 'hsl(174 72% 38%)' },
-];
+const THEMES = themesConfig.themes;
 
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();

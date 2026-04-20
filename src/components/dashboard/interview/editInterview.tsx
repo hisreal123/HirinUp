@@ -405,7 +405,7 @@ function EditInterview({ interview }: EditInterviewProps) {
               step="1"
               max={MAX_DURATION}
               min={MIN_DURATION}
-              className="border-2 text-center focus:outline-none bg-slate-100 rounded-md border-gray-500 w-14 px-2 py-0.5 ml-3"
+              className="border-2 text-center focus:outline-none bg-muted rounded-md border-input w-14 px-2 py-0.5 ml-3"
               value={Number(duration)}
               onChange={(e) => {
                 let value = e.target.value;

@@ -387,7 +387,7 @@ function DetailsPopup({
                   ? false
                   : true) || isClicked
               }
-              className="bg-indigo-600 w-40 hover:bg-indigo-800"
+              className="bg-primary w-40 hover:bg-primary/90"
               onClick={() => {
                 setIsClicked(true);
                 onManual();

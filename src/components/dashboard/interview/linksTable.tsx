@@ -119,7 +119,7 @@ return (
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">No links to display</div>
+      <div className="text-center py-8 text-muted-foreground">No links to display</div>
     );
   }
 
@@ -133,7 +133,7 @@ return (
 
       {/* Search Bar */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           type="text"
           placeholder="Search by response ID, name, email, status..."
@@ -193,7 +193,7 @@ return (
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">Show:</span>
+            <span className="text-sm text-foreground">Show:</span>
             <Select
               value={table.getState().pagination.pageSize.toString()}
               onValueChange={(value) => table.setPageSize(Number(value))}
@@ -209,9 +209,9 @@ return (
                 ))}
               </SelectContent>
             </Select>
-            <span className="text-sm text-gray-700">per page</span>
+            <span className="text-sm text-foreground">per page</span>
           </div>
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-foreground">
             Showing{' '}
             {table.getState().pagination.pageIndex *
               table.getState().pagination.pageSize +
@@ -234,7 +234,7 @@ return (
           >
             Previous
           </Button>
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-foreground">
             Page {table.getState().pagination.pageIndex + 1} of{' '}
             {table.getPageCount()}
           </span>

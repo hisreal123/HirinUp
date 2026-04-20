@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -182,7 +182,7 @@ function ResponsesTable({
         header: 'Candidate Status',
         cell: ({ row }) => {
           const status = row.getValue('candidate_status') as string;
-          const color = STATUS_COLORS[status] || 'bg-neutral-foreground';
+          const color = STATUS_COLORS[status] || 'bg-muted-foreground';
           const label = STATUS_LABELS[status] || 'No Status';
 
           return (
