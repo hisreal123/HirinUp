@@ -378,6 +378,138 @@ html[data-theme-transitioning] *::after {
     --font-heading: 'Satoshi', Arial, sans-serif;
   }
 
+  /* ─── Theme: USATech ─────────────────────────────────────────────────────
+     Light orange theme inspired by usatech-recruit.com. Clean, corporate. */
+  [data-theme="usatech"] {
+    --background: 0 0% 99%;
+    --foreground: 220 13% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 13%;
+
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 20 90% 42%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 30 30% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 33 100% 95%;
+    --accent-foreground: 16 77% 28%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 25 95% 53%;
+
+    --surface-subtle: 30 40% 98%;
+    --neutral: 220 13% 91%;
+    --neutral-foreground: 220 9% 46%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-subtle: 142 71% 93%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 15%;
+    --warning-subtle: 48 100% 93%;
+
+    --auth-primary: 25 95% 53%;
+    --auth-primary-hover: 20 90% 42%;
+    --auth-primary-light: 25 95% 80%;
+    --auth-overlay: 25 95% 53%;
+    --auth-text-heading: 220 13% 13%;
+    --auth-text-body: 220 9% 46%;
+    --auth-text-label: 220 9% 35%;
+    --auth-text-muted: 220 9% 60%;
+    --auth-link: 25 95% 53%;
+    --auth-link-hover: 20 90% 42%;
+    --auth-success: 142 71% 45%;
+    --auth-success-light: 142 71% 93%;
+
+    --gradient-text-start: 20 90% 20%;
+    --gradient-text-via: 25 95% 35%;
+    --gradient-text-mid: 25 95% 45%;
+    --gradient-text-end: 25 95% 53%;
+    --gradient-bg-from: 25 95% 53%;
+    --gradient-bg-to: 20 90% 42%;
+    --gradient-main-from: 25 95% 53%;
+    --gradient-main-to: 25 95% 68%;
+  }
+
+  /* ─── Theme: Talvin ──────────────────────────────────────────────────────
+     Light purple theme inspired by talvin.ai. Modern AI/SaaS aesthetic. */
+  [data-theme="talvin"] {
+    --background: 0 0% 99%;
+    --foreground: 252 24% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 252 24% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 252 24% 12%;
+
+    --primary: 258 90% 62%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 258 60% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 252 40% 96%;
+    --muted-foreground: 252 10% 45%;
+
+    --accent: 252 60% 95%;
+    --accent-foreground: 258 60% 30%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 252 20% 90%;
+    --input: 252 20% 90%;
+    --ring: 258 90% 62%;
+
+    --surface-subtle: 252 40% 98%;
+    --neutral: 252 20% 90%;
+    --neutral-foreground: 252 10% 45%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-subtle: 142 71% 93%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 15%;
+    --warning-subtle: 48 100% 93%;
+
+    --auth-primary: 258 90% 62%;
+    --auth-primary-hover: 258 90% 54%;
+    --auth-primary-light: 258 80% 80%;
+    --auth-overlay: 258 90% 62%;
+    --auth-text-heading: 252 24% 12%;
+    --auth-text-body: 252 10% 45%;
+    --auth-text-label: 252 10% 35%;
+    --auth-text-muted: 252 10% 60%;
+    --auth-link: 258 90% 62%;
+    --auth-link-hover: 258 90% 54%;
+    --auth-success: 142 71% 45%;
+    --auth-success-light: 142 71% 93%;
+
+    --gradient-text-start: 258 90% 20%;
+    --gradient-text-via: 270 80% 35%;
+    --gradient-text-mid: 258 90% 50%;
+    --gradient-text-end: 258 90% 62%;
+    --gradient-bg-from: 258 90% 62%;
+    --gradient-bg-to: 258 60% 50%;
+    --gradient-main-from: 258 90% 62%;
+    --gradient-main-to: 270 80% 72%;
+  }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;

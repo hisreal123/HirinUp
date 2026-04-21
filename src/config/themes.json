@@ -19,6 +19,16 @@
       "id": "evergreen",
       "name": "Evergreen",
       "swatch": "hsl(141 92% 28%)"
+    },
+    {
+      "id": "usatech",
+      "name": "USATech",
+      "swatch": "hsl(25 95% 53%)"
+    },
+    {
+      "id": "talvin",
+      "name": "Talvin",
+      "swatch": "hsl(258 90% 66%)"
     }
   ]
 }
