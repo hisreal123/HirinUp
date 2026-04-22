@@ -1190,10 +1190,10 @@ function Call({
   // Show loading while checking session
   if (isSessionChecking && responseToken) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-white">
+      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-background">
         <div className="flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600" />
-          <p className="mt-4 text-gray-600 text-sm">Verifying session...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary" />
+          <p className="mt-4 text-muted-foreground text-sm">Verifying session...</p>
         </div>
       </div>
     );

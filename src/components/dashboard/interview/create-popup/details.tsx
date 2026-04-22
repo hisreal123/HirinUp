@@ -197,7 +197,7 @@ function DetailsPopup({
             <h3 className="text-sm font-medium">Interview Name:</h3>
             <input
               type="text"
-              className="border-b-2 focus:outline-none border-input px-2 w-96 py-0.5 ml-3"
+              className="border-b-2 focus:outline-none border-input bg-background px-2 w-96 py-0.5 ml-3"
               placeholder="e.g. Name of the Interview"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -272,7 +272,7 @@ function DetailsPopup({
           </div>
           <h3 className="text-sm font-medium">Objective:</h3>
           <textarea
-            className="border-2 border-input rounded-md mt-2 w-full px-3 py-2 text-sm focus:outline-none resize-none"
+            className="border-2 border-input rounded-md mt-2 w-full px-3 py-2 text-sm focus:outline-none resize-none bg-background"
             rows={4}
             placeholder="e.g. Find the best candidates based on their soft skills and past experiences."
             value={objective}
@@ -318,7 +318,7 @@ function DetailsPopup({
                 step="1"
                 max={MAX_QUESTIONS}
                 min={MIN_QUESTION}
-                className="border-b-2 text-center focus:outline-none  border-input w-14 px-2 py-0.5 ml-3"
+                className="border-b-2 text-center focus:outline-none border-input bg-background w-14 px-2 py-0.5 ml-3"
                 value={numQuestions}
                 onChange={(e) => {
                   let value = e.target.value;
@@ -341,7 +341,7 @@ function DetailsPopup({
                 step="1"
                 max={MAX_DURATION}
                 min={MIN_QUESTION}
-                className="border-b-2 text-center focus:outline-none  border-input w-14 px-2 py-0.5 ml-3"
+                className="border-b-2 text-center focus:outline-none border-input bg-background w-14 px-2 py-0.5 ml-3"
                 value={duration}
                 onChange={(e) => {
                   let value = e.target.value;

@@ -132,10 +132,10 @@ html[data-theme-transitioning] *::after {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
-    --card: 0 0% 100%;
+    --card: 270 20% 96%;
     --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 0 0% 100%;
+    --popover: 270 20% 96%;
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 270 70% 50%;
@@ -144,10 +144,10 @@ html[data-theme-transitioning] *::after {
     --secondary: 318 77% 39%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 270 18% 91%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 270 18% 91%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -155,7 +155,7 @@ html[data-theme-transitioning] *::after {
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 270 70% 50%;
 
     --radius: 0.5rem;
 
@@ -203,142 +203,142 @@ html[data-theme-transitioning] *::after {
     --gradient-bg-to: 316 96% 22%;
   }
 
-  /* ─── Theme: Corporate Blue (inspired by ustech-recruit.com) ─────────────
-     Clean light theme — corporate US tech recruiting. Professional blue. */
+  /* ─── Theme: Corporate Blue ─────────────────────────────────────────────
+     Cool blue-tinted light theme. Professional, grounded. */
   [data-theme="corporate-blue"] {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 216 28% 97%;
+    --foreground: 222 38% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 38% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 222 38% 10%;
 
-    --primary: 221 83% 53%;
+    --primary: 221 76% 49%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 199 89% 37%;
+    --secondary: 199 74% 34%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 214 32% 91%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 214 26% 90%;
+    --muted-foreground: 215 14% 44%;
 
-    --accent: 214 32% 91%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 214 36% 87%;
+    --accent-foreground: 222 38% 10%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 78% 57%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 88%;
-    --input: 214 32% 88%;
-    --ring: 221 83% 53%;
+    --border: 214 24% 88%;
+    --input: 214 22% 90%;
+    --ring: 221 76% 49%;
 
-    --surface-subtle: 214 60% 97%;
-    --neutral: 214 32% 85%;
-    --neutral-foreground: 215 16% 47%;
+    --surface-subtle: 214 40% 96%;
+    --neutral: 214 24% 84%;
+    --neutral-foreground: 215 14% 44%;
 
-    --success: 142 71% 45%;
+    --success: 142 63% 40%;
     --success-foreground: 0 0% 100%;
-    --success-subtle: 142 71% 93%;
+    --success-subtle: 142 55% 91%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 92% 15%;
-    --warning-subtle: 48 100% 93%;
+    --warning: 38 86% 47%;
+    --warning-foreground: 30 55% 12%;
+    --warning-subtle: 44 85% 90%;
 
-    --gradient-text-start: 221 83% 20%;
-    --gradient-text-via: 199 89% 30%;
-    --gradient-text-mid: 221 83% 45%;
-    --gradient-text-end: 199 89% 37%;
-    --gradient-bg-from: 221 83% 53%;
-    --gradient-bg-to: 199 89% 37%;
-    --gradient-main-from: 221 83% 53%;
-    --gradient-main-to: 199 89% 60%;
+    --gradient-text-start: 221 76% 18%;
+    --gradient-text-via: 199 74% 27%;
+    --gradient-text-mid: 221 76% 40%;
+    --gradient-text-end: 199 74% 34%;
+    --gradient-bg-from: 221 76% 49%;
+    --gradient-bg-to: 199 74% 34%;
+    --gradient-main-from: 221 76% 49%;
+    --gradient-main-to: 199 74% 56%;
   }
 
-  /* ─── Theme: Crypto Dark (inspired by cryptorecruit.com) ────────────────
-     Very dark background — high contrast teal/cyan accent. Crypto aesthetic. */
+  /* ─── Theme: Crypto ─────────────────────────────────────────────────────
+     Teal-tinted light theme. Fresh, techy feel. */
   [data-theme="crypto-dark"] {
-    --background: 0 0% 100%;
-    --foreground: 220 20% 10%;
+    --background: 174 18% 96%;
+    --foreground: 200 22% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 200 22% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 200 22% 11%;
 
-    --primary: 174 72% 38%;
+    --primary: 174 65% 34%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 152 69% 32%;
+    --secondary: 152 62% 28%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 174 20% 93%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 174 20% 88%;
+    --muted-foreground: 186 12% 41%;
 
-    --accent: 174 20% 93%;
-    --accent-foreground: 220 20% 10%;
+    --accent: 174 26% 84%;
+    --accent-foreground: 200 22% 11%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 78% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 174 15% 88%;
-    --input: 174 15% 88%;
-    --ring: 174 72% 38%;
+    --border: 174 18% 84%;
+    --input: 174 14% 88%;
+    --ring: 174 65% 34%;
 
-    --surface-subtle: 174 40% 97%;
-    --neutral: 174 15% 86%;
-    --neutral-foreground: 220 10% 45%;
+    --surface-subtle: 174 28% 95%;
+    --neutral: 174 16% 83%;
+    --neutral-foreground: 186 12% 41%;
 
-    --success: 142 71% 45%;
+    --success: 142 63% 40%;
     --success-foreground: 0 0% 100%;
-    --success-subtle: 142 71% 93%;
+    --success-subtle: 142 50% 90%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 92% 15%;
-    --warning-subtle: 48 100% 93%;
+    --warning: 38 86% 47%;
+    --warning-foreground: 30 55% 12%;
+    --warning-subtle: 44 82% 90%;
 
-    --gradient-text-start: 174 72% 15%;
-    --gradient-text-via: 152 69% 22%;
-    --gradient-text-mid: 174 72% 32%;
-    --gradient-text-end: 152 69% 38%;
-    --gradient-bg-from: 174 72% 38%;
-    --gradient-bg-to: 152 69% 32%;
-    --gradient-main-from: 174 72% 38%;
-    --gradient-main-to: 152 69% 45%;
+    --gradient-text-start: 174 65% 13%;
+    --gradient-text-via: 152 62% 20%;
+    --gradient-text-mid: 174 65% 28%;
+    --gradient-text-end: 152 62% 34%;
+    --gradient-bg-from: 174 65% 34%;
+    --gradient-bg-to: 152 62% 28%;
+    --gradient-main-from: 174 65% 34%;
+    --gradient-main-to: 152 62% 42%;
   }
 
   /* ─── Theme: Evergreen ───────────────────────────────────────────────────
-     Clean light green theme. Satoshi font. Nature/eco aesthetic. */
+     Warm green-tinted light theme. Satoshi font. Nature/eco aesthetic. */
   [data-theme="evergreen"] {
-    --background: 180 16% 96%;
+    --background: 152 18% 95%;
     --foreground: 235 6% 41%;
 
-    --card: 0 0% 100%;
+    --card: 140 14% 98%;
     --card-foreground: 235 6% 41%;
 
-    --popover: 0 0% 100%;
+    --popover: 140 14% 98%;
     --popover-foreground: 218 36% 9%;
 
-    --primary: 141 92% 28%;
+    --primary: 141 78% 26%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 139 92% 14%;
+    --secondary: 139 76% 14%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 185 16% 92%;
-    --muted-foreground: 200 13% 39%;
+    --muted: 152 18% 87%;
+    --muted-foreground: 186 10% 38%;
 
-    --accent: 185 16% 92%;
-    --accent-foreground: 213 16% 26%;
+    --accent: 152 20% 83%;
+    --accent-foreground: 213 16% 22%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 78% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 4% 88%;
-    --input: 240 4% 88%;
-    --ring: 141 92% 28%;
+    --border: 150 14% 84%;
+    --input: 150 12% 88%;
+    --ring: 141 78% 26%;
 
     --surface-subtle: 180 16% 96%;
     --neutral: 185 16% 92%;
@@ -379,134 +379,137 @@ html[data-theme-transitioning] *::after {
   }
 
   /* ─── Theme: USATech ─────────────────────────────────────────────────────
-     Light orange theme inspired by usatech-recruit.com. Clean, corporate. */
+     Warm orange theme inspired by usatech-recruit.com. */
   [data-theme="usatech"] {
-    --background: 0 0% 99%;
-    --foreground: 220 13% 13%;
+    --background: 38 65% 95%;
+    --foreground: 20 25% 14%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 13% 13%;
+    --card: 36 55% 93%;
+    --card-foreground: 20 25% 14%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 13%;
+    --popover: 36 55% 93%;
+    --popover-foreground: 20 25% 14%;
 
-    --primary: 25 95% 53%;
+    --primary: 25 88% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 20 90% 42%;
+    --secondary: 18 80% 38%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 30 30% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 34 40% 88%;
+    --muted-foreground: 22 15% 42%;
 
-    --accent: 33 100% 95%;
-    --accent-foreground: 16 77% 28%;
+    --accent: 33 70% 88%;
+    --accent-foreground: 16 70% 25%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 78% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 25 95% 53%;
+    --border: 25 50% 72%;
+    --input: 25 40% 78%;
+    --ring: 25 88% 50%;
 
-    --surface-subtle: 30 40% 98%;
-    --neutral: 220 13% 91%;
-    --neutral-foreground: 220 9% 46%;
+    --surface-subtle: 38 55% 93%;
+    --neutral: 30 35% 86%;
+    --neutral-foreground: 22 15% 42%;
 
-    --success: 142 71% 45%;
+    --success: 142 60% 40%;
     --success-foreground: 0 0% 100%;
-    --success-subtle: 142 71% 93%;
+    --success-subtle: 142 55% 90%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 92% 15%;
-    --warning-subtle: 48 100% 93%;
+    --warning: 38 88% 48%;
+    --warning-foreground: 30 60% 12%;
+    --warning-subtle: 44 90% 88%;
 
-    --auth-primary: 25 95% 53%;
-    --auth-primary-hover: 20 90% 42%;
-    --auth-primary-light: 25 95% 80%;
-    --auth-overlay: 25 95% 53%;
-    --auth-text-heading: 220 13% 13%;
-    --auth-text-body: 220 9% 46%;
-    --auth-text-label: 220 9% 35%;
-    --auth-text-muted: 220 9% 60%;
-    --auth-link: 25 95% 53%;
-    --auth-link-hover: 20 90% 42%;
-    --auth-success: 142 71% 45%;
-    --auth-success-light: 142 71% 93%;
+    --auth-primary: 25 88% 50%;
+    --auth-primary-hover: 18 80% 38%;
+    --auth-primary-light: 25 80% 76%;
+    --auth-overlay: 25 88% 50%;
+    --auth-text-heading: 20 25% 14%;
+    --auth-text-body: 22 15% 42%;
+    --auth-text-label: 22 15% 33%;
+    --auth-text-muted: 22 12% 56%;
+    --auth-link: 25 88% 50%;
+    --auth-link-hover: 18 80% 38%;
+    --auth-success: 142 60% 40%;
+    --auth-success-light: 142 55% 90%;
 
-    --gradient-text-start: 20 90% 20%;
-    --gradient-text-via: 25 95% 35%;
-    --gradient-text-mid: 25 95% 45%;
-    --gradient-text-end: 25 95% 53%;
-    --gradient-bg-from: 25 95% 53%;
-    --gradient-bg-to: 20 90% 42%;
-    --gradient-main-from: 25 95% 53%;
-    --gradient-main-to: 25 95% 68%;
+    --gradient-text-start: 18 80% 18%;
+    --gradient-text-via: 22 85% 30%;
+    --gradient-text-mid: 25 88% 42%;
+    --gradient-text-end: 25 88% 50%;
+    --gradient-bg-from: 25 88% 50%;
+    --gradient-bg-to: 18 80% 38%;
+    --gradient-main-from: 25 88% 50%;
+    --gradient-main-to: 30 90% 63%;
+
+    --font-sans: 'Montreal', sans-serif;
+    --font-heading: 'Montreal', sans-serif;
   }
 
   /* ─── Theme: Talvin ──────────────────────────────────────────────────────
      Light purple theme inspired by talvin.ai. Modern AI/SaaS aesthetic. */
   [data-theme="talvin"] {
-    --background: 0 0% 99%;
-    --foreground: 252 24% 12%;
+    --background: 252 22% 97%;
+    --foreground: 252 22% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 252 24% 12%;
+    --card: 252 18% 99%;
+    --card-foreground: 252 22% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 252 24% 12%;
+    --popover: 252 18% 99%;
+    --popover-foreground: 252 22% 12%;
 
-    --primary: 258 90% 62%;
+    --primary: 258 76% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 258 60% 50%;
+    --secondary: 258 54% 46%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 252 40% 96%;
-    --muted-foreground: 252 10% 45%;
+    --muted: 252 26% 89%;
+    --muted-foreground: 252 10% 43%;
 
-    --accent: 252 60% 95%;
-    --accent-foreground: 258 60% 30%;
+    --accent: 252 38% 85%;
+    --accent-foreground: 258 54% 28%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 78% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 252 20% 90%;
-    --input: 252 20% 90%;
-    --ring: 258 90% 62%;
+    --border: 252 18% 86%;
+    --input: 252 16% 90%;
+    --ring: 258 76% 58%;
 
-    --surface-subtle: 252 40% 98%;
-    --neutral: 252 20% 90%;
-    --neutral-foreground: 252 10% 45%;
+    --surface-subtle: 252 28% 96%;
+    --neutral: 252 18% 85%;
+    --neutral-foreground: 252 10% 43%;
 
-    --success: 142 71% 45%;
+    --success: 142 63% 40%;
     --success-foreground: 0 0% 100%;
-    --success-subtle: 142 71% 93%;
+    --success-subtle: 142 55% 91%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 92% 15%;
-    --warning-subtle: 48 100% 93%;
+    --warning: 38 86% 47%;
+    --warning-foreground: 30 55% 12%;
+    --warning-subtle: 44 85% 90%;
 
-    --auth-primary: 258 90% 62%;
-    --auth-primary-hover: 258 90% 54%;
-    --auth-primary-light: 258 80% 80%;
-    --auth-overlay: 258 90% 62%;
-    --auth-text-heading: 252 24% 12%;
-    --auth-text-body: 252 10% 45%;
-    --auth-text-label: 252 10% 35%;
-    --auth-text-muted: 252 10% 60%;
-    --auth-link: 258 90% 62%;
-    --auth-link-hover: 258 90% 54%;
-    --auth-success: 142 71% 45%;
-    --auth-success-light: 142 71% 93%;
+    --auth-primary: 258 76% 58%;
+    --auth-primary-hover: 258 76% 50%;
+    --auth-primary-light: 258 70% 78%;
+    --auth-overlay: 258 76% 58%;
+    --auth-text-heading: 252 22% 12%;
+    --auth-text-body: 252 10% 43%;
+    --auth-text-label: 252 10% 33%;
+    --auth-text-muted: 252 10% 58%;
+    --auth-link: 258 76% 58%;
+    --auth-link-hover: 258 76% 50%;
+    --auth-success: 142 63% 40%;
+    --auth-success-light: 142 55% 91%;
 
-    --gradient-text-start: 258 90% 20%;
-    --gradient-text-via: 270 80% 35%;
-    --gradient-text-mid: 258 90% 50%;
-    --gradient-text-end: 258 90% 62%;
-    --gradient-bg-from: 258 90% 62%;
-    --gradient-bg-to: 258 60% 50%;
-    --gradient-main-from: 258 90% 62%;
+    --gradient-text-start: 258 76% 18%;
+    --gradient-text-via: 270 68% 32%;
+    --gradient-text-mid: 258 76% 46%;
+    --gradient-text-end: 258 76% 58%;
+    --gradient-bg-from: 258 76% 58%;
+    --gradient-bg-to: 258 54% 46%;
+    --gradient-main-from: 258 76% 58%;
     --gradient-main-to: 270 80% 72%;
   }
 
@@ -566,6 +569,30 @@ span {
 strong, b, strong span, b span {
   font-size: inherit;
   font-weight: bold;
+}
+
+/* Themed scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary)) hsl(var(--background));
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--primary));
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--primary) / 0.8);
 }
 
 .cl-logoImage {
