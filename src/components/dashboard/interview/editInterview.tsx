@@ -37,6 +37,8 @@ function EditInterview({ interview }: EditInterviewProps) {
   const { fetchInterviews } = useInterviews();
   const queryClient = useQueryClient();
 
+  const [title, setTitle] = useState<string>(interview?.name || '');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [description, setDescription] = useState<string>(
     normalizeDescriptionForEditor(interview?.description || '')
   );
@@ -104,6 +106,7 @@ function EditInterview({ interview }: EditInterviewProps) {
 
   const onSave = async () => {
     const interviewData = {
+      name: title.trim(),
       objective: objective,
       questions: questions,
       interviewer_id: Number(selectedInterviewer),
@@ -192,6 +195,31 @@ function EditInterview({ interview }: EditInterviewProps) {
             <p className="text-sm font-semibold">Back to Summary</p>
           </div>
         </div>
+        <div className="flex items-center gap-2 mt-3 mb-1 ml-2">
+          <p className="font-medium">Title</p>
+          <button
+            type="button"
+            title={isEditingTitle ? 'Cancel editing' : 'Edit title'}
+            className="text-muted-foreground hover:text-primary transition-colors"
+            onClick={() => setIsEditingTitle((prev) => !prev)}
+          >
+            {isEditingTitle ? <X size={15} /> : <Pencil size={15} />}
+          </button>
+        </div>
+        {isEditingTitle ? (
+          <input
+            type="text"
+            value={title}
+            className="mt-1 ml-2 py-2 border-2 rounded-md w-[75%] px-2 border-input bg-background text-sm"
+            placeholder="Enter interview title."
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={(e) => setTitle(e.target.value.trim())}
+          />
+        ) : (
+          <div className="ml-2 w-[75%] mt-1 px-3 py-2 text-sm border-2 border-border rounded-md min-h-[2.5rem]">
+            {title || <span className="text-muted-foreground">No title set.</span>}
+          </div>
+        )}
         <div className="flex flex-row justify-between">
           <div className="flex items-center gap-2 mt-3 mb-1 ml-2">
             <p className="font-medium">
@@ -215,6 +243,7 @@ function EditInterview({ interview }: EditInterviewProps) {
             <Button
               disabled={
                 isClicked ||
+                title.trim() === '' ||
                 questions.length === 0 ||
                 questions.some((q) => q.question.trim() === '') ||
                 description.replace(/<[^>]*>/g, '').trim() === '' ||
